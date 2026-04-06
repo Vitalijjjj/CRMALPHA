@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agency OS — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--bg2:#0f0f18;--bg3:#13131e;--bg4:#1a1a28;
+  --border:#1e1e2e;--border2:#252535;
+  --text:#e8e8f0;--text2:#8888a8;--text3:#555570;
+  --violet:#7c6fcd;--violet2:#6356b5;--vglow:rgba(124,111,205,0.15);
+  --cyan:#4dd9d9;--orange:#f0875a;--green:#4caf7d;
+  --red:#e05c5c;--yellow:#d4a843;
+  --r:10px;--mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}
+
+/* ── LOGIN ── */
+#login{display:flex;align-items:center;justify-content:center;height:100vh;padding:24px}
+.lw{width:100%;max-width:480px}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.logo-box{width:38px;height:38px;background:var(--violet);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff}
+.logo-name{font-size:22px;font-weight:700;letter-spacing:-0.5px}
+.login-sub{color:var(--text3);font-size:12px;margin-bottom:28px;font-family:var(--mono)}
+.rc{width:100%;text-align:left;padding:15px 18px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);cursor:pointer;transition:all .15s;margin-bottom:8px;display:flex;align-items:center;gap:14px}
+.rc:hover{background:var(--bg4);border-color:#3a3a55;transform:translateX(3px)}
+.ri{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.rm{flex:1}
+.rt{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.rd{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.rtag{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid;flex-shrink:0}
+.rarr{color:var(--text3);font-size:16px;transition:.15s}
+.rc:hover .rarr{color:var(--text2);transform:translateX(2px)}
+.lfoot{text-align:center;color:var(--text3);font-size:11px;margin-top:20px;font-family:var(--mono)}
+
+/* ── APP ── */
+#app{display:none;height:100vh}
+.shell{display:flex;height:100%}
+
+/* sidebar */
+.sidebar{width:224px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%}
+.slogo{display:flex;align-items:center;gap:8px;padding:18px 16px;border-bottom:1px solid var(--border)}
+.slogo-box{width:28px;height:28px;background:var(--violet);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
+.snav{flex:1;padding:10px 8px;overflow-y:auto}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .12s;color:var(--text2);font-size:13px;margin-bottom:1px}
+.ni:hover{background:var(--bg4);color:var(--text)}
+.ni.active{background:var(--vglow);color:var(--text);border:1px solid rgba(124,111,205,.2)}
+.ni.active .nic{color:var(--violet)}
+.nic{font-size:14px;width:16px;text-align:center;flex-shrink:0}
+.suser{padding:12px;border-top:1px solid var(--border)}
+.urow{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;background:var(--bg3);margin-bottom:6px}
+.uav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;border:1px solid}
+.uname{font-size:12px;font-weight:500;color:var(--text)}
+.urole{font-family:var(--mono);font-size:9px;margin-top:1px}
+.logout{width:100%;padding:7px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all .12s;font-family:var(--sans)}
+.logout:hover{background:var(--bg4);color:var(--text2)}
+
+/* main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:52px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;align-items:center;padding:0 24px;flex-shrink:0}
+.tb-title{font-size:14px;font-weight:600;flex:1}
+.tb-sub{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.notif{width:30px;height:30px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:13px;flex-shrink:0}
+.ndot{position:absolute;top:5px;right:5px;width:5px;height:5px;background:var(--red);border-radius:50%}
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* stat cards */
+.sg{display:grid;gap:12px;margin-bottom:20px}
+.sg4{grid-template-columns:repeat(4,1fr)}
+.sg3{grid-template-columns:repeat(3,1fr)}
+.sc{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:18px}
+.sc-l{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.sc-v{font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--text)}
+.sc-v.d{color:var(--red)}.sc-v.s{color:var(--green)}.sc-v.w{color:var(--yellow)}
+.sc-t{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px}
+
+/* section */
+.section{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.sh{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.sh-t{font-size:13px;font-weight:600;flex:1}
+.sbtn{font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .12s;font-family:var(--sans)}
+.sbtn:hover{background:var(--bg4);color:var(--text)}
+.sbtn.p{background:var(--violet);border-color:var(--violet);color:#fff}
+.sbtn.p:hover{background:var(--violet2)}
+
+/* table */
+table{width:100%;border-collapse:collapse}
+thead th{padding:10px 16px;text-align:left;font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--bg4)}
+td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
+.cm{color:var(--text);font-weight:500;font-size:13px}
+
+/* badge */
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;font-weight:500;border:1px solid;white-space:nowrap}
+.bv{background:rgba(124,111,205,.15);color:#a99de8;border-color:rgba(124,111,205,.3)}
+.bc{background:rgba(77,217,217,.08);color:var(--cyan);border-color:rgba(77,217,217,.25)}
+.bo{background:rgba(240,135,90,.08);color:var(--orange);border-color:rgba(240,135,90,.25)}
+.bg_{background:rgba(76,175,125,.08);color:var(--green);border-color:rgba(76,175,125,.25)}
+.br{background:rgba(224,92,92,.08);color:var(--red);border-color:rgba(224,92,92,.25)}
+.by{background:rgba(212,168,67,.08);color:var(--yellow);border-color:rgba(212,168,67,.25)}
+.bgr{background:rgba(255,255,255,.04);color:var(--text3);border-color:var(--border2)}
+
+/* tabs */
+.tabs{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:3px;margin-bottom:16px;width:fit-content}
+.tab{padding:6px 16px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--text3);transition:all .12s;font-weight:500;user-select:none}
+.tab.active{background:var(--bg4);color:var(--text);border:1px solid var(--border2)}
+
+/* progress */
+.pbw{display:flex;align-items:center;gap:8px}
+.pb{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;min-width:60px}
+.pf{height:100%;border-radius:2px;background:var(--violet)}
+.pf.hi{background:var(--green)}.pf.lo{background:var(--red)}
+.pl{font-family:var(--mono);font-size:10px;color:var(--text3);min-width:28px;text-align:right}
+
+/* AI block */
+.ai-block{background:var(--bg3);border:1px solid rgba(124,111,205,.25);border-radius:var(--r);padding:18px;margin-bottom:20px}
+.ai-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ai-ico{width:30px;height:30px;background:rgba(124,111,205,.15);border:1px solid rgba(124,111,205,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.ai-ttl{font-size:13px;font-weight:600}
+.ai-stl{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px}
+.mock-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;background:rgba(124,111,205,.1);color:var(--violet);border:1px solid rgba(124,111,205,.2);border-radius:20px;margin-left:auto}
+.ai-row{display:flex;gap:8px}
+.ai-inp{flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:9px 13px;font-size:12px;color:var(--text);font-family:var(--sans);outline:none;transition:border .15s}
+.ai-inp:focus{border-color:rgba(124,111,205,.5)}
+.ai-inp::placeholder{color:var(--text3)}
+.ai-mic{padding:9px 13px;background:var(--bg4);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:13px;cursor:pointer;flex-shrink:0}
+.ai-run{padding:9px 18px;background:var(--violet);border:none;border-radius:8px;color:#fff;font-size:12px;cursor:pointer;font-family:var(--sans);font-weight:600;transition:all .15s;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ai-run:hover{background:var(--violet2)}
+.ai-run:disabled{opacity:.5;cursor:not-allowed}
+.ai-res{margin-top:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;display:none}
+.ai-res pre{font-family:var(--mono);font-size:11px;color:var(--text2);white-space:pre-wrap;line-height:1.75}
+.ai-acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.ai-act{font-size:11px;padding:5px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--sans);transition:all .12s}
+.ai-act:hover{background:var(--bg4);color:var(--text2)}
+.ai-act.notion{color:var(--violet);border-color:rgba(124,111,205,.3)}
+
+/* project cards */
+.pcards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.pcard{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:18px}
+.pcard-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.pcard-n{font-size:13px;font-weight:600;margin-bottom:3px}
+.pcard-c{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.pcard-f{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.pcard-d{font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+/* overdue */
+.ov-row{background:rgba(224,92,92,.03)}
+.od-dot{display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:6px;vertical-align:middle}
+
+/* spinner */
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* responsive */
+@media(max-width:768px){
+  .sidebar{width:52px}
+  .slogo span,.ni span:last-child,.uname,.urole,.logout{display:none}
+  .ni{justify-content:center;padding:8px}
+  .nic{width:auto}
+  .sg4{grid-template-columns:repeat(2,1fr)}
+  .pcards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ LOGIN ════════ -->
+<div id="login">
+<div class="lw">
+  <div class="logo-row">
+    <div class="logo-box">A</div>
+    <span class="logo-name">Agency OS</span>
+  </div>
+  <div class="login-sub">internal agency management — demo v1.0</div>
+  <div id="role-cards"></div>
+  <div class="lfoot">no backend · mock data · demo mode only</div>
+</div>
+</div>
+
+<!-- ════════ APP ════════ -->
+<div id="app">
+<div class="shell">
+
+  <div class="sidebar">
+    <div class="slogo">
+      <div class="slogo-box">A</div>
+      <span style="font-size:14px;font-weight:700;letter-spacing:-.3px">Agency OS</span>
+    </div>
+    <nav class="snav" id="snav"></nav>
+    <div class="suser">
+      <div class="urow">
+        <div class="uav" id="uav"></div>
+        <div>
+          <div class="uname" id="uname"></div>
+          <div class="urole" id="urole"></div>
+        </div>
+      </div>
+      <button class="logout" onclick="logout()">↩ Switch role</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="flex:1">
+        <div class="tb-title" id="ptitle">Dashboard</div>
+        <div class="tb-sub" id="psub"></div>
+      </div>
+      <div class="notif">🔔<div class="ndot"></div></div>
+    </div>
+    <div class="content" id="pcontent"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const NOW=new Date();
+const d=n=>{const x=new Date(NOW);x.setDate(x.getDate()+n);return x.toISOString().split('T')[0]};
+
+const USERS=[
+  {id:'u1',name:'Артур + Я',role:'OPERATIONS_SALES'},
+  {id:'u2',name:'Ліна',role:'PM'},
+  {id:'u3',name:'Макс',role:'DEV_WEBFLOW'},
+  {id:'u4',name:'Андрій',role:'DEV_WORDPRESS'},
+];
+const PROJECTS=[
+  {id:'p1',name:'AutoBrand Website',client:'AutoBrand LLC',type:'WEBFLOW',deadline:d(15),progress:65,status:'ACTIVE',pmId:'u2',devId:'u3'},
+  {id:'p2',name:'TechBlog Rebuild',client:'TechBlog Media',type:'WEBFLOW',deadline:d(-2),progress:30,status:'AT_RISK',pmId:'u2',devId:'u3'},
+  {id:'p3',name:'KFC Landing',client:'KFC Ukraine',type:'WORDPRESS',deadline:d(1),progress:80,status:'ACTIVE',pmId:'u2',devId:'u4'},
+  {id:'p4',name:'MedClinic Portal',client:'MedClinic Group',type:'WORDPRESS',deadline:d(30),progress:20,status:'ACTIVE',pmId:'u2',devId:'u4'},
+  {id:'p5',name:'FashionStore',client:'Moda UA',type:'WEBFLOW',deadline:d(5),progress:95,status:'COMPLETED',pmId:'u2',devId:'u3'},
+  {id:'p6',name:'LawFirm Site',client:'Lexis Partners',type:'WORDPRESS',deadline:d(60),progress:10,status:'ON_HOLD',pmId:'u2',devId:'u4'},
+];
+const TASKS=[
+  {id:'t1',title:'Header animations',pId:'p1',aId:'u3',pri:'HIGH',dl:d(-2),st:'IN_PROGRESS',ov:true},
+  {id:'t2',title:'Mobile navigation',pId:'p1',aId:'u3',pri:'MEDIUM',dl:d(3),st:'TODO',ov:false},
+  {id:'t3',title:'CMS collections setup',pId:'p2',aId:'u3',pri:'CRITICAL',dl:d(-4),st:'TODO',ov:true},
+  {id:'t4',title:'SEO meta tags',pId:'p2',aId:'u3',pri:'LOW',dl:d(-1),st:'REVIEW',ov:true},
+  {id:'t5',title:'WooCommerce setup',pId:'p3',aId:'u4',pri:'HIGH',dl:d(1),st:'IN_PROGRESS',ov:false},
+  {id:'t6',title:'Form integrations',pId:'p3',aId:'u4',pri:'MEDIUM',dl:d(-3),st:'IN_PROGRESS',ov:true},
+  {id:'t7',title:'Appointment booking',pId:'p4',aId:'u4',pri:'HIGH',dl:d(14),st:'TODO',ov:false},
+  {id:'t8',title:'Homepage hero',pId:'p5',aId:'u3',pri:'LOW',dl:d(5),st:'DONE',ov:false},
+  {id:'t9',title:'Product gallery',pId:'p5',aId:'u3',pri:'MEDIUM',dl:d(2),st:'DONE',ov:false},
+  {id:'t10',title:'Multilingual plugin',pId:'p6',aId:'u4',pri:'MEDIUM',dl:d(30),st:'TODO',ov:false},
+  {id:'t11',title:'Client content review',pId:'p1',aId:'u2',pri:'HIGH',dl:d(4),st:'TODO',ov:false},
+  {id:'t12',title:'Final QA pass',pId:'p3',aId:'u2',pri:'CRITICAL',dl:d(1),st:'TODO',ov:false},
+];
+const LEADS=[
+  {id:'l1',name:'Петро Коваленко',src:'Referral',st:'CONTACTED',amt:3500,cr:d(-10),cm:'Корпоративний сайт'},
+  {id:'l2',name:'Марина Лисенко',src:'Instagram',st:'WON',amt:1800,cr:d(-20),cm:'Лендінг косметика'},
+  {id:'l3',name:'Oleks Design Studio',src:'Upwork',st:'PROPOSAL',amt:5200,cr:d(-5),cm:'White-label dev'},
+  {id:'l4',name:'Nova Logistics',src:'Website',st:'NEW',amt:4000,cr:d(-2)},
+  {id:'l5',name:'Grill House',src:'Referral',st:'CONTACTED',amt:1200,cr:d(-7),cm:'Меню + бронювання'},
+  {id:'l6',name:'MindSpark Agency',src:'Partner',st:'WON',amt:7800,cr:d(-30),cm:'Довгостроковий контракт'},
+  {id:'l7',name:'EcoShop Ukraine',src:'Cold Outreach',st:'LOST',amt:2200,cr:d(-15),cm:'Обрали іншого'},
+  {id:'l8',name:'Fit Academy',src:'Instagram',st:'PROPOSAL',amt:3100,cr:d(-3),cm:'Фітнес-клуб'},
+];
+const FINANCE=[
+  {id:'f1',type:'INCOME',pId:'p1',amt:2500,dt:d(-25),cat:'Project Payment',desc:'AutoBrand — 50% передоплата'},
+  {id:'f2',type:'INCOME',pId:'p3',amt:1800,dt:d(-18),cat:'Project Payment',desc:'KFC Landing — 100% оплата'},
+  {id:'f3',type:'EXPENSE',amt:99,dt:d(-20),cat:'Software',desc:'Figma subscription'},
+  {id:'f4',type:'INCOME',pId:'p5',amt:3200,dt:d(-10),cat:'Project Payment',desc:'FashionStore — фінальна'},
+  {id:'f5',type:'EXPENSE',amt:299,dt:d(-15),cat:'Software',desc:'Webflow Business plan'},
+  {id:'f6',type:'INCOME',pId:'p2',amt:1500,dt:d(-8),cat:'Project Payment',desc:'TechBlog — 50% передоплата'},
+  {id:'f7',type:'EXPENSE',amt:450,dt:d(-5),cat:'Contractor',desc:'Дизайнер — AutoBrand'},
+  {id:'f8',type:'INCOME',pId:'p4',amt:2000,dt:d(-3),cat:'Project Payment',desc:'MedClinic — передоплата'},
+  {id:'f9',type:'EXPENSE',amt:120,dt:d(-1),cat:'Marketing',desc:'Instagram реклама'},
+  {id:'f10',type:'INCOME',amt:7800,dt:d(-30),cat:'Retainer',desc:'MindSpark — ретейнер'},
+];
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+const fmt=s=>new Date(s).toLocaleDateString('uk-UA',{day:'numeric',month:'short'});
+const cur=n=>'$'+n.toLocaleString();
+const U=id=>USERS.find(u=>u.id===id)||{name:'—'};
+const P=id=>PROJECTS.find(p=>p.id===id)||{name:'—'};
+
+const SC={ACTIVE:'bg_',AT_RISK:'br',COMPLETED:'bc',ON_HOLD:'bgr',
+  TODO:'bgr',IN_PROGRESS:'bv',REVIEW:'by',DONE:'bg_',
+  NEW:'bgr',CONTACTED:'bv',PROPOSAL:'by',WON:'bg_',LOST:'br'};
+const badge=(s,l)=>`<span class="badge ${SC[s]||'bgr'}">${(l||s).replace(/_/g,' ')}</span>`;
+
+const PC={LOW:'#555570',MEDIUM:'#d4a843',HIGH:'#f0875a',CRITICAL:'#e05c5c'};
+const priDot=p=>`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${PC[p]};margin-right:5px;vertical-align:middle"></span>${p}`;
+const pb=v=>`<div class="pbw"><div class="pb"><div class="pf ${v>=80?'hi':v<30?'lo':''}" style="width:${v}%"></div></div><span class="pl">${v}%</span></div>`;
+
+// ═══════════════════════════════════════
+// ROLE CONFIG
+// ═══════════════════════════════════════
+const ROLES={
+  OPERATIONS_SALES:{label:'Operations & Sales',icon:'⚡',bg:'rgba(124,111,205,.15)',tc:'bv',desc:'Full access — all modules + AI analytics',
+    nav:[{id:'overview',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'},{id:'leads',ic:'◎',l:'Leads'},{id:'finance',ic:'◈',l:'Finance'}]},
+  PM:{label:'Project Manager',icon:'📋',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'Projects, tasks, AI spec generation, finance',
+    nav:[{id:'pm',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'},{id:'finance',ic:'◈',l:'Finance'}]},
+  DEV_WEBFLOW:{label:'Webflow Developer',icon:'🌐',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'Webflow projects & tasks only',
+    nav:[{id:'dev',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'}]},
+  DEV_WORDPRESS:{label:'WordPress Developer',icon:'🔵',bg:'rgba(240,135,90,.1)',tc:'bo',desc:'WordPress projects & tasks only',
+    nav:[{id:'dev',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'}]},
+};
+
+// avatar colors per role
+const AV_STYLE={
+  OPERATIONS_SALES:'background:rgba(124,111,205,.2);color:#a99de8;border-color:rgba(124,111,205,.4)',
+  PM:'background:rgba(77,217,217,.15);color:#4dd9d9;border-color:rgba(77,217,217,.3)',
+  DEV_WEBFLOW:'background:rgba(77,217,217,.15);color:#4dd9d9;border-color:rgba(77,217,217,.3)',
+  DEV_WORDPRESS:'background:rgba(240,135,90,.15);color:#f0875a;border-color:rgba(240,135,90,.3)',
+};
+
+// ═══════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════
+function renderLogin(){
+  document.getElementById('role-cards').innerHTML=Object.entries(ROLES).map(([role,cfg])=>`
+    <button class="rc" onclick="enterRole('${role}')">
+      <div class="ri" style="background:${cfg.bg}">${cfg.icon}</div>
+      <div class="rm">
+        <div class="rt">${cfg.label}</div>
+        <div class="rd">${cfg.desc}</div>
+      </div>
+      <span class="rtag badge ${cfg.tc}" style="font-size:9px">${role}</span>
+      <span class="rarr">→</span>
+    </button>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// ENTER / LOGOUT
+// ═══════════════════════════════════════
+let CR=null; // current role
+
+function enterRole(role){
+  CR=role;
+  localStorage.setItem('aos_role',role);
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  setupShell();
+  go(ROLES[role].nav[0].id);
+}
+
+function logout(){
+  localStorage.removeItem('aos_role');
+  CR=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='flex';
+}
+
+function setupShell(){
+  const u=USERS.find(x=>x.role===CR);
+  const cfg=ROLES[CR];
+  document.getElementById('uav').textContent=u.name.charAt(0);
+  document.getElementById('uav').style.cssText=AV_STYLE[CR];
+  document.getElementById('uname').textContent=u.name;
+  const roleEl=document.getElementById('urole');
+  roleEl.textContent=CR;
+  roleEl.style.color=CR==='OPERATIONS_SALES'?'#a99de8':CR==='PM'?'#4dd9d9':'#f0875a';
+  document.getElementById('snav').innerHTML=cfg.nav.map(n=>`
+    <div class="ni" id="ni-${n.id}" onclick="go('${n.id}')">
+      <span class="nic">${n.ic}</span><span>${n.l}</span>
+    </div>
+  `).join('');
+}
+
+function go(id){
+  document.querySelectorAll('.ni').forEach(el=>el.classList.toggle('active',el.id==='ni-'+id));
+  ({overview:rOverview,pm:rPM,dev:rDev,projects:rProjects,tasks:rTasks,leads:rLeads,finance:rFinance})[id]?.();
+}
+
+function setPage(t,s){
+  document.getElementById('ptitle').textContent=t;
+  document.getElementById('psub').textContent=s;
+}
+
+function switchTab(el,showId){
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===el));
+  let sib=el.closest('.tabs').nextElementSibling;
+  while(sib){if(!sib.classList.contains('tabs'))sib.style.display=sib.id===showId?'':'none';sib=sib.nextElementSibling;}
+}
+
+// ═══════════════════════════════════════
+// RBAC filter
+// ═══════════════════════════════════════
+function filterProjects(role=CR){
+  if(role==='OPERATIONS_SALES'||role==='PM') return PROJECTS;
+  if(role==='DEV_WEBFLOW') return PROJECTS.filter(p=>p.type==='WEBFLOW');
+  if(role==='DEV_WORDPRESS') return PROJECTS.filter(p=>p.type==='WORDPRESS');
+  return [];
+}
+function filterTasks(role=CR){
+  if(role==='OPERATIONS_SALES'||role==='PM') return TASKS;
+  const pids=filterProjects(role).map(p=>p.id);
+  return TASKS.filter(t=>pids.includes(t.pId));
+}
+
+// ═══════════════════════════════════════
+// AI MOCK
+// ═══════════════════════════════════════
+const AI_ANALYTICS=`## Executive Summary — Agency OS
+
+🔴 Критично (дій зараз):
+  • TechBlog Rebuild — 30% прогрес, дедлайн 2 дні тому
+    CMS collections не почато. Ризик повного зриву.
+  • Form integrations (KFC) — 3+ дні без прогресу
+    Дедлайн завтра. Контактуй Андрія сьогодні.
+
+🟡 Під наглядом:
+  • Header animations (AutoBrand) — прострочено 2 дні
+  • SEO meta tags (TechBlog) — на review, без оновлень
+
+✅ Добре:
+  • FashionStore — 95%, готовий до здачі
+  • KFC Landing — 80%, фінальний етап
+
+💰 Фінанси:
+  Revenue: $19,800  |  Expenses: $968  |  Profit: $18,832
+
+Пріоритет на сьогодні:
+  1. Зателефонуй Максу → TechBlog CMS (критично)
+  2. Перевір форми KFC → Андрій
+  3. AutoBrand — нагадати про header animations`;
+
+const AI_SPEC=`## Технічне завдання — AutoBrand Website
+
+Мета: Редизайн корпоративного сайту на Webflow з CMS.
+
+Функціонал:
+  • Головна з hero-секцією та анімаціями
+  • CMS для новин та кейсів (Webflow Collections)
+  • Форма зворотнього зв'язку + email інтеграція
+  • Адаптивний дизайн (mobile-first)
+  • SEO: meta tags, OG images, sitemap
+
+Етапи:
+  1. Wireframes та дизайн — 3 дні
+  2. Webflow розробка — 7 днів
+  3. CMS налаштування — 2 дні
+  4. QA + передача клієнту — 2 дні
+
+Дедлайн: 15 травня 2025
+Відповідальний: Макс (DEV_WEBFLOW)
+
+Ризики:
+  ⚠ Затримка контенту від клієнта
+  ⚠ Зміни ТЗ після старту розробки`;
+
+function aiBlock(mode){
+  const isSpec=mode==='spec';
+  return `<div class="ai-block">
+    <div class="ai-head">
+      <div class="ai-ico">✦</div>
+      <div>
+        <div class="ai-ttl">${isSpec?'AI Spec Generator':'AI Project Analyst'}</div>
+        <div class="ai-stl">${isSpec?'Paste a brief — get structured TZ':'Ask about projects, deadlines, risks'}</div>
+      </div>
+      <span class="mock-tag">mock AI</span>
+    </div>
+    <div class="ai-row">
+      <input class="ai-inp" placeholder="${isSpec?'Paste project brief here...':'What\'s critical right now?'}"/>
+      ${!isSpec?'<button class="ai-mic">🎤</button>':''}
+      <button class="ai-run" onclick="runAI(this,'${mode}')"><span>✦</span> ${isSpec?'Generate':'Analyze'}</button>
+    </div>
+    <div class="ai-res">
+      <pre></pre>
+      <div class="ai-acts">
+        <button class="ai-act">Copy</button>
+        <button class="ai-act">Save</button>
+        ${isSpec?'<button class="ai-act notion">→ Notion</button>':'<button class="ai-act">Export PDF</button>'}
+      </div>
+    </div>
+  </div>`;
+}
+
+function runAI(btn,mode){
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span> Running...';
+  const res=btn.closest('.ai-block').querySelector('.ai-res');
+  res.style.display='none';
+  setTimeout(()=>{
+    btn.disabled=false;
+    btn.innerHTML=`<span>✦</span> ${mode==='spec'?'Generate':'Analyze'}`;
+    res.querySelector('pre').textContent=mode==='spec'?AI_SPEC:AI_ANALYTICS;
+    res.style.display='block';
+  },1800);
+}
+
+// ═══════════════════════════════════════
+// SHARED COMPONENTS
+// ═══════════════════════════════════════
+function overdueSection(){
+  const ov=filterTasks().filter(t=>t.ov&&t.st!=='DONE');
+  return `<div class="section">
+    <div class="sh"><span class="sh-t"><span style="color:var(--red)">⚠</span> Overdue tasks <span class="badge br">${ov.length}</span></span></div>
+    ${ov.length===0?'<div style="padding:32px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px">No overdue tasks 🎉</div>':`
+    <table>
+      <thead><tr><th>Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Deadline</th></tr></thead>
+      <tbody>${ov.map(t=>`<tr class="ov-row">
+        <td><span class="od-dot"></span><span class="cm">${t.title}</span></td>
+        <td>${P(t.pId).name}</td><td>${U(t.aId).name}</td>
+        <td>${priDot(t.pri)}</td><td>${badge(t.st)}</td>
+        <td style="color:var(--red)">${fmt(t.dl)}</td>
+      </tr>`).join('')}</tbody>
+    </table>`}
+  </div>`;
+}
+
+function projectsTable(role=CR){
+  const ps=filterProjects(role);
+  const canAdd=role==='OPERATIONS_SALES'||role==='PM';
+  return `<div class="section">
+    <div class="sh">
+      <span class="sh-t">Projects <span style="color:var(--text3);font-weight:400">(${ps.length})</span></span>
+      ${canAdd?'<button class="sbtn p">+ New project</button>':''}
+    </div>
+    <table>
+      <thead><tr><th>Project</th><th>Client</th><th>Type</th><th>Progress</th><th>Status</th><th>Deadline</th><th>Dev</th></tr></thead>
+      <tbody>${ps.map(p=>`<tr>
+        <td><div class="cm">${p.name}</div></td>
+        <td>${p.client}</td>
+        <td><span class="badge ${p.type==='WEBFLOW'?'bc':'bo'}">${p.type}</span></td>
+        <td style="min-width:120px">${pb(p.progress)}</td>
+        <td>${badge(p.status)}</td>
+        <td style="color:${p.status==='AT_RISK'?'var(--red)':'var(--text3)'}">${fmt(p.deadline)}</td>
+        <td>${U(p.devId).name}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+function tasksTable(role=CR){
+  const ts=filterTasks(role);
+  return `<div class="section">
+    <div class="sh">
+      <span class="sh-t">Tasks <span style="color:var(--text3);font-weight:400">(${ts.length})</span></span>
+      <button class="sbtn p">+ New task</button>
+    </div>
+    <table>
+      <thead><tr><th>Task</th><th>Project</th><th>Priority</th><th>Assignee</th><th>Status</th><th>Deadline</th></tr></thead>
+      <tbody>${ts.map(t=>`<tr${t.ov&&t.st!=='DONE'?' class="ov-row"':''}>
+        <td>${t.ov&&t.st!=='DONE'?'<span class="od-dot"></span>':''}<span class="cm">${t.title}</span></td>
+        <td>${P(t.pId).name}</td><td>${priDot(t.pri)}</td><td>${U(t.aId).name}</td>
+        <td>${badge(t.st)}</td>
+        <td style="color:${t.ov&&t.st!=='DONE'?'var(--red)':'var(--text3)'}">${fmt(t.dl)}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// PAGES
+// ═══════════════════════════════════════
+function rOverview(){
+  setPage('Operations & Sales','Full overview — projects, leads & finances');
+  const ov=TASKS.filter(t=>t.ov&&t.st!=='DONE');
+  const inc=FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0);
+  const exp=FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0);
+  const won=LEADS.filter(l=>l.st==='WON').length;
+  document.getElementById('pcontent').innerHTML=`
+    <div class="sg sg4">
+      <div class="sc"><div class="sc-l">◫ Active projects</div><div class="sc-v">${PROJECTS.filter(p=>p.status==='ACTIVE').length}</div><div class="sc-t">${PROJECTS.filter(p=>p.status==='AT_RISK').length} at risk</div></div>
+      <div class="sc"><div class="sc-l">⚠ Overdue tasks</div><div class="sc-v d">${ov.length}</div><div class="sc-t">needs attention</div></div>
+      <div class="sc"><div class="sc-l">◎ Won leads</div><div class="sc-v s">${won}</div><div class="sc-t">of ${LEADS.length} total</div></div>
+      <div class="sc"><div class="sc-l">◈ Net profit</div><div class="sc-v s">${cur(inc-exp)}</div><div class="sc-t">${cur(inc)} income</div></div>
+    </div>
+    ${aiBlock('analytics')}
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'t-ov')">Overdue tasks</div>
+      <div class="tab" onclick="switchTab(this,'t-leads')">Leads</div>
+      <div class="tab" onclick="switchTab(this,'t-fin')">Finance</div>
+    </div>
+    <div id="t-ov">${overdueSection()}</div>
+    <div id="t-leads" style="display:none">${leadsHTML()}</div>
+    <div id="t-fin" style="display:none">${financeHTML()}</div>`;
+}
+
+function rPM(){
+  setPage('Project Manager','Projects, tasks & AI spec generator');
+  const ov=filterTasks('PM').filter(t=>t.ov&&t.st!=='DONE');
+  document.getElementById('pcontent').innerHTML=`
+    <div class="sg sg4">
+      <div class="sc"><div class="sc-l">◫ Projects</div><div class="sc-v">${PROJECTS.length}</div></div>
+      <div class="sc"><div class="sc-l">☑ Open tasks</div><div class="sc-v">${TASKS.filter(t=>t.st!=='DONE').length}</div></div>
+      <div class="sc"><div class="sc-l">⚠ Overdue</div><div class="sc-v d">${ov.length}</div></div>
+      <div class="sc"><div class="sc-l">✦ TZ drafts</div><div class="sc-v w">3</div><div class="sc-t">AI generated</div></div>
+    </div>
+    ${aiBlock('spec')}
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'pm-p')">Projects</div>
+      <div class="tab" onclick="switchTab(this,'pm-t')">Tasks</div>
+    </div>
+    <div id="pm-p">${projectsTable('PM')}</div>
+    <div id="pm-t" style="display:none">${tasksTable('PM')}</div>`;
+}
+
+function rDev(){
+  const isWF=CR==='DEV_WEBFLOW';
+  const typeLabel=isWF?'Webflow':'WordPress';
+  setPage(typeLabel+' Developer','Your assigned projects & tasks only');
+  const ps=filterProjects();
+  const ts=filterTasks();
+  const ov=ts.filter(t=>t.ov&&t.st!=='DONE');
+  document.getElementById('pcontent').innerHTML=`
+    <div class="sg sg3">
+      <div class="sc"><div class="sc-l">◫ My projects</div><div class="sc-v">${ps.length}</div></div>
+      <div class="sc"><div class="sc-l">☑ Open tasks</div><div class="sc-v">${ts.filter(t=>t.st!=='DONE').length}</div></div>
+      <div class="sc"><div class="sc-l">⚠ Overdue</div><div class="sc-v ${ov.length?'d':''}">${ov.length}</div></div>
+    </div>
+    <div class="pcards">${ps.map(p=>`
+      <div class="pcard">
+        <div class="pcard-h">
+          <div><div class="pcard-n">${p.name}</div><div class="pcard-c">${p.client}</div></div>
+          <span class="badge ${p.type==='WEBFLOW'?'bc':'bo'}">${p.type}</span>
+        </div>
+        ${pb(p.progress)}
+        <div class="pcard-f">
+          <span class="pcard-d">🗓 ${fmt(p.deadline)}</span>
+          ${badge(p.status)}
+        </div>
+      </div>
+    `).join('')}</div>
+    ${tasksTable()}`;
+}
+
+function rProjects(){
+  setPage('Projects','Filtered by your role');
+  document.getElementById('pcontent').innerHTML=projectsTable();
+}
+
+function rTasks(){
+  setPage('Tasks','Filtered by your role');
+  document.getElementById('pcontent').innerHTML=tasksTable();
+}
+
+function rLeads(){
+  if(CR!=='OPERATIONS_SALES'){logout();return;}
+  setPage('Leads','CRM — pipeline & deals');
+  const won=LEADS.filter(l=>l.st==='WON').reduce((s,l)=>s+l.amt,0);
+  const pipe=LEADS.filter(l=>l.st!=='WON'&&l.st!=='LOST').reduce((s,l)=>s+l.amt,0);
+  document.getElementById('pcontent').innerHTML=`
+    <div class="sg sg3">
+      <div class="sc"><div class="sc-l">◎ Total</div><div class="sc-v">${LEADS.length}</div></div>
+      <div class="sc"><div class="sc-l">✓ Won</div><div class="sc-v s">${cur(won)}</div></div>
+      <div class="sc"><div class="sc-l">⟳ Pipeline</div><div class="sc-v w">${cur(pipe)}</div></div>
+    </div>
+    ${leadsHTML()}`;
+}
+
+function leadsHTML(){
+  return `<div class="section">
+    <div class="sh">
+      <span class="sh-t">All leads</span>
+      <button class="sbtn">Import CSV</button>
+      <button class="sbtn">Export CSV</button>
+      <button class="sbtn p">+ Add lead</button>
+    </div>
+    <table>
+      <thead><tr><th>Name</th><th>Source</th><th>Status</th><th>Amount</th><th>Created</th><th>Comment</th></tr></thead>
+      <tbody>${LEADS.map(l=>`<tr>
+        <td><div class="cm">${l.name}</div></td>
+        <td><span class="badge bgr">${l.src}</span></td>
+        <td>${badge(l.st)}</td>
+        <td style="color:var(--text);font-weight:600">${cur(l.amt)}</td>
+        <td>${fmt(l.cr)}</td>
+        <td style="color:var(--text3);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.cm||'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+function rFinance(){
+  if(CR!=='OPERATIONS_SALES'&&CR!=='PM'){logout();return;}
+  setPage('Finance','Income, expenses & project finances');
+  const inc=FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0);
+  const exp=FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0);
+  document.getElementById('pcontent').innerHTML=`
+    <div class="sg sg3">
+      <div class="sc"><div class="sc-l">↑ Income</div><div class="sc-v s">${cur(inc)}</div></div>
+      <div class="sc"><div class="sc-l">↓ Expenses</div><div class="sc-v d">${cur(exp)}</div></div>
+      <div class="sc"><div class="sc-l">= Profit</div><div class="sc-v">${cur(inc-exp)}</div></div>
+    </div>
+    ${financeHTML()}`;
+}
+
+function financeHTML(){
+  return `<div class="section">
+    <div class="sh">
+      <span class="sh-t">Transactions</span>
+      <button class="sbtn">Export CSV</button>
+      <button class="sbtn p">+ Record</button>
+    </div>
+    <table>
+      <thead><tr><th>Type</th><th>Description</th><th>Project</th><th>Category</th><th>Date</th><th>Amount</th></tr></thead>
+      <tbody>${FINANCE.map(f=>`<tr>
+        <td><span class="badge ${f.type==='INCOME'?'bg_':'br'}">${f.type}</span></td>
+        <td><span class="cm">${f.desc}</span></td>
+        <td style="color:var(--text3)">${f.pId?P(f.pId).name:'—'}</td>
+        <td><span class="badge bgr">${f.cat}</span></td>
+        <td>${fmt(f.dt)}</td>
+        <td style="font-weight:600;color:${f.type==='INCOME'?'var(--green)':'var(--red)'}">
+          ${f.type==='INCOME'?'+':'−'}${cur(f.amt)}
+        </td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+renderLogin();
+const saved=localStorage.getItem('aos_role');
+if(saved&&ROLES[saved]) enterRole(saved);
+</script>
+</body>
+</html>
