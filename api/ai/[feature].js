@@ -7,6 +7,7 @@ const MODEL = 'claude-sonnet-4-20250514'
 const MAX_TOKENS = 1024
 
 function getClient() {
+  if (!process.env.ANTHROPIC_API_KEY) return null
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 }
 
@@ -79,8 +80,12 @@ ${context}
 
 Надай стислий executive summary (до 300 слів). Виділи критичні проблеми, що потребують негайних дій, та конкретні рекомендації.`
 
+  const client = getClient()
+  if (!client) {
+    return res.status(503).json({ error: 'AI недоступний: ANTHROPIC_API_KEY не налаштовано' })
+  }
+
   try {
-    const client = getClient()
     const message = await client.messages.create({
       model: MODEL,
       max_tokens: MAX_TOKENS,
@@ -90,7 +95,6 @@ ${context}
     const tokensUsed = (message.usage?.input_tokens || 0) + (message.usage?.output_tokens || 0)
     const result = message.content[0]?.text || ''
 
-    // Log AI call (no prompt text stored)
     await prisma.aiLog.create({
       data: { user_id: sub, feature: 'analyze', tokens_used: tokensUsed },
     })
@@ -102,7 +106,7 @@ ${context}
     })
   } catch (err) {
     console.error('Anthropic error:', err.message)
-    return res.status(502).json({ error: 'AI service unavailable. Try again later.' })
+    return res.status(502).json({ error: 'AI сервіс тимчасово недоступний. Спробуйте пізніше.' })
   }
 }
 
@@ -173,8 +177,12 @@ ${notes ? `\nДодаткові нотатки:\n${notes}` : ''}
 ## Ризики
 [Маркований список потенційних ризиків і способів їх мінімізації]`
 
+  const client = getClient()
+  if (!client) {
+    return res.status(503).json({ error: 'AI недоступний: ANTHROPIC_API_KEY не налаштовано' })
+  }
+
   try {
-    const client = getClient()
     const message = await client.messages.create({
       model: MODEL,
       max_tokens: MAX_TOKENS,
