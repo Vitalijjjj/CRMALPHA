@@ -150,6 +150,17 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
 .pcard-f{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
 .pcard-d{font-family:var(--mono);font-size:10px;color:var(--text3)}
 
+/* login form */
+.lform{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.lfield{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:11px 14px;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;transition:border .15s;width:100%}
+.lfield:focus{border-color:rgba(124,111,205,.5)}
+.lfield::placeholder{color:var(--text3)}
+.lbtn{width:100%;padding:12px;background:var(--violet);border:none;border-radius:var(--r);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.lbtn:hover{background:var(--violet2)}
+.lbtn:disabled{opacity:.5;cursor:not-allowed}
+.lerr{color:var(--red);font-family:var(--mono);font-size:11px;text-align:center;min-height:16px}
+.lsep{display:flex;align-items:center;gap:10px;margin:16px 0 12px;color:var(--text3);font-size:11px;font-family:var(--mono)}
+.lsep::before,.lsep::after{content:'';flex:1;height:1px;background:var(--border)}
 /* overdue */
 .ov-row{background:rgba(224,92,92,.03)}
 .od-dot{display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:6px;vertical-align:middle}
@@ -178,9 +189,17 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
     <div class="logo-box">A</div>
     <span class="logo-name">Agency OS</span>
   </div>
-  <div class="login-sub">internal agency management — demo v1.0</div>
+  <div class="login-sub">internal agency management · sign in to continue</div>
+  <div class="lform">
+    <input id="l-email" class="lfield" type="email" placeholder="Email" autocomplete="email"/>
+    <input id="l-pass"  class="lfield" type="password" placeholder="Password" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()"/>
+  </div>
+  <div class="lerr" id="l-err"></div>
+  <button class="lbtn" id="l-btn" onclick="doLogin()" style="margin-top:4px">Sign in →</button>
+  <div class="lsep">quick login — test accounts</div>
   <div id="role-cards"></div>
-  <div class="lfoot">no backend · mock data · demo mode only</div>
+  <div class="lfoot">JWT auth · Argon2id · PostgreSQL · Vercel</div>
 </div>
 </div>
 
@@ -202,7 +221,7 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
           <div class="urole" id="urole"></div>
         </div>
       </div>
-      <button class="logout" onclick="logout()">↩ Switch role</button>
+      <button class="logout" onclick="doLogout()">↩ Log out</button>
     </div>
   </div>
 
@@ -221,215 +240,314 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
 </div>
 
 <script>
-// ═══════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════
-const NOW=new Date();
-const d=n=>{const x=new Date(NOW);x.setDate(x.getDate()+n);return x.toISOString().split('T')[0]};
+// ════════════════════════════════════════
+// TOKEN STORE  (access token in memory only)
+// ════════════════════════════════════════
+let accessToken = null
+let currentUser = null  // { id, email, role, is_active }
 
-const USERS=[
-  {id:'u1',name:'Артур + Я',role:'OPERATIONS_SALES'},
-  {id:'u2',name:'Ліна',role:'PM'},
-  {id:'u3',name:'Макс',role:'DEV_WEBFLOW'},
-  {id:'u4',name:'Андрій',role:'DEV_WORDPRESS'},
-];
-const PROJECTS=[
-  {id:'p1',name:'AutoBrand Website',client:'AutoBrand LLC',type:'WEBFLOW',deadline:d(15),progress:65,status:'ACTIVE',pmId:'u2',devId:'u3'},
-  {id:'p2',name:'TechBlog Rebuild',client:'TechBlog Media',type:'WEBFLOW',deadline:d(-2),progress:30,status:'AT_RISK',pmId:'u2',devId:'u3'},
-  {id:'p3',name:'KFC Landing',client:'KFC Ukraine',type:'WORDPRESS',deadline:d(1),progress:80,status:'ACTIVE',pmId:'u2',devId:'u4'},
-  {id:'p4',name:'MedClinic Portal',client:'MedClinic Group',type:'WORDPRESS',deadline:d(30),progress:20,status:'ACTIVE',pmId:'u2',devId:'u4'},
-  {id:'p5',name:'FashionStore',client:'Moda UA',type:'WEBFLOW',deadline:d(5),progress:95,status:'COMPLETED',pmId:'u2',devId:'u3'},
-  {id:'p6',name:'LawFirm Site',client:'Lexis Partners',type:'WORDPRESS',deadline:d(60),progress:10,status:'ON_HOLD',pmId:'u2',devId:'u4'},
-];
-const TASKS=[
-  {id:'t1',title:'Header animations',pId:'p1',aId:'u3',pri:'HIGH',dl:d(-2),st:'IN_PROGRESS',ov:true},
-  {id:'t2',title:'Mobile navigation',pId:'p1',aId:'u3',pri:'MEDIUM',dl:d(3),st:'TODO',ov:false},
-  {id:'t3',title:'CMS collections setup',pId:'p2',aId:'u3',pri:'CRITICAL',dl:d(-4),st:'TODO',ov:true},
-  {id:'t4',title:'SEO meta tags',pId:'p2',aId:'u3',pri:'LOW',dl:d(-1),st:'REVIEW',ov:true},
-  {id:'t5',title:'WooCommerce setup',pId:'p3',aId:'u4',pri:'HIGH',dl:d(1),st:'IN_PROGRESS',ov:false},
-  {id:'t6',title:'Form integrations',pId:'p3',aId:'u4',pri:'MEDIUM',dl:d(-3),st:'IN_PROGRESS',ov:true},
-  {id:'t7',title:'Appointment booking',pId:'p4',aId:'u4',pri:'HIGH',dl:d(14),st:'TODO',ov:false},
-  {id:'t8',title:'Homepage hero',pId:'p5',aId:'u3',pri:'LOW',dl:d(5),st:'DONE',ov:false},
-  {id:'t9',title:'Product gallery',pId:'p5',aId:'u3',pri:'MEDIUM',dl:d(2),st:'DONE',ov:false},
-  {id:'t10',title:'Multilingual plugin',pId:'p6',aId:'u4',pri:'MEDIUM',dl:d(30),st:'TODO',ov:false},
-  {id:'t11',title:'Client content review',pId:'p1',aId:'u2',pri:'HIGH',dl:d(4),st:'TODO',ov:false},
-  {id:'t12',title:'Final QA pass',pId:'p3',aId:'u2',pri:'CRITICAL',dl:d(1),st:'TODO',ov:false},
-];
-const LEADS=[
-  {id:'l1',name:'Петро Коваленко',src:'Referral',st:'CONTACTED',amt:3500,cr:d(-10),cm:'Корпоративний сайт'},
-  {id:'l2',name:'Марина Лисенко',src:'Instagram',st:'WON',amt:1800,cr:d(-20),cm:'Лендінг косметика'},
-  {id:'l3',name:'Oleks Design Studio',src:'Upwork',st:'PROPOSAL',amt:5200,cr:d(-5),cm:'White-label dev'},
-  {id:'l4',name:'Nova Logistics',src:'Website',st:'NEW',amt:4000,cr:d(-2)},
-  {id:'l5',name:'Grill House',src:'Referral',st:'CONTACTED',amt:1200,cr:d(-7),cm:'Меню + бронювання'},
-  {id:'l6',name:'MindSpark Agency',src:'Partner',st:'WON',amt:7800,cr:d(-30),cm:'Довгостроковий контракт'},
-  {id:'l7',name:'EcoShop Ukraine',src:'Cold Outreach',st:'LOST',amt:2200,cr:d(-15),cm:'Обрали іншого'},
-  {id:'l8',name:'Fit Academy',src:'Instagram',st:'PROPOSAL',amt:3100,cr:d(-3),cm:'Фітнес-клуб'},
-];
-const FINANCE=[
-  {id:'f1',type:'INCOME',pId:'p1',amt:2500,dt:d(-25),cat:'Project Payment',desc:'AutoBrand — 50% передоплата'},
-  {id:'f2',type:'INCOME',pId:'p3',amt:1800,dt:d(-18),cat:'Project Payment',desc:'KFC Landing — 100% оплата'},
-  {id:'f3',type:'EXPENSE',amt:99,dt:d(-20),cat:'Software',desc:'Figma subscription'},
-  {id:'f4',type:'INCOME',pId:'p5',amt:3200,dt:d(-10),cat:'Project Payment',desc:'FashionStore — фінальна'},
-  {id:'f5',type:'EXPENSE',amt:299,dt:d(-15),cat:'Software',desc:'Webflow Business plan'},
-  {id:'f6',type:'INCOME',pId:'p2',amt:1500,dt:d(-8),cat:'Project Payment',desc:'TechBlog — 50% передоплата'},
-  {id:'f7',type:'EXPENSE',amt:450,dt:d(-5),cat:'Contractor',desc:'Дизайнер — AutoBrand'},
-  {id:'f8',type:'INCOME',pId:'p4',amt:2000,dt:d(-3),cat:'Project Payment',desc:'MedClinic — передоплата'},
-  {id:'f9',type:'EXPENSE',amt:120,dt:d(-1),cat:'Marketing',desc:'Instagram реклама'},
-  {id:'f10',type:'INCOME',amt:7800,dt:d(-30),cat:'Retainer',desc:'MindSpark — ретейнер'},
-];
+// ════════════════════════════════════════
+// API CLIENT  — adds Bearer, auto-refreshes
+// ════════════════════════════════════════
+async function api(path, opts = {}) {
+  const hdrs = { 'Content-Type': 'application/json', ...(opts.headers || {}) }
+  if (accessToken) hdrs['Authorization'] = 'Bearer ' + accessToken
 
-// ═══════════════════════════════════════
+  let res = await fetch(path, { ...opts, headers: hdrs })
+
+  if (res.status === 401 && accessToken) {
+    const r = await fetch('/api/auth/refresh', { method: 'POST' })
+    if (r.ok) {
+      accessToken = (await r.json()).accessToken
+      hdrs['Authorization'] = 'Bearer ' + accessToken
+      res = await fetch(path, { ...opts, headers: hdrs })
+    } else {
+      doLogout()
+      throw new Error('Session expired')
+    }
+  }
+  return res
+}
+
+// ════════════════════════════════════════
+// MOCK DATA  (Leads & Finance — no API yet)
+// ════════════════════════════════════════
+const NOW = new Date()
+const dOff = n => { const x = new Date(NOW); x.setDate(x.getDate()+n); return x.toISOString().split('T')[0] }
+
+const LEADS = [
+  {id:'l1',name:'Петро Коваленко',src:'Referral',st:'CONTACTED',amt:3500,cr:dOff(-10),cm:'Корпоративний сайт'},
+  {id:'l2',name:'Марина Лисенко',src:'Instagram',st:'WON',amt:1800,cr:dOff(-20),cm:'Лендінг косметика'},
+  {id:'l3',name:'Oleks Design Studio',src:'Upwork',st:'PROPOSAL',amt:5200,cr:dOff(-5),cm:'White-label dev'},
+  {id:'l4',name:'Nova Logistics',src:'Website',st:'NEW',amt:4000,cr:dOff(-2)},
+  {id:'l5',name:'Grill House',src:'Referral',st:'CONTACTED',amt:1200,cr:dOff(-7),cm:'Меню + бронювання'},
+  {id:'l6',name:'MindSpark Agency',src:'Partner',st:'WON',amt:7800,cr:dOff(-30),cm:'Довгостроковий контракт'},
+  {id:'l7',name:'EcoShop Ukraine',src:'Cold Outreach',st:'LOST',amt:2200,cr:dOff(-15),cm:'Обрали іншого'},
+  {id:'l8',name:'Fit Academy',src:'Instagram',st:'PROPOSAL',amt:3100,cr:dOff(-3),cm:'Фітнес-клуб'},
+]
+const FINANCE = [
+  {type:'INCOME',amt:2500,dt:dOff(-25),cat:'Project Payment',desc:'AutoBrand — 50% передоплата'},
+  {type:'INCOME',amt:1800,dt:dOff(-18),cat:'Project Payment',desc:'KFC Landing — 100% оплата'},
+  {type:'EXPENSE',amt:99,dt:dOff(-20),cat:'Software',desc:'Figma subscription'},
+  {type:'INCOME',amt:3200,dt:dOff(-10),cat:'Project Payment',desc:'FashionStore — фінальна'},
+  {type:'EXPENSE',amt:299,dt:dOff(-15),cat:'Software',desc:'Webflow Business plan'},
+  {type:'INCOME',amt:1500,dt:dOff(-8),cat:'Project Payment',desc:'TechBlog — 50% передоплата'},
+  {type:'EXPENSE',amt:450,dt:dOff(-5),cat:'Contractor',desc:'Дизайнер — AutoBrand'},
+  {type:'INCOME',amt:2000,dt:dOff(-3),cat:'Project Payment',desc:'MedClinic — передоплата'},
+  {type:'EXPENSE',amt:120,dt:dOff(-1),cat:'Marketing',desc:'Instagram реклама'},
+  {type:'INCOME',amt:7800,dt:dOff(-30),cat:'Retainer',desc:'MindSpark — ретейнер'},
+]
+
+// ════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════
-const fmt=s=>new Date(s).toLocaleDateString('uk-UA',{day:'numeric',month:'short'});
-const cur=n=>'$'+n.toLocaleString();
-const U=id=>USERS.find(u=>u.id===id)||{name:'—'};
-const P=id=>PROJECTS.find(p=>p.id===id)||{name:'—'};
+// ════════════════════════════════════════
+const fmt = s => new Date(s).toLocaleDateString('uk-UA', {day:'numeric', month:'short'})
+const cur = n => '$' + Number(n).toLocaleString()
+const isOverdue = t => t.deadline && new Date(t.deadline) < NOW && t.status !== 'DONE'
 
-const SC={ACTIVE:'bg_',AT_RISK:'br',COMPLETED:'bc',ON_HOLD:'bgr',
-  TODO:'bgr',IN_PROGRESS:'bv',REVIEW:'by',DONE:'bg_',
-  NEW:'bgr',CONTACTED:'bv',PROPOSAL:'by',WON:'bg_',LOST:'br'};
-const badge=(s,l)=>`<span class="badge ${SC[s]||'bgr'}">${(l||s).replace(/_/g,' ')}</span>`;
+const SC = {
+  ACTIVE:'bg_', COMPLETED:'bc', ON_HOLD:'bgr', CANCELLED:'br',
+  TODO:'bgr', IN_PROGRESS:'bv', REVIEW:'by', DONE:'bg_',
+  NEW:'bgr', CONTACTED:'bv', PROPOSAL:'by', WON:'bg_', LOST:'br',
+}
+const badge = (s, l) => `<span class="badge ${SC[s]||'bgr'}">${(l||s).replace(/_/g,' ')}</span>`
 
-const PC={LOW:'#555570',MEDIUM:'#d4a843',HIGH:'#f0875a',CRITICAL:'#e05c5c'};
-const priDot=p=>`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${PC[p]};margin-right:5px;vertical-align:middle"></span>${p}`;
-const pb=v=>`<div class="pbw"><div class="pb"><div class="pf ${v>=80?'hi':v<30?'lo':''}" style="width:${v}%"></div></div><span class="pl">${v}%</span></div>`;
+const PC = {LOW:'#555570', MEDIUM:'#d4a843', HIGH:'#f0875a', URGENT:'#e05c5c'}
+const priDot = p => `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${PC[p]||'#555570'};margin-right:5px;vertical-align:middle"></span>${p}`
+const pb = v => `<div class="pbw"><div class="pb"><div class="pf ${v>=80?'hi':v<30?'lo':''}" style="width:${v}%"></div></div><span class="pl">${v}%</span></div>`
+const loadingHTML = () => `<div style="padding:48px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px"><span class="spin" style="width:16px;height:16px;margin-bottom:10px;display:block;margin:0 auto 10px"></span>Loading...</div>`
+const errorHTML = msg => `<div style="padding:32px;text-align:center;color:var(--red);font-family:var(--mono);font-size:12px">⚠ ${msg}</div>`
+const emptyHTML = msg => `<div style="padding:32px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px">${msg}</div>`
 
-// ═══════════════════════════════════════
+// ════════════════════════════════════════
 // ROLE CONFIG
-// ═══════════════════════════════════════
-const ROLES={
-  OPERATIONS_SALES:{label:'Operations & Sales',icon:'⚡',bg:'rgba(124,111,205,.15)',tc:'bv',desc:'Full access — all modules + AI analytics',
+// ════════════════════════════════════════
+const ROLES = {
+  OPERATIONS_SALES:{label:'Operations & Sales',icon:'⚡',bg:'rgba(124,111,205,.15)',tc:'bv',desc:'ops@agency.com',
     nav:[{id:'overview',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'},{id:'leads',ic:'◎',l:'Leads'},{id:'finance',ic:'◈',l:'Finance'}]},
-  PM:{label:'Project Manager',icon:'📋',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'Projects, tasks, AI spec generation, finance',
+  PM:{label:'Project Manager',icon:'📋',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'pm@agency.com',
     nav:[{id:'pm',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'},{id:'finance',ic:'◈',l:'Finance'}]},
-  DEV_WEBFLOW:{label:'Webflow Developer',icon:'🌐',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'Webflow projects & tasks only',
+  DEV_WEBFLOW:{label:'Webflow Developer',icon:'🌐',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'webflow@agency.com',
     nav:[{id:'dev',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'}]},
-  DEV_WORDPRESS:{label:'WordPress Developer',icon:'🔵',bg:'rgba(240,135,90,.1)',tc:'bo',desc:'WordPress projects & tasks only',
+  DEV_WORDPRESS:{label:'WordPress Developer',icon:'🔵',bg:'rgba(240,135,90,.1)',tc:'bo',desc:'wordpress@agency.com',
     nav:[{id:'dev',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'}]},
-};
-
-// avatar colors per role
-const AV_STYLE={
+}
+const AV_STYLE = {
   OPERATIONS_SALES:'background:rgba(124,111,205,.2);color:#a99de8;border-color:rgba(124,111,205,.4)',
   PM:'background:rgba(77,217,217,.15);color:#4dd9d9;border-color:rgba(77,217,217,.3)',
   DEV_WEBFLOW:'background:rgba(77,217,217,.15);color:#4dd9d9;border-color:rgba(77,217,217,.3)',
   DEV_WORDPRESS:'background:rgba(240,135,90,.15);color:#f0875a;border-color:rgba(240,135,90,.3)',
-};
+}
 
-// ═══════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════
-function renderLogin(){
-  document.getElementById('role-cards').innerHTML=Object.entries(ROLES).map(([role,cfg])=>`
-    <button class="rc" onclick="enterRole('${role}')">
+// ════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════
+function renderLogin() {
+  document.getElementById('role-cards').innerHTML = Object.entries(ROLES).map(([role, cfg]) => `
+    <button class="rc" onclick="quickLogin('${cfg.desc}')">
       <div class="ri" style="background:${cfg.bg}">${cfg.icon}</div>
       <div class="rm">
         <div class="rt">${cfg.label}</div>
-        <div class="rd">${cfg.desc}</div>
+        <div class="rd">${cfg.desc} · password123</div>
       </div>
       <span class="rtag badge ${cfg.tc}" style="font-size:9px">${role}</span>
       <span class="rarr">→</span>
     </button>
-  `).join('');
+  `).join('')
 }
 
-// ═══════════════════════════════════════
-// ENTER / LOGOUT
-// ═══════════════════════════════════════
-let CR=null; // current role
-
-function enterRole(role){
-  CR=role;
-  localStorage.setItem('aos_role',role);
-  document.getElementById('login').style.display='none';
-  document.getElementById('app').style.display='block';
-  setupShell();
-  go(ROLES[role].nav[0].id);
+function quickLogin(email) {
+  document.getElementById('l-email').value = email
+  document.getElementById('l-pass').value = 'password123'
+  doLogin()
 }
 
-function logout(){
-  localStorage.removeItem('aos_role');
-  CR=null;
-  document.getElementById('app').style.display='none';
-  document.getElementById('login').style.display='flex';
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim()
+  const password = document.getElementById('l-pass').value
+  const btn = document.getElementById('l-btn')
+  const errEl = document.getElementById('l-err')
+  errEl.textContent = ''
+
+  if (!email || !password) { errEl.textContent = 'Enter email and password'; return }
+
+  btn.disabled = true
+  btn.innerHTML = '<span class="spin"></span> Signing in...'
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Login failed') }
+    const data = await res.json()
+    accessToken = data.accessToken
+    currentUser = data.user
+    enterApp()
+  } catch (e) {
+    errEl.textContent = e.message
+  } finally {
+    btn.disabled = false
+    btn.innerHTML = 'Sign in →'
+  }
 }
 
-function setupShell(){
-  const u=USERS.find(x=>x.role===CR);
-  const cfg=ROLES[CR];
-  document.getElementById('uav').textContent=u.name.charAt(0);
-  document.getElementById('uav').style.cssText=AV_STYLE[CR];
-  document.getElementById('uname').textContent=u.name;
-  const roleEl=document.getElementById('urole');
-  roleEl.textContent=CR;
-  roleEl.style.color=CR==='OPERATIONS_SALES'?'#a99de8':CR==='PM'?'#4dd9d9':'#f0875a';
-  document.getElementById('snav').innerHTML=cfg.nav.map(n=>`
+async function tryAutoLogin() {
+  try {
+    const res = await fetch('/api/auth/refresh', { method: 'POST' })
+    if (!res.ok) return
+    accessToken = (await res.json()).accessToken
+    const pl = JSON.parse(atob(accessToken.split('.')[1]))
+    currentUser = { id: pl.sub, email: pl.email, role: pl.role, is_active: true }
+    enterApp()
+  } catch {}
+}
+
+function enterApp() {
+  document.getElementById('login').style.display = 'none'
+  document.getElementById('app').style.display = 'block'
+  setupShell()
+  go(ROLES[currentUser.role].nav[0].id)
+}
+
+async function doLogout() {
+  try { await fetch('/api/auth/logout', { method: 'POST' }) } catch {}
+  accessToken = null
+  currentUser = null
+  document.getElementById('app').style.display = 'none'
+  document.getElementById('login').style.display = 'flex'
+}
+
+function setupShell() {
+  const role = currentUser.role
+  const cfg = ROLES[role]
+  document.getElementById('uav').textContent = currentUser.email.charAt(0).toUpperCase()
+  document.getElementById('uav').style.cssText = AV_STYLE[role]
+  document.getElementById('uname').textContent = currentUser.email
+  const roleEl = document.getElementById('urole')
+  roleEl.textContent = role
+  roleEl.style.color = role==='OPERATIONS_SALES'?'#a99de8':role==='PM'?'#4dd9d9':'#f0875a'
+  document.getElementById('snav').innerHTML = cfg.nav.map(n => `
     <div class="ni" id="ni-${n.id}" onclick="go('${n.id}')">
       <span class="nic">${n.ic}</span><span>${n.l}</span>
     </div>
-  `).join('');
+  `).join('')
 }
 
-function go(id){
-  document.querySelectorAll('.ni').forEach(el=>el.classList.toggle('active',el.id==='ni-'+id));
-  ({overview:rOverview,pm:rPM,dev:rDev,projects:rProjects,tasks:rTasks,leads:rLeads,finance:rFinance})[id]?.();
+function go(id) {
+  document.querySelectorAll('.ni').forEach(el => el.classList.toggle('active', el.id==='ni-'+id))
+  ;({overview:rOverview, pm:rPM, dev:rDev, projects:rProjects, tasks:rTasks, leads:rLeads, finance:rFinance})[id]?.()
 }
 
-function setPage(t,s){
-  document.getElementById('ptitle').textContent=t;
-  document.getElementById('psub').textContent=s;
+function setPage(t, s) {
+  document.getElementById('ptitle').textContent = t
+  document.getElementById('psub').textContent = s
 }
 
-function switchTab(el,showId){
-  el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===el));
-  let sib=el.closest('.tabs').nextElementSibling;
-  while(sib){if(!sib.classList.contains('tabs'))sib.style.display=sib.id===showId?'':'none';sib=sib.nextElementSibling;}
+function switchTab(el, showId) {
+  el.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t===el))
+  let sib = el.closest('.tabs').nextElementSibling
+  while(sib){ if(!sib.classList.contains('tabs')) sib.style.display = sib.id===showId?'':'none'; sib=sib.nextElementSibling }
 }
 
-// ═══════════════════════════════════════
-// RBAC filter
-// ═══════════════════════════════════════
-function filterProjects(role=CR){
-  if(role==='OPERATIONS_SALES'||role==='PM') return PROJECTS;
-  if(role==='DEV_WEBFLOW') return PROJECTS.filter(p=>p.type==='WEBFLOW');
-  if(role==='DEV_WORDPRESS') return PROJECTS.filter(p=>p.type==='WORDPRESS');
-  return [];
-}
-function filterTasks(role=CR){
-  if(role==='OPERATIONS_SALES'||role==='PM') return TASKS;
-  const pids=filterProjects(role).map(p=>p.id);
-  return TASKS.filter(t=>pids.includes(t.pId));
+// ════════════════════════════════════════
+// RENDER HELPERS
+// ════════════════════════════════════════
+function projectsTableHTML(projects) {
+  const role = currentUser.role
+  const canAdd = role==='OPERATIONS_SALES' || role==='PM'
+  if (!projects.length) return emptyHTML('No projects found')
+  return `<div class="section">
+    <div class="sh">
+      <span class="sh-t">Projects <span style="color:var(--text3);font-weight:400">(${projects.length})</span></span>
+      ${canAdd ? '<button class="sbtn p">+ New project</button>' : ''}
+    </div>
+    <table>
+      <thead><tr><th>Project</th><th>Client</th><th>Type</th><th>Progress</th><th>Status</th><th>Deadline</th><th>Dev</th></tr></thead>
+      <tbody>${projects.map(p => `<tr>
+        <td><div class="cm">${p.name}</div></td>
+        <td>${p.client}</td>
+        <td><span class="badge ${p.type==='WEBFLOW'?'bc':'bo'}">${p.type}</span></td>
+        <td style="min-width:120px">${pb(p.progress)}</td>
+        <td>${badge(p.status)}</td>
+        <td style="color:${p.deadline&&new Date(p.deadline)<NOW?'var(--red)':'var(--text3)'}">${p.deadline?fmt(p.deadline):'—'}</td>
+        <td>${p.dev?.email||'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`
 }
 
-// ═══════════════════════════════════════
+function tasksTableHTML(tasks) {
+  if (!tasks.length) return emptyHTML('No tasks found')
+  return `<div class="section">
+    <div class="sh">
+      <span class="sh-t">Tasks <span style="color:var(--text3);font-weight:400">(${tasks.length})</span></span>
+      <button class="sbtn p">+ New task</button>
+    </div>
+    <table>
+      <thead><tr><th>Task</th><th>Priority</th><th>Assignee</th><th>Status</th><th>Deadline</th></tr></thead>
+      <tbody>${tasks.map(t => {
+        const ov = isOverdue(t)
+        return `<tr${ov?' class="ov-row"':''}>
+          <td>${ov?'<span class="od-dot"></span>':''}<span class="cm">${t.title}</span></td>
+          <td>${priDot(t.priority)}</td>
+          <td>${t.assignee?.email||'—'}</td>
+          <td>${badge(t.status)}</td>
+          <td style="color:${ov?'var(--red)':'var(--text3)'}">${t.deadline?fmt(t.deadline):'—'}</td>
+        </tr>`
+      }).join('')}</tbody>
+    </table>
+  </div>`
+}
+
+function overdueHTML(tasks) {
+  const ov = tasks.filter(isOverdue)
+  return `<div class="section">
+    <div class="sh"><span class="sh-t"><span style="color:var(--red)">⚠</span> Overdue tasks <span class="badge br">${ov.length}</span></span></div>
+    ${ov.length===0 ? emptyHTML('No overdue tasks 🎉') : `
+    <table>
+      <thead><tr><th>Task</th><th>Priority</th><th>Assignee</th><th>Status</th><th>Deadline</th></tr></thead>
+      <tbody>${ov.map(t => `<tr class="ov-row">
+        <td><span class="od-dot"></span><span class="cm">${t.title}</span></td>
+        <td>${priDot(t.priority)}</td><td>${t.assignee?.email||'—'}</td>
+        <td>${badge(t.status)}</td>
+        <td style="color:var(--red)">${fmt(t.deadline)}</td>
+      </tr>`).join('')}</tbody>
+    </table>`}
+  </div>`
+}
+
+// Fetch all tasks across visible projects
+async function fetchAllTasks(projects) {
+  const results = await Promise.all(
+    projects.map(p => api(`/api/projects/${p.id}/tasks`).then(r => r.ok ? r.json() : []).catch(() => []))
+  )
+  return results.flat()
+}
+
+// ════════════════════════════════════════
 // AI MOCK
-// ═══════════════════════════════════════
-const AI_ANALYTICS=`## Executive Summary — Agency OS
+// ════════════════════════════════════════
+const AI_ANALYTICS = `## Executive Summary — Agency OS
 
 🔴 Критично (дій зараз):
-  • TechBlog Rebuild — 30% прогрес, дедлайн 2 дні тому
-    CMS collections не почато. Ризик повного зриву.
+  • TechBlog Rebuild — дедлайн прострочено
+    CMS collections не почато. Ризик зриву.
   • Form integrations (KFC) — 3+ дні без прогресу
-    Дедлайн завтра. Контактуй Андрія сьогодні.
 
 🟡 Під наглядом:
-  • Header animations (AutoBrand) — прострочено 2 дні
-  • SEO meta tags (TechBlog) — на review, без оновлень
+  • Header animations (AutoBrand) — прострочено
+  • SEO meta tags (TechBlog) — на review
 
 ✅ Добре:
-  • FashionStore — 95%, готовий до здачі
-  • KFC Landing — 80%, фінальний етап
+  • FashionStore — 100%, здано
+  • KFC Landing — фінальний етап
 
-💰 Фінанси:
-  Revenue: $19,800  |  Expenses: $968  |  Profit: $18,832
+💰 Фінанси (mock):
+  Revenue: $19,800  |  Expenses: $968  |  Profit: $18,832`
 
-Пріоритет на сьогодні:
-  1. Зателефонуй Максу → TechBlog CMS (критично)
-  2. Перевір форми KFC → Андрій
-  3. AutoBrand — нагадати про header animations`;
-
-const AI_SPEC=`## Технічне завдання — AutoBrand Website
+const AI_SPEC = `## Технічне завдання — AutoBrand Website
 
 Мета: Редизайн корпоративного сайту на Webflow з CMS.
 
@@ -440,21 +558,11 @@ const AI_SPEC=`## Технічне завдання — AutoBrand Website
   • Адаптивний дизайн (mobile-first)
   • SEO: meta tags, OG images, sitemap
 
-Етапи:
-  1. Wireframes та дизайн — 3 дні
-  2. Webflow розробка — 7 днів
-  3. CMS налаштування — 2 дні
-  4. QA + передача клієнту — 2 дні
-
 Дедлайн: 15 травня 2025
-Відповідальний: Макс (DEV_WEBFLOW)
+Відповідальний: webflow@agency.com`
 
-Ризики:
-  ⚠ Затримка контенту від клієнта
-  ⚠ Зміни ТЗ після старту розробки`;
-
-function aiBlock(mode){
-  const isSpec=mode==='spec';
+function aiBlock(mode) {
+  const isSpec = mode==='spec'
   return `<div class="ai-block">
     <div class="ai-head">
       <div class="ai-ico">✦</div>
@@ -465,109 +573,43 @@ function aiBlock(mode){
       <span class="mock-tag">mock AI</span>
     </div>
     <div class="ai-row">
-      <input class="ai-inp" placeholder="${isSpec?'Paste project brief here...':'What\'s critical right now?'}"/>
+      <input class="ai-inp" placeholder="${isSpec?'Paste project brief here...':"What's critical right now?"}"/>
       ${!isSpec?'<button class="ai-mic">🎤</button>':''}
       <button class="ai-run" onclick="runAI(this,'${mode}')"><span>✦</span> ${isSpec?'Generate':'Analyze'}</button>
     </div>
-    <div class="ai-res">
-      <pre></pre>
+    <div class="ai-res"><pre></pre>
       <div class="ai-acts">
         <button class="ai-act">Copy</button>
         <button class="ai-act">Save</button>
         ${isSpec?'<button class="ai-act notion">→ Notion</button>':'<button class="ai-act">Export PDF</button>'}
       </div>
     </div>
-  </div>`;
+  </div>`
 }
 
-function runAI(btn,mode){
-  btn.disabled=true;
-  btn.innerHTML='<span class="spin"></span> Running...';
-  const res=btn.closest('.ai-block').querySelector('.ai-res');
-  res.style.display='none';
-  setTimeout(()=>{
-    btn.disabled=false;
-    btn.innerHTML=`<span>✦</span> ${mode==='spec'?'Generate':'Analyze'}`;
-    res.querySelector('pre').textContent=mode==='spec'?AI_SPEC:AI_ANALYTICS;
-    res.style.display='block';
-  },1800);
+function runAI(btn, mode) {
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...'
+  const res = btn.closest('.ai-block').querySelector('.ai-res')
+  res.style.display = 'none'
+  setTimeout(() => {
+    btn.disabled = false; btn.innerHTML = `<span>✦</span> ${mode==='spec'?'Generate':'Analyze'}`
+    res.querySelector('pre').textContent = mode==='spec' ? AI_SPEC : AI_ANALYTICS
+    res.style.display = 'block'
+  }, 1800)
 }
 
-// ═══════════════════════════════════════
-// SHARED COMPONENTS
-// ═══════════════════════════════════════
-function overdueSection(){
-  const ov=filterTasks().filter(t=>t.ov&&t.st!=='DONE');
-  return `<div class="section">
-    <div class="sh"><span class="sh-t"><span style="color:var(--red)">⚠</span> Overdue tasks <span class="badge br">${ov.length}</span></span></div>
-    ${ov.length===0?'<div style="padding:32px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px">No overdue tasks 🎉</div>':`
-    <table>
-      <thead><tr><th>Task</th><th>Project</th><th>Assignee</th><th>Priority</th><th>Status</th><th>Deadline</th></tr></thead>
-      <tbody>${ov.map(t=>`<tr class="ov-row">
-        <td><span class="od-dot"></span><span class="cm">${t.title}</span></td>
-        <td>${P(t.pId).name}</td><td>${U(t.aId).name}</td>
-        <td>${priDot(t.pri)}</td><td>${badge(t.st)}</td>
-        <td style="color:var(--red)">${fmt(t.dl)}</td>
-      </tr>`).join('')}</tbody>
-    </table>`}
-  </div>`;
-}
-
-function projectsTable(role=CR){
-  const ps=filterProjects(role);
-  const canAdd=role==='OPERATIONS_SALES'||role==='PM';
-  return `<div class="section">
-    <div class="sh">
-      <span class="sh-t">Projects <span style="color:var(--text3);font-weight:400">(${ps.length})</span></span>
-      ${canAdd?'<button class="sbtn p">+ New project</button>':''}
-    </div>
-    <table>
-      <thead><tr><th>Project</th><th>Client</th><th>Type</th><th>Progress</th><th>Status</th><th>Deadline</th><th>Dev</th></tr></thead>
-      <tbody>${ps.map(p=>`<tr>
-        <td><div class="cm">${p.name}</div></td>
-        <td>${p.client}</td>
-        <td><span class="badge ${p.type==='WEBFLOW'?'bc':'bo'}">${p.type}</span></td>
-        <td style="min-width:120px">${pb(p.progress)}</td>
-        <td>${badge(p.status)}</td>
-        <td style="color:${p.status==='AT_RISK'?'var(--red)':'var(--text3)'}">${fmt(p.deadline)}</td>
-        <td>${U(p.devId).name}</td>
-      </tr>`).join('')}</tbody>
-    </table>
-  </div>`;
-}
-
-function tasksTable(role=CR){
-  const ts=filterTasks(role);
-  return `<div class="section">
-    <div class="sh">
-      <span class="sh-t">Tasks <span style="color:var(--text3);font-weight:400">(${ts.length})</span></span>
-      <button class="sbtn p">+ New task</button>
-    </div>
-    <table>
-      <thead><tr><th>Task</th><th>Project</th><th>Priority</th><th>Assignee</th><th>Status</th><th>Deadline</th></tr></thead>
-      <tbody>${ts.map(t=>`<tr${t.ov&&t.st!=='DONE'?' class="ov-row"':''}>
-        <td>${t.ov&&t.st!=='DONE'?'<span class="od-dot"></span>':''}<span class="cm">${t.title}</span></td>
-        <td>${P(t.pId).name}</td><td>${priDot(t.pri)}</td><td>${U(t.aId).name}</td>
-        <td>${badge(t.st)}</td>
-        <td style="color:${t.ov&&t.st!=='DONE'?'var(--red)':'var(--text3)'}">${fmt(t.dl)}</td>
-      </tr>`).join('')}</tbody>
-    </table>
-  </div>`;
-}
-
-// ═══════════════════════════════════════
+// ════════════════════════════════════════
 // PAGES
-// ═══════════════════════════════════════
-function rOverview(){
-  setPage('Operations & Sales','Full overview — projects, leads & finances');
-  const ov=TASKS.filter(t=>t.ov&&t.st!=='DONE');
-  const inc=FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0);
-  const exp=FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0);
-  const won=LEADS.filter(l=>l.st==='WON').length;
-  document.getElementById('pcontent').innerHTML=`
+// ════════════════════════════════════════
+async function rOverview() {
+  setPage('Operations & Sales', 'Full overview — projects, leads & finances')
+  const inc = FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0)
+  const exp = FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0)
+  const won = LEADS.filter(l=>l.st==='WON').length
+  document.getElementById('pcontent').innerHTML = `
     <div class="sg sg4">
-      <div class="sc"><div class="sc-l">◫ Active projects</div><div class="sc-v">${PROJECTS.filter(p=>p.status==='ACTIVE').length}</div><div class="sc-t">${PROJECTS.filter(p=>p.status==='AT_RISK').length} at risk</div></div>
-      <div class="sc"><div class="sc-l">⚠ Overdue tasks</div><div class="sc-v d">${ov.length}</div><div class="sc-t">needs attention</div></div>
+      <div class="sc"><div class="sc-l">◫ Active projects</div><div class="sc-v" id="sc-ap">—</div><div class="sc-t" id="sc-ar"></div></div>
+      <div class="sc"><div class="sc-l">⚠ Overdue tasks</div><div class="sc-v d" id="sc-ov">—</div><div class="sc-t">needs attention</div></div>
       <div class="sc"><div class="sc-l">◎ Won leads</div><div class="sc-v s">${won}</div><div class="sc-t">of ${LEADS.length} total</div></div>
       <div class="sc"><div class="sc-l">◈ Net profit</div><div class="sc-v s">${cur(inc-exp)}</div><div class="sc-t">${cur(inc)} income</div></div>
     </div>
@@ -577,19 +619,29 @@ function rOverview(){
       <div class="tab" onclick="switchTab(this,'t-leads')">Leads</div>
       <div class="tab" onclick="switchTab(this,'t-fin')">Finance</div>
     </div>
-    <div id="t-ov">${overdueSection()}</div>
+    <div id="t-ov">${loadingHTML()}</div>
     <div id="t-leads" style="display:none">${leadsHTML()}</div>
-    <div id="t-fin" style="display:none">${financeHTML()}</div>`;
+    <div id="t-fin" style="display:none">${financeHTML()}</div>`
+
+  try {
+    const res = await api('/api/projects')
+    const projects = res.ok ? await res.json() : []
+    const tasks = await fetchAllTasks(projects)
+    const active = projects.filter(p => p.status==='ACTIVE')
+    document.getElementById('sc-ap').textContent = active.length
+    document.getElementById('sc-ar').textContent = `${projects.filter(p=>p.status==='ON_HOLD').length} on hold`
+    document.getElementById('sc-ov').textContent = tasks.filter(isOverdue).length
+    document.getElementById('t-ov').innerHTML = overdueHTML(tasks)
+  } catch {}
 }
 
-function rPM(){
-  setPage('Project Manager','Projects, tasks & AI spec generator');
-  const ov=filterTasks('PM').filter(t=>t.ov&&t.st!=='DONE');
-  document.getElementById('pcontent').innerHTML=`
+async function rPM() {
+  setPage('Project Manager', 'Projects, tasks & AI spec generator')
+  document.getElementById('pcontent').innerHTML = `
     <div class="sg sg4">
-      <div class="sc"><div class="sc-l">◫ Projects</div><div class="sc-v">${PROJECTS.length}</div></div>
-      <div class="sc"><div class="sc-l">☑ Open tasks</div><div class="sc-v">${TASKS.filter(t=>t.st!=='DONE').length}</div></div>
-      <div class="sc"><div class="sc-l">⚠ Overdue</div><div class="sc-v d">${ov.length}</div></div>
+      <div class="sc"><div class="sc-l">◫ Projects</div><div class="sc-v" id="sc-p">—</div></div>
+      <div class="sc"><div class="sc-l">☑ Open tasks</div><div class="sc-v" id="sc-t">—</div></div>
+      <div class="sc"><div class="sc-l">⚠ Overdue</div><div class="sc-v d" id="sc-o">—</div></div>
       <div class="sc"><div class="sc-l">✦ TZ drafts</div><div class="sc-v w">3</div><div class="sc-t">AI generated</div></div>
     </div>
     ${aiBlock('spec')}
@@ -597,24 +649,46 @@ function rPM(){
       <div class="tab active" onclick="switchTab(this,'pm-p')">Projects</div>
       <div class="tab" onclick="switchTab(this,'pm-t')">Tasks</div>
     </div>
-    <div id="pm-p">${projectsTable('PM')}</div>
-    <div id="pm-t" style="display:none">${tasksTable('PM')}</div>`;
+    <div id="pm-p">${loadingHTML()}</div>
+    <div id="pm-t" style="display:none">${loadingHTML()}</div>`
+
+  try {
+    const res = await api('/api/projects')
+    const projects = res.ok ? await res.json() : []
+    const tasks = await fetchAllTasks(projects)
+    document.getElementById('sc-p').textContent = projects.length
+    document.getElementById('sc-t').textContent = tasks.filter(t=>t.status!=='DONE').length
+    document.getElementById('sc-o').textContent = tasks.filter(isOverdue).length
+    document.getElementById('pm-p').innerHTML = projectsTableHTML(projects)
+    document.getElementById('pm-t').innerHTML = tasksTableHTML(tasks)
+  } catch (e) {
+    document.getElementById('pm-p').innerHTML = errorHTML(e.message)
+  }
 }
 
-function rDev(){
-  const isWF=CR==='DEV_WEBFLOW';
-  const typeLabel=isWF?'Webflow':'WordPress';
-  setPage(typeLabel+' Developer','Your assigned projects & tasks only');
-  const ps=filterProjects();
-  const ts=filterTasks();
-  const ov=ts.filter(t=>t.ov&&t.st!=='DONE');
-  document.getElementById('pcontent').innerHTML=`
+async function rDev() {
+  const isWF = currentUser.role==='DEV_WEBFLOW'
+  setPage((isWF?'Webflow':'WordPress')+' Developer', 'Your assigned projects & tasks only')
+  document.getElementById('pcontent').innerHTML = `
     <div class="sg sg3">
-      <div class="sc"><div class="sc-l">◫ My projects</div><div class="sc-v">${ps.length}</div></div>
-      <div class="sc"><div class="sc-l">☑ Open tasks</div><div class="sc-v">${ts.filter(t=>t.st!=='DONE').length}</div></div>
-      <div class="sc"><div class="sc-l">⚠ Overdue</div><div class="sc-v ${ov.length?'d':''}">${ov.length}</div></div>
+      <div class="sc"><div class="sc-l">◫ My projects</div><div class="sc-v" id="sc-p">—</div></div>
+      <div class="sc"><div class="sc-l">☑ Open tasks</div><div class="sc-v" id="sc-t">—</div></div>
+      <div class="sc"><div class="sc-l">⚠ Overdue</div><div class="sc-v" id="sc-o">—</div></div>
     </div>
-    <div class="pcards">${ps.map(p=>`
+    <div id="dev-cards">${loadingHTML()}</div>
+    <div id="dev-tasks">${loadingHTML()}</div>`
+
+  try {
+    const res = await api('/api/projects')
+    const projects = res.ok ? await res.json() : []
+    const tasks = await fetchAllTasks(projects)
+    const ov = tasks.filter(isOverdue)
+    document.getElementById('sc-p').textContent = projects.length
+    document.getElementById('sc-t').textContent = tasks.filter(t=>t.status!=='DONE').length
+    const ovEl = document.getElementById('sc-o')
+    ovEl.textContent = ov.length
+    if(ov.length) ovEl.classList.add('d')
+    document.getElementById('dev-cards').innerHTML = `<div class="pcards">${projects.map(p=>`
       <div class="pcard">
         <div class="pcard-h">
           <div><div class="pcard-n">${p.name}</div><div class="pcard-c">${p.client}</div></div>
@@ -622,44 +696,60 @@ function rDev(){
         </div>
         ${pb(p.progress)}
         <div class="pcard-f">
-          <span class="pcard-d">🗓 ${fmt(p.deadline)}</span>
+          <span class="pcard-d">🗓 ${p.deadline?fmt(p.deadline):'—'}</span>
           ${badge(p.status)}
         </div>
       </div>
-    `).join('')}</div>
-    ${tasksTable()}`;
+    `).join('')}</div>`
+    document.getElementById('dev-tasks').innerHTML = tasksTableHTML(tasks)
+  } catch (e) {
+    document.getElementById('dev-cards').innerHTML = errorHTML(e.message)
+  }
 }
 
-function rProjects(){
-  setPage('Projects','Filtered by your role');
-  document.getElementById('pcontent').innerHTML=projectsTable();
+async function rProjects() {
+  setPage('Projects', 'Filtered by your role')
+  document.getElementById('pcontent').innerHTML = loadingHTML()
+  try {
+    const res = await api('/api/projects')
+    if (!res.ok) throw new Error('Failed to load projects')
+    document.getElementById('pcontent').innerHTML = projectsTableHTML(await res.json())
+  } catch (e) {
+    document.getElementById('pcontent').innerHTML = errorHTML(e.message)
+  }
 }
 
-function rTasks(){
-  setPage('Tasks','Filtered by your role');
-  document.getElementById('pcontent').innerHTML=tasksTable();
+async function rTasks() {
+  setPage('Tasks', 'Filtered by your role')
+  document.getElementById('pcontent').innerHTML = loadingHTML()
+  try {
+    const res = await api('/api/projects')
+    const projects = res.ok ? await res.json() : []
+    const tasks = await fetchAllTasks(projects)
+    document.getElementById('pcontent').innerHTML = tasksTableHTML(tasks)
+  } catch (e) {
+    document.getElementById('pcontent').innerHTML = errorHTML(e.message)
+  }
 }
 
-function rLeads(){
-  if(CR!=='OPERATIONS_SALES'){logout();return;}
-  setPage('Leads','CRM — pipeline & deals');
-  const won=LEADS.filter(l=>l.st==='WON').reduce((s,l)=>s+l.amt,0);
-  const pipe=LEADS.filter(l=>l.st!=='WON'&&l.st!=='LOST').reduce((s,l)=>s+l.amt,0);
-  document.getElementById('pcontent').innerHTML=`
+function rLeads() {
+  setPage('Leads', 'CRM — pipeline & deals')
+  const won = LEADS.filter(l=>l.st==='WON').reduce((s,l)=>s+l.amt,0)
+  const pipe = LEADS.filter(l=>l.st!=='WON'&&l.st!=='LOST').reduce((s,l)=>s+l.amt,0)
+  document.getElementById('pcontent').innerHTML = `
     <div class="sg sg3">
       <div class="sc"><div class="sc-l">◎ Total</div><div class="sc-v">${LEADS.length}</div></div>
       <div class="sc"><div class="sc-l">✓ Won</div><div class="sc-v s">${cur(won)}</div></div>
       <div class="sc"><div class="sc-l">⟳ Pipeline</div><div class="sc-v w">${cur(pipe)}</div></div>
     </div>
-    ${leadsHTML()}`;
+    ${leadsHTML()}`
 }
 
-function leadsHTML(){
+function leadsHTML() {
   return `<div class="section">
     <div class="sh">
       <span class="sh-t">All leads</span>
-      <button class="sbtn">Import CSV</button>
-      <button class="sbtn">Export CSV</button>
+      <button class="sbtn">Import CSV</button><button class="sbtn">Export CSV</button>
       <button class="sbtn p">+ Add lead</button>
     </div>
     <table>
@@ -670,39 +760,36 @@ function leadsHTML(){
         <td>${badge(l.st)}</td>
         <td style="color:var(--text);font-weight:600">${cur(l.amt)}</td>
         <td>${fmt(l.cr)}</td>
-        <td style="color:var(--text3);max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.cm||'—'}</td>
+        <td style="color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis">${l.cm||'—'}</td>
       </tr>`).join('')}</tbody>
     </table>
-  </div>`;
+  </div>`
 }
 
-function rFinance(){
-  if(CR!=='OPERATIONS_SALES'&&CR!=='PM'){logout();return;}
-  setPage('Finance','Income, expenses & project finances');
-  const inc=FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0);
-  const exp=FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0);
-  document.getElementById('pcontent').innerHTML=`
+function rFinance() {
+  setPage('Finance', 'Income, expenses & project finances')
+  const inc = FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0)
+  const exp = FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0)
+  document.getElementById('pcontent').innerHTML = `
     <div class="sg sg3">
       <div class="sc"><div class="sc-l">↑ Income</div><div class="sc-v s">${cur(inc)}</div></div>
       <div class="sc"><div class="sc-l">↓ Expenses</div><div class="sc-v d">${cur(exp)}</div></div>
       <div class="sc"><div class="sc-l">= Profit</div><div class="sc-v">${cur(inc-exp)}</div></div>
     </div>
-    ${financeHTML()}`;
+    ${financeHTML()}`
 }
 
-function financeHTML(){
+function financeHTML() {
   return `<div class="section">
     <div class="sh">
       <span class="sh-t">Transactions</span>
-      <button class="sbtn">Export CSV</button>
-      <button class="sbtn p">+ Record</button>
+      <button class="sbtn">Export CSV</button><button class="sbtn p">+ Record</button>
     </div>
     <table>
-      <thead><tr><th>Type</th><th>Description</th><th>Project</th><th>Category</th><th>Date</th><th>Amount</th></tr></thead>
+      <thead><tr><th>Type</th><th>Description</th><th>Category</th><th>Date</th><th>Amount</th></tr></thead>
       <tbody>${FINANCE.map(f=>`<tr>
         <td><span class="badge ${f.type==='INCOME'?'bg_':'br'}">${f.type}</span></td>
         <td><span class="cm">${f.desc}</span></td>
-        <td style="color:var(--text3)">${f.pId?P(f.pId).name:'—'}</td>
         <td><span class="badge bgr">${f.cat}</span></td>
         <td>${fmt(f.dt)}</td>
         <td style="font-weight:600;color:${f.type==='INCOME'?'var(--green)':'var(--red)'}">
@@ -710,15 +797,14 @@ function financeHTML(){
         </td>
       </tr>`).join('')}</tbody>
     </table>
-  </div>`;
+  </div>`
 }
 
-// ═══════════════════════════════════════
+// ════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════
-renderLogin();
-const saved=localStorage.getItem('aos_role');
-if(saved&&ROLES[saved]) enterRole(saved);
+// ════════════════════════════════════════
+renderLogin()
+tryAutoLogin()
 </script>
 </body>
 </html>

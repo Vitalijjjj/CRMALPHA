@@ -21,7 +21,9 @@
       "Bash(git -C /Users/gural/Desktop/ALPHACRM rm \"api/projects/[id].js\")",
       "Bash(git -C /Users/gural/Desktop/ALPHACRM add .)",
       "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Add tasks CRUD with RBAC and auto progress recalculation\")",
-      "Bash(git -C /Users/gural/Desktop/ALPHACRM push)"
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM push)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" node prisma/seed.js)",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Connect frontend to real API, add login form, seed script\")"
     ]
   }
 }
