@@ -76,6 +76,8 @@ model User {
   task_comments     TaskComment[]
   leads             Lead[]
   finance_records   FinanceRecord[]
+  documents         Document[]
+  ai_logs           AiLog[]
 
   @@map("users")
 }
@@ -98,6 +100,7 @@ model Project {
   members         ProjectMember[]
   tasks           Task[]
   finance_records FinanceRecord[]
+  documents       Document[]
 
   @@map("projects")
 }
@@ -164,6 +167,34 @@ model Lead {
   finance_records FinanceRecord[]
 
   @@map("leads")
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  project_id String?
+  title      String
+  content    String
+  type       String   @default("SPEC")
+  created_by String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  project Project? @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  creator User     @relation(fields: [created_by], references: [id])
+
+  @@map("documents")
+}
+
+model AiLog {
+  id          String   @id @default(cuid())
+  user_id     String
+  feature     String
+  tokens_used Int
+  created_at  DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("ai_logs")
 }
 
 model FinanceRecord {

@@ -34,7 +34,8 @@
       "Bash(git -C /Users/gural/Desktop/ALPHACRM add \"api/projects/[id]/index.js\")",
       "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Fix broken require paths in projects/[id]/index.js\")",
       "Bash(git -C /Users/gural/Desktop/ALPHACRM rm api/auth/login.js api/auth/logout.js api/auth/refresh.js api/auth/register.js api/leads/import-csv.js api/leads/export-csv.js api/finance/summary.js)",
-      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Reduce serverless functions from 15 to 9 \\(Hobby plan limit fix\\)\")"
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Reduce serverless functions from 15 to 9 \\(Hobby plan limit fix\\)\")",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Add AI analyze and generate-spec endpoints with rate limiting and logging\")"
     ]
   }
 }
