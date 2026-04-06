@@ -189,17 +189,17 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
     <div class="logo-box">A</div>
     <span class="logo-name">Agency OS</span>
   </div>
-  <div class="login-sub">internal agency management · sign in to continue</div>
+  <div class="login-sub">внутрішня система управління агентством · увійдіть щоб продовжити</div>
   <div class="lform">
-    <input id="l-email" class="lfield" type="email" placeholder="Email" autocomplete="email"/>
-    <input id="l-pass"  class="lfield" type="password" placeholder="Password" autocomplete="current-password"
+    <input id="l-email" class="lfield" type="email" placeholder="Електронна пошта" autocomplete="email"/>
+    <input id="l-pass"  class="lfield" type="password" placeholder="Пароль" autocomplete="current-password"
       onkeydown="if(event.key==='Enter')doLogin()"/>
   </div>
   <div class="lerr" id="l-err"></div>
-  <button class="lbtn" id="l-btn" onclick="doLogin()" style="margin-top:4px">Sign in →</button>
-  <div class="lsep">quick login — test accounts</div>
+  <button class="lbtn" id="l-btn" onclick="doLogin()" style="margin-top:4px">Увійти →</button>
+  <div class="lsep">швидкий вхід — тестові акаунти</div>
   <div id="role-cards"></div>
-  <div class="lfoot">JWT auth · Argon2id · PostgreSQL · Vercel</div>
+  <div class="lfoot">JWT авторизація · Argon2id · PostgreSQL · Vercel</div>
 </div>
 </div>
 
@@ -221,7 +221,7 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
           <div class="urole" id="urole"></div>
         </div>
       </div>
-      <button class="logout" onclick="doLogout()">↩ Log out</button>
+      <button class="logout" onclick="doLogout()">↩ Вийти</button>
     </div>
   </div>
 
@@ -276,13 +276,13 @@ const NOW = new Date()
 const dOff = n => { const x = new Date(NOW); x.setDate(x.getDate()+n); return x.toISOString().split('T')[0] }
 
 const LEADS = [
-  {id:'l1',name:'Петро Коваленко',src:'Referral',st:'CONTACTED',amt:3500,cr:dOff(-10),cm:'Корпоративний сайт'},
+  {id:'l1',name:'Петро Коваленко',src:'Реферал',st:'CONTACTED',amt:3500,cr:dOff(-10),cm:'Корпоративний сайт'},
   {id:'l2',name:'Марина Лисенко',src:'Instagram',st:'WON',amt:1800,cr:dOff(-20),cm:'Лендінг косметика'},
-  {id:'l3',name:'Oleks Design Studio',src:'Upwork',st:'PROPOSAL',amt:5200,cr:dOff(-5),cm:'White-label dev'},
-  {id:'l4',name:'Nova Logistics',src:'Website',st:'NEW',amt:4000,cr:dOff(-2)},
-  {id:'l5',name:'Grill House',src:'Referral',st:'CONTACTED',amt:1200,cr:dOff(-7),cm:'Меню + бронювання'},
-  {id:'l6',name:'MindSpark Agency',src:'Partner',st:'WON',amt:7800,cr:dOff(-30),cm:'Довгостроковий контракт'},
-  {id:'l7',name:'EcoShop Ukraine',src:'Cold Outreach',st:'LOST',amt:2200,cr:dOff(-15),cm:'Обрали іншого'},
+  {id:'l3',name:'Oleks Design Studio',src:'Upwork',st:'PROPOSAL',amt:5200,cr:dOff(-5),cm:'White-label розробка'},
+  {id:'l4',name:'Nova Logistics',src:'Сайт',st:'NEW',amt:4000,cr:dOff(-2)},
+  {id:'l5',name:'Grill House',src:'Реферал',st:'CONTACTED',amt:1200,cr:dOff(-7),cm:'Меню + бронювання'},
+  {id:'l6',name:'MindSpark Agency',src:'Партнер',st:'WON',amt:7800,cr:dOff(-30),cm:'Довгостроковий контракт'},
+  {id:'l7',name:'EcoShop Ukraine',src:'Холодний контакт',st:'LOST',amt:2200,cr:dOff(-15),cm:'Обрали іншого'},
   {id:'l8',name:'Fit Academy',src:'Instagram',st:'PROPOSAL',amt:3100,cr:dOff(-3),cm:'Фітнес-клуб'},
 ]
 const FINANCE = [
@@ -310,12 +310,19 @@ const SC = {
   TODO:'bgr', IN_PROGRESS:'bv', REVIEW:'by', DONE:'bg_',
   NEW:'bgr', CONTACTED:'bv', PROPOSAL:'by', WON:'bg_', LOST:'br',
 }
-const badge = (s, l) => `<span class="badge ${SC[s]||'bgr'}">${(l||s).replace(/_/g,' ')}</span>`
+const STATUS_UA = {
+  ACTIVE:'Активний', COMPLETED:'Завершено', ON_HOLD:'На паузі', CANCELLED:'Скасовано',
+  TODO:'До виконання', IN_PROGRESS:'В роботі', REVIEW:'На перевірці', DONE:'Готово',
+  NEW:'Новий', CONTACTED:'Контакт', PROPOSAL:'Пропозиція', WON:'Виграно', LOST:'Програно',
+  INCOME:'Дохід', EXPENSE:'Витрата',
+}
+const badge = (s, l) => `<span class="badge ${SC[s]||'bgr'}">${l || STATUS_UA[s] || s.replace(/_/g,' ')}</span>`
 
 const PC = {LOW:'#555570', MEDIUM:'#d4a843', HIGH:'#f0875a', URGENT:'#e05c5c'}
-const priDot = p => `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${PC[p]||'#555570'};margin-right:5px;vertical-align:middle"></span>${p}`
+const PRI_UA = {LOW:'Низький', MEDIUM:'Середній', HIGH:'Високий', URGENT:'Критичний'}
+const priDot = p => `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${PC[p]||'#555570'};margin-right:5px;vertical-align:middle"></span>${PRI_UA[p]||p}`
 const pb = v => `<div class="pbw"><div class="pb"><div class="pf ${v>=80?'hi':v<30?'lo':''}" style="width:${v}%"></div></div><span class="pl">${v}%</span></div>`
-const loadingHTML = () => `<div style="padding:48px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px"><span class="spin" style="width:16px;height:16px;margin-bottom:10px;display:block;margin:0 auto 10px"></span>Loading...</div>`
+const loadingHTML = () => `<div style="padding:48px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px"><span class="spin" style="width:16px;height:16px;margin-bottom:10px;display:block;margin:0 auto 10px"></span>Завантаження...</div>`
 const errorHTML = msg => `<div style="padding:32px;text-align:center;color:var(--red);font-family:var(--mono);font-size:12px">⚠ ${msg}</div>`
 const emptyHTML = msg => `<div style="padding:32px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px">${msg}</div>`
 
@@ -323,14 +330,14 @@ const emptyHTML = msg => `<div style="padding:32px;text-align:center;color:var(-
 // ROLE CONFIG
 // ════════════════════════════════════════
 const ROLES = {
-  OPERATIONS_SALES:{label:'Operations & Sales',icon:'⚡',bg:'rgba(124,111,205,.15)',tc:'bv',desc:'ops@agency.com',
-    nav:[{id:'overview',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'},{id:'leads',ic:'◎',l:'Leads'},{id:'finance',ic:'◈',l:'Finance'}]},
-  PM:{label:'Project Manager',icon:'📋',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'pm@agency.com',
-    nav:[{id:'pm',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'},{id:'finance',ic:'◈',l:'Finance'}]},
-  DEV_WEBFLOW:{label:'Webflow Developer',icon:'🌐',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'webflow@agency.com',
-    nav:[{id:'dev',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'}]},
-  DEV_WORDPRESS:{label:'WordPress Developer',icon:'🔵',bg:'rgba(240,135,90,.1)',tc:'bo',desc:'wordpress@agency.com',
-    nav:[{id:'dev',ic:'⬡',l:'Dashboard'},{id:'projects',ic:'◫',l:'Projects'},{id:'tasks',ic:'☑',l:'Tasks'}]},
+  OPERATIONS_SALES:{label:'Операції та продажі',icon:'⚡',bg:'rgba(124,111,205,.15)',tc:'bv',desc:'ops@agency.com',
+    nav:[{id:'overview',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'},{id:'leads',ic:'◎',l:'Ліди'},{id:'finance',ic:'◈',l:'Фінанси'}]},
+  PM:{label:'Проєктний менеджер',icon:'📋',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'pm@agency.com',
+    nav:[{id:'pm',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'},{id:'finance',ic:'◈',l:'Фінанси'}]},
+  DEV_WEBFLOW:{label:'Webflow розробник',icon:'🌐',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'webflow@agency.com',
+    nav:[{id:'dev',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'}]},
+  DEV_WORDPRESS:{label:'WordPress розробник',icon:'🔵',bg:'rgba(240,135,90,.1)',tc:'bo',desc:'wordpress@agency.com',
+    nav:[{id:'dev',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'}]},
 }
 const AV_STYLE = {
   OPERATIONS_SALES:'background:rgba(124,111,205,.2);color:#a99de8;border-color:rgba(124,111,205,.4)',
@@ -348,7 +355,7 @@ function renderLogin() {
       <div class="ri" style="background:${cfg.bg}">${cfg.icon}</div>
       <div class="rm">
         <div class="rt">${cfg.label}</div>
-        <div class="rd">${cfg.desc} · password123</div>
+        <div class="rd">${cfg.desc} · пароль: password123</div>
       </div>
       <span class="rtag badge ${cfg.tc}" style="font-size:9px">${role}</span>
       <span class="rarr">→</span>
@@ -369,10 +376,10 @@ async function doLogin() {
   const errEl = document.getElementById('l-err')
   errEl.textContent = ''
 
-  if (!email || !password) { errEl.textContent = 'Enter email and password'; return }
+  if (!email || !password) { errEl.textContent = 'Введіть email та пароль'; return }
 
   btn.disabled = true
-  btn.innerHTML = '<span class="spin"></span> Signing in...'
+  btn.innerHTML = '<span class="spin"></span> Вхід...'
 
   try {
     const res = await fetch('/api/auth/login', {
@@ -389,7 +396,7 @@ async function doLogin() {
     errEl.textContent = e.message
   } finally {
     btn.disabled = false
-    btn.innerHTML = 'Sign in →'
+    btn.innerHTML = 'Увійти →'
   }
 }
 
@@ -457,14 +464,14 @@ function switchTab(el, showId) {
 function projectsTableHTML(projects) {
   const role = currentUser.role
   const canAdd = role==='OPERATIONS_SALES' || role==='PM'
-  if (!projects.length) return emptyHTML('No projects found')
+  if (!projects.length) return emptyHTML('Проєктів не знайдено')
   return `<div class="section">
     <div class="sh">
-      <span class="sh-t">Projects <span style="color:var(--text3);font-weight:400">(${projects.length})</span></span>
-      ${canAdd ? '<button class="sbtn p">+ New project</button>' : ''}
+      <span class="sh-t">Проєкти <span style="color:var(--text3);font-weight:400">(${projects.length})</span></span>
+      ${canAdd ? '<button class="sbtn p">+ Новий проєкт</button>' : ''}
     </div>
     <table>
-      <thead><tr><th>Project</th><th>Client</th><th>Type</th><th>Progress</th><th>Status</th><th>Deadline</th><th>Dev</th></tr></thead>
+      <thead><tr><th>Проєкт</th><th>Клієнт</th><th>Тип</th><th>Прогрес</th><th>Статус</th><th>Дедлайн</th><th>Розробник</th></tr></thead>
       <tbody>${projects.map(p => `<tr>
         <td><div class="cm">${p.name}</div></td>
         <td>${p.client}</td>
@@ -479,14 +486,14 @@ function projectsTableHTML(projects) {
 }
 
 function tasksTableHTML(tasks) {
-  if (!tasks.length) return emptyHTML('No tasks found')
+  if (!tasks.length) return emptyHTML('Задач не знайдено')
   return `<div class="section">
     <div class="sh">
-      <span class="sh-t">Tasks <span style="color:var(--text3);font-weight:400">(${tasks.length})</span></span>
-      <button class="sbtn p">+ New task</button>
+      <span class="sh-t">Задачі <span style="color:var(--text3);font-weight:400">(${tasks.length})</span></span>
+      <button class="sbtn p">+ Нова задача</button>
     </div>
     <table>
-      <thead><tr><th>Task</th><th>Priority</th><th>Assignee</th><th>Status</th><th>Deadline</th></tr></thead>
+      <thead><tr><th>Задача</th><th>Пріоритет</th><th>Виконавець</th><th>Статус</th><th>Дедлайн</th></tr></thead>
       <tbody>${tasks.map(t => {
         const ov = isOverdue(t)
         return `<tr${ov?' class="ov-row"':''}>
@@ -504,10 +511,10 @@ function tasksTableHTML(tasks) {
 function overdueHTML(tasks) {
   const ov = tasks.filter(isOverdue)
   return `<div class="section">
-    <div class="sh"><span class="sh-t"><span style="color:var(--red)">⚠</span> Overdue tasks <span class="badge br">${ov.length}</span></span></div>
-    ${ov.length===0 ? emptyHTML('No overdue tasks 🎉') : `
+    <div class="sh"><span class="sh-t"><span style="color:var(--red)">⚠</span> Прострочені задачі <span class="badge br">${ov.length}</span></span></div>
+    ${ov.length===0 ? emptyHTML('Прострочених задач немає 🎉') : `
     <table>
-      <thead><tr><th>Task</th><th>Priority</th><th>Assignee</th><th>Status</th><th>Deadline</th></tr></thead>
+      <thead><tr><th>Задача</th><th>Пріоритет</th><th>Виконавець</th><th>Статус</th><th>Дедлайн</th></tr></thead>
       <tbody>${ov.map(t => `<tr class="ov-row">
         <td><span class="od-dot"></span><span class="cm">${t.title}</span></td>
         <td>${priDot(t.priority)}</td><td>${t.assignee?.email||'—'}</td>
@@ -529,7 +536,7 @@ async function fetchAllTasks(projects) {
 // ════════════════════════════════════════
 // AI MOCK
 // ════════════════════════════════════════
-const AI_ANALYTICS = `## Executive Summary — Agency OS
+const AI_ANALYTICS = `## Зведення — Agency OS
 
 🔴 Критично (дій зараз):
   • TechBlog Rebuild — дедлайн прострочено
@@ -538,14 +545,14 @@ const AI_ANALYTICS = `## Executive Summary — Agency OS
 
 🟡 Під наглядом:
   • Header animations (AutoBrand) — прострочено
-  • SEO meta tags (TechBlog) — на review
+  • SEO meta tags (TechBlog) — на перегляді
 
 ✅ Добре:
   • FashionStore — 100%, здано
   • KFC Landing — фінальний етап
 
-💰 Фінанси (mock):
-  Revenue: $19,800  |  Expenses: $968  |  Profit: $18,832`
+💰 Фінанси (тестові дані):
+  Дохід: $19,800  |  Витрати: $968  |  Прибуток: $18,832`
 
 const AI_SPEC = `## Технічне завдання — AutoBrand Website
 
@@ -556,7 +563,7 @@ const AI_SPEC = `## Технічне завдання — AutoBrand Website
   • CMS для новин та кейсів (Webflow Collections)
   • Форма зворотнього зв'язку + email інтеграція
   • Адаптивний дизайн (mobile-first)
-  • SEO: meta tags, OG images, sitemap
+  • SEO: мета-теги, OG зображення, sitemap
 
 Дедлайн: 15 травня 2025
 Відповідальний: webflow@agency.com`
@@ -567,32 +574,32 @@ function aiBlock(mode) {
     <div class="ai-head">
       <div class="ai-ico">✦</div>
       <div>
-        <div class="ai-ttl">${isSpec?'AI Spec Generator':'AI Project Analyst'}</div>
-        <div class="ai-stl">${isSpec?'Paste a brief — get structured TZ':'Ask about projects, deadlines, risks'}</div>
+        <div class="ai-ttl">${isSpec?'AI Генератор ТЗ':'AI Аналітик проєктів'}</div>
+        <div class="ai-stl">${isSpec?'Вставте бриф — отримайте структуроване ТЗ':'Запитайте про проєкти, дедлайни, ризики'}</div>
       </div>
       <span class="mock-tag">mock AI</span>
     </div>
     <div class="ai-row">
-      <input class="ai-inp" placeholder="${isSpec?'Paste project brief here...':"What's critical right now?"}"/>
+      <input class="ai-inp" placeholder="${isSpec?'Вставте бриф проєкту...':'Що критично зараз?'}"/>
       ${!isSpec?'<button class="ai-mic">🎤</button>':''}
-      <button class="ai-run" onclick="runAI(this,'${mode}')"><span>✦</span> ${isSpec?'Generate':'Analyze'}</button>
+      <button class="ai-run" onclick="runAI(this,'${mode}')"><span>✦</span> ${isSpec?'Згенерувати':'Аналізувати'}</button>
     </div>
     <div class="ai-res"><pre></pre>
       <div class="ai-acts">
-        <button class="ai-act">Copy</button>
-        <button class="ai-act">Save</button>
-        ${isSpec?'<button class="ai-act notion">→ Notion</button>':'<button class="ai-act">Export PDF</button>'}
+        <button class="ai-act">Копіювати</button>
+        <button class="ai-act">Зберегти</button>
+        ${isSpec?'<button class="ai-act notion">→ Notion</button>':'<button class="ai-act">Експорт PDF</button>'}
       </div>
     </div>
   </div>`
 }
 
 function runAI(btn, mode) {
-  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Running...'
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Обробка...'
   const res = btn.closest('.ai-block').querySelector('.ai-res')
   res.style.display = 'none'
   setTimeout(() => {
-    btn.disabled = false; btn.innerHTML = `<span>✦</span> ${mode==='spec'?'Generate':'Analyze'}`
+    btn.disabled = false; btn.innerHTML = `<span>✦</span> ${mode==='spec'?'Згенерувати':'Аналізувати'}`
     res.querySelector('pre').textContent = mode==='spec' ? AI_SPEC : AI_ANALYTICS
     res.style.display = 'block'
   }, 1800)
@@ -602,22 +609,22 @@ function runAI(btn, mode) {
 // PAGES
 // ════════════════════════════════════════
 async function rOverview() {
-  setPage('Operations & Sales', 'Full overview — projects, leads & finances')
+  setPage('Операції та продажі', 'Повний огляд — проєкти, ліди та фінанси')
   const inc = FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0)
   const exp = FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0)
   const won = LEADS.filter(l=>l.st==='WON').length
   document.getElementById('pcontent').innerHTML = `
     <div class="sg sg4">
-      <div class="sc"><div class="sc-l">◫ Active projects</div><div class="sc-v" id="sc-ap">—</div><div class="sc-t" id="sc-ar"></div></div>
-      <div class="sc"><div class="sc-l">⚠ Overdue tasks</div><div class="sc-v d" id="sc-ov">—</div><div class="sc-t">needs attention</div></div>
-      <div class="sc"><div class="sc-l">◎ Won leads</div><div class="sc-v s">${won}</div><div class="sc-t">of ${LEADS.length} total</div></div>
-      <div class="sc"><div class="sc-l">◈ Net profit</div><div class="sc-v s">${cur(inc-exp)}</div><div class="sc-t">${cur(inc)} income</div></div>
+      <div class="sc"><div class="sc-l">◫ Активні проєкти</div><div class="sc-v" id="sc-ap">—</div><div class="sc-t" id="sc-ar"></div></div>
+      <div class="sc"><div class="sc-l">⚠ Прострочені задачі</div><div class="sc-v d" id="sc-ov">—</div><div class="sc-t">потребують уваги</div></div>
+      <div class="sc"><div class="sc-l">◎ Виграні ліди</div><div class="sc-v s">${won}</div><div class="sc-t">з ${LEADS.length} всього</div></div>
+      <div class="sc"><div class="sc-l">◈ Чистий прибуток</div><div class="sc-v s">${cur(inc-exp)}</div><div class="sc-t">${cur(inc)} дохід</div></div>
     </div>
     ${aiBlock('analytics')}
     <div class="tabs">
-      <div class="tab active" onclick="switchTab(this,'t-ov')">Overdue tasks</div>
-      <div class="tab" onclick="switchTab(this,'t-leads')">Leads</div>
-      <div class="tab" onclick="switchTab(this,'t-fin')">Finance</div>
+      <div class="tab active" onclick="switchTab(this,'t-ov')">Прострочені задачі</div>
+      <div class="tab" onclick="switchTab(this,'t-leads')">Ліди</div>
+      <div class="tab" onclick="switchTab(this,'t-fin')">Фінанси</div>
     </div>
     <div id="t-ov">${loadingHTML()}</div>
     <div id="t-leads" style="display:none">${leadsHTML()}</div>
@@ -629,25 +636,25 @@ async function rOverview() {
     const tasks = await fetchAllTasks(projects)
     const active = projects.filter(p => p.status==='ACTIVE')
     document.getElementById('sc-ap').textContent = active.length
-    document.getElementById('sc-ar').textContent = `${projects.filter(p=>p.status==='ON_HOLD').length} on hold`
+    document.getElementById('sc-ar').textContent = `${projects.filter(p=>p.status==='ON_HOLD').length} на паузі`
     document.getElementById('sc-ov').textContent = tasks.filter(isOverdue).length
     document.getElementById('t-ov').innerHTML = overdueHTML(tasks)
   } catch {}
 }
 
 async function rPM() {
-  setPage('Project Manager', 'Projects, tasks & AI spec generator')
+  setPage('Проєктний менеджер', 'Проєкти, задачі та AI генератор ТЗ')
   document.getElementById('pcontent').innerHTML = `
     <div class="sg sg4">
-      <div class="sc"><div class="sc-l">◫ Projects</div><div class="sc-v" id="sc-p">—</div></div>
-      <div class="sc"><div class="sc-l">☑ Open tasks</div><div class="sc-v" id="sc-t">—</div></div>
-      <div class="sc"><div class="sc-l">⚠ Overdue</div><div class="sc-v d" id="sc-o">—</div></div>
-      <div class="sc"><div class="sc-l">✦ TZ drafts</div><div class="sc-v w">3</div><div class="sc-t">AI generated</div></div>
+      <div class="sc"><div class="sc-l">◫ Проєкти</div><div class="sc-v" id="sc-p">—</div></div>
+      <div class="sc"><div class="sc-l">☑ Відкриті задачі</div><div class="sc-v" id="sc-t">—</div></div>
+      <div class="sc"><div class="sc-l">⚠ Прострочені</div><div class="sc-v d" id="sc-o">—</div></div>
+      <div class="sc"><div class="sc-l">✦ Чернетки ТЗ</div><div class="sc-v w">3</div><div class="sc-t">згенеровано AI</div></div>
     </div>
     ${aiBlock('spec')}
     <div class="tabs">
-      <div class="tab active" onclick="switchTab(this,'pm-p')">Projects</div>
-      <div class="tab" onclick="switchTab(this,'pm-t')">Tasks</div>
+      <div class="tab active" onclick="switchTab(this,'pm-p')">Проєкти</div>
+      <div class="tab" onclick="switchTab(this,'pm-t')">Задачі</div>
     </div>
     <div id="pm-p">${loadingHTML()}</div>
     <div id="pm-t" style="display:none">${loadingHTML()}</div>`
@@ -668,12 +675,12 @@ async function rPM() {
 
 async function rDev() {
   const isWF = currentUser.role==='DEV_WEBFLOW'
-  setPage((isWF?'Webflow':'WordPress')+' Developer', 'Your assigned projects & tasks only')
+  setPage((isWF?'Webflow':'WordPress')+' розробник', 'Тільки ваші призначені проєкти та задачі')
   document.getElementById('pcontent').innerHTML = `
     <div class="sg sg3">
-      <div class="sc"><div class="sc-l">◫ My projects</div><div class="sc-v" id="sc-p">—</div></div>
-      <div class="sc"><div class="sc-l">☑ Open tasks</div><div class="sc-v" id="sc-t">—</div></div>
-      <div class="sc"><div class="sc-l">⚠ Overdue</div><div class="sc-v" id="sc-o">—</div></div>
+      <div class="sc"><div class="sc-l">◫ Мої проєкти</div><div class="sc-v" id="sc-p">—</div></div>
+      <div class="sc"><div class="sc-l">☑ Відкриті задачі</div><div class="sc-v" id="sc-t">—</div></div>
+      <div class="sc"><div class="sc-l">⚠ Прострочені</div><div class="sc-v" id="sc-o">—</div></div>
     </div>
     <div id="dev-cards">${loadingHTML()}</div>
     <div id="dev-tasks">${loadingHTML()}</div>`
@@ -708,11 +715,11 @@ async function rDev() {
 }
 
 async function rProjects() {
-  setPage('Projects', 'Filtered by your role')
+  setPage('Проєкти', 'Відфільтровано за вашою роллю')
   document.getElementById('pcontent').innerHTML = loadingHTML()
   try {
     const res = await api('/api/projects')
-    if (!res.ok) throw new Error('Failed to load projects')
+    if (!res.ok) throw new Error('Не вдалося завантажити проєкти')
     document.getElementById('pcontent').innerHTML = projectsTableHTML(await res.json())
   } catch (e) {
     document.getElementById('pcontent').innerHTML = errorHTML(e.message)
@@ -720,7 +727,7 @@ async function rProjects() {
 }
 
 async function rTasks() {
-  setPage('Tasks', 'Filtered by your role')
+  setPage('Задачі', 'Відфільтровано за вашою роллю')
   document.getElementById('pcontent').innerHTML = loadingHTML()
   try {
     const res = await api('/api/projects')
@@ -733,14 +740,14 @@ async function rTasks() {
 }
 
 function rLeads() {
-  setPage('Leads', 'CRM — pipeline & deals')
+  setPage('Ліди', 'CRM — воронка та угоди')
   const won = LEADS.filter(l=>l.st==='WON').reduce((s,l)=>s+l.amt,0)
   const pipe = LEADS.filter(l=>l.st!=='WON'&&l.st!=='LOST').reduce((s,l)=>s+l.amt,0)
   document.getElementById('pcontent').innerHTML = `
     <div class="sg sg3">
-      <div class="sc"><div class="sc-l">◎ Total</div><div class="sc-v">${LEADS.length}</div></div>
-      <div class="sc"><div class="sc-l">✓ Won</div><div class="sc-v s">${cur(won)}</div></div>
-      <div class="sc"><div class="sc-l">⟳ Pipeline</div><div class="sc-v w">${cur(pipe)}</div></div>
+      <div class="sc"><div class="sc-l">◎ Всього</div><div class="sc-v">${LEADS.length}</div></div>
+      <div class="sc"><div class="sc-l">✓ Виграно</div><div class="sc-v s">${cur(won)}</div></div>
+      <div class="sc"><div class="sc-l">⟳ Воронка</div><div class="sc-v w">${cur(pipe)}</div></div>
     </div>
     ${leadsHTML()}`
 }
@@ -748,12 +755,12 @@ function rLeads() {
 function leadsHTML() {
   return `<div class="section">
     <div class="sh">
-      <span class="sh-t">All leads</span>
-      <button class="sbtn">Import CSV</button><button class="sbtn">Export CSV</button>
-      <button class="sbtn p">+ Add lead</button>
+      <span class="sh-t">Всі ліди</span>
+      <button class="sbtn">Імпорт CSV</button><button class="sbtn">Експорт CSV</button>
+      <button class="sbtn p">+ Додати лід</button>
     </div>
     <table>
-      <thead><tr><th>Name</th><th>Source</th><th>Status</th><th>Amount</th><th>Created</th><th>Comment</th></tr></thead>
+      <thead><tr><th>Ім'я</th><th>Джерело</th><th>Статус</th><th>Сума</th><th>Створено</th><th>Коментар</th></tr></thead>
       <tbody>${LEADS.map(l=>`<tr>
         <td><div class="cm">${l.name}</div></td>
         <td><span class="badge bgr">${l.src}</span></td>
@@ -767,14 +774,14 @@ function leadsHTML() {
 }
 
 function rFinance() {
-  setPage('Finance', 'Income, expenses & project finances')
+  setPage('Фінанси', 'Доходи, витрати та фінанси проєктів')
   const inc = FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0)
   const exp = FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0)
   document.getElementById('pcontent').innerHTML = `
     <div class="sg sg3">
-      <div class="sc"><div class="sc-l">↑ Income</div><div class="sc-v s">${cur(inc)}</div></div>
-      <div class="sc"><div class="sc-l">↓ Expenses</div><div class="sc-v d">${cur(exp)}</div></div>
-      <div class="sc"><div class="sc-l">= Profit</div><div class="sc-v">${cur(inc-exp)}</div></div>
+      <div class="sc"><div class="sc-l">↑ Дохід</div><div class="sc-v s">${cur(inc)}</div></div>
+      <div class="sc"><div class="sc-l">↓ Витрати</div><div class="sc-v d">${cur(exp)}</div></div>
+      <div class="sc"><div class="sc-l">= Прибуток</div><div class="sc-v">${cur(inc-exp)}</div></div>
     </div>
     ${financeHTML()}`
 }
@@ -782,11 +789,11 @@ function rFinance() {
 function financeHTML() {
   return `<div class="section">
     <div class="sh">
-      <span class="sh-t">Transactions</span>
-      <button class="sbtn">Export CSV</button><button class="sbtn p">+ Record</button>
+      <span class="sh-t">Транзакції</span>
+      <button class="sbtn">Експорт CSV</button><button class="sbtn p">+ Додати запис</button>
     </div>
     <table>
-      <thead><tr><th>Type</th><th>Description</th><th>Category</th><th>Date</th><th>Amount</th></tr></thead>
+      <thead><tr><th>Тип</th><th>Опис</th><th>Категорія</th><th>Дата</th><th>Сума</th></tr></thead>
       <tbody>${FINANCE.map(f=>`<tr>
         <td><span class="badge ${f.type==='INCOME'?'bg_':'br'}">${f.type}</span></td>
         <td><span class="cm">${f.desc}</span></td>
