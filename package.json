@@ -1,0 +1,16 @@
+{
+  "name": "crmalpha",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.14.0",
+    "argon2": "^0.31.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0"
+  }
+}
