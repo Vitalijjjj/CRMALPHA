@@ -1,5 +1,5 @@
-const prisma = require('../_lib/db')
-const { withAuth, FULL_ACCESS } = require('../_lib/auth')
+const prisma = require('../../_lib/db')
+const { withAuth, FULL_ACCESS } = require('../../_lib/auth')
 
 async function handler(req, res) {
   const { id } = req.query
