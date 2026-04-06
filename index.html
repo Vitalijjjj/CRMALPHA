@@ -1349,7 +1349,7 @@ function financeTableHTML(records) {
 async function openProfileModal() {
   openModal('Редагувати профіль', loadingHTML())
   try {
-    const res = await api('/api/users/profile')
+    const res = await api('/api/users?scope=profile')
     const u = res.ok ? await res.json() : currentUser
     document.getElementById('modal-body').innerHTML = `
       <div class="merr" id="m-err"></div>
@@ -1372,7 +1372,7 @@ async function submitProfile() {
   const avatar_url = document.getElementById('mf-avatar').value.trim()
   modalBtnBusy('Збереження...')
   try {
-    const res = await api('/api/users/profile', { method:'PATCH', body: JSON.stringify({ name, email, avatar_url }) })
+    const res = await api('/api/users?scope=profile', { method:'PATCH', body: JSON.stringify({ name, email, avatar_url }) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error||'Помилка')
     currentUser = { ...currentUser, ...data }
@@ -1388,7 +1388,7 @@ async function rTeam() {
   setPage('Команда', 'Управління користувачами')
   document.getElementById('pcontent').innerHTML = loadingHTML()
   try {
-    const res = await api('/api/users/admin')
+    const res = await api('/api/users?scope=admin')
     const users = res.ok ? await res.json() : []
     const roleColors = {
       OPERATIONS_SALES:'rgba(124,111,205,.2);color:#a99de8;border-color:rgba(124,111,205,.4)',
@@ -1455,7 +1455,7 @@ async function submitAddUser() {
   if (!email||!password) return modalErr('Email та пароль обов\'язкові')
   modalBtnBusy('Створення...')
   try {
-    const res = await api('/api/users/admin', { method:'POST', body: JSON.stringify({ name, email, password, role }) })
+    const res = await api('/api/users?scope=admin', { method:'POST', body: JSON.stringify({ name, email, password, role }) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error||'Помилка')
     closeModal(); rTeam()
@@ -1495,7 +1495,7 @@ async function submitEditUser(id) {
   modalBtnBusy('Збереження...')
   try {
     const body = { name, role, is_active, ...(password ? { password } : {}) }
-    const res = await api(`/api/users/admin/${id}`, { method:'PATCH', body: JSON.stringify(body) })
+    const res = await api(`/api/users?scope=admin&id=${id}`, { method:'PATCH', body: JSON.stringify(body) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error||'Помилка')
     closeModal(); rTeam()
@@ -1505,7 +1505,7 @@ async function submitEditUser(id) {
 async function deleteUser(id, label) {
   if (!confirm(`Видалити "${label}"? Дія незворотна.`)) return
   try {
-    const res = await api(`/api/users/admin/${id}`, { method:'DELETE' })
+    const res = await api(`/api/users?scope=admin&id=${id}`, { method:'DELETE' })
     if (!res.ok) { const e=await res.json(); alert(e.error||'Помилка'); return }
     rTeam()
   } catch(e) { alert(e.message) }
@@ -1622,14 +1622,14 @@ async function submitPrivTask() {
 async function togglePrivTask(id, currentStatus) {
   const newStatus = currentStatus==='DONE' ? 'TODO' : 'DONE'
   try {
-    await api(`/api/tasks/private/${id}`, { method:'PATCH', body: JSON.stringify({ status: newStatus }) })
+    await api(`/api/tasks/private?id=${id}`, { method:'PATCH', body: JSON.stringify({ status: newStatus }) })
     rWorkspace()
   } catch {}
 }
 
 async function deletePrivTask(id) {
   try {
-    await api(`/api/tasks/private/${id}`, { method:'DELETE' })
+    await api(`/api/tasks/private?id=${id}`, { method:'DELETE' })
     rWorkspace()
   } catch {}
 }
