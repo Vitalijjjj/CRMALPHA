@@ -24,12 +24,12 @@ async function handler(req, res) {
 async function listProjects(req, res) {
   const { role, sub } = req.user
 
-  let where = {}
+  let where = { NOT: { name: '__PRIVATE_OPS__' } }
 
   if (role === 'DEV_WEBFLOW') {
-    where = { type: 'WEBFLOW', members: { some: { user_id: sub } } }
+    where = { type: 'WEBFLOW', members: { some: { user_id: sub } }, NOT: { name: '__PRIVATE_OPS__' } }
   } else if (role === 'DEV_WORDPRESS') {
-    where = { type: 'WORDPRESS', members: { some: { user_id: sub } } }
+    where = { type: 'WORDPRESS', members: { some: { user_id: sub } }, NOT: { name: '__PRIVATE_OPS__' } }
   }
 
   const projects = await prisma.project.findMany({

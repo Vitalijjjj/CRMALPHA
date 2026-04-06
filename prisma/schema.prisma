@@ -62,6 +62,8 @@ enum FinanceType {
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
+  name          String?
+  avatar_url    String?
   password_hash String
   role          Role     @default(OPERATIONS_SALES)
   is_active     Boolean  @default(true)

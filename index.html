@@ -192,6 +192,72 @@ textarea.mfield{resize:vertical;line-height:1.5}
 /* status select in tables */
 .status-sel{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--text2);font-family:var(--mono);cursor:pointer;outline:none}
 .status-sel:focus{border-color:rgba(124,111,205,.4)}
+
+/* ── DATE PICKER (dark mode) ── */
+input[type=date].mfield{color-scheme:dark;cursor:pointer}
+input[type=date].mfield::-webkit-calendar-picker-indicator{filter:invert(0.6);cursor:pointer;opacity:.7}
+input[type=date].mfield::-webkit-calendar-picker-indicator:hover{opacity:1}
+
+/* ── DONE TASK ROW ── */
+tr.done-row{opacity:.38}
+tr.done-row td{text-decoration:line-through;text-decoration-color:var(--text3)}
+tr.done-row .cm{color:var(--text3)}
+tr.done-row:hover{opacity:.5}
+
+/* ── KANBAN ── */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start}
+.kancol{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden}
+.kancol-h{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.kancol-title{font-size:11px;font-weight:600;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;flex:1}
+.kancol-cnt{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg4);padding:2px 7px;border-radius:10px}
+.kancard{margin:8px;padding:11px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;cursor:default;transition:border-color .12s}
+.kancard:hover{border-color:var(--border2)}
+.kancard.done-card{opacity:.38}
+.kancard-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:7px;line-height:1.4}
+.kancard-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.kancard-assignee{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.kancard-dl{font-family:var(--mono);font-size:10px}
+.view-toggle{display:flex;gap:2px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:2px}
+.vt-btn{padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer;color:var(--text3);border:none;background:transparent;font-family:var(--sans);transition:all .12s}
+.vt-btn.active{background:var(--bg4);color:var(--text);border:1px solid var(--border2)}
+
+/* ── USER MANAGEMENT ── */
+.user-card{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:border-color .12s}
+.user-card:hover{border-color:#3a3a55}
+.user-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;border:1px solid;overflow:hidden}
+.user-av img{width:100%;height:100%;object-fit:cover}
+.user-info{flex:1}
+.user-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.user-email{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.user-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── PROFILE EDIT IN SIDEBAR ── */
+.edit-profile-btn{width:100%;padding:5px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text3);font-size:10px;cursor:pointer;transition:all .12s;font-family:var(--mono);margin-top:2px;text-align:center}
+.edit-profile-btn:hover{background:var(--bg4);color:var(--text2);border-color:var(--border2)}
+
+/* ── PRIVATE WORKSPACE ── */
+.priv-empty{padding:32px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px}
+.ptask-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);transition:background .1s}
+.ptask-item:last-child{border-bottom:none}
+.ptask-item:hover{background:var(--bg4)}
+.ptask-check{width:16px;height:16px;border-radius:4px;border:1px solid var(--border2);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin-top:1px;font-size:10px}
+.ptask-check.done{background:var(--green);border-color:var(--green);color:#fff}
+.ptask-body{flex:1}
+.ptask-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.ptask-title.done{text-decoration:line-through;color:var(--text3);opacity:.5}
+.ptask-meta{display:flex;gap:8px;font-family:var(--mono);font-size:10px;color:var(--text3)}
+.ptask-del{color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;border:none;background:transparent;opacity:0;transition:opacity .12s}
+.ptask-item:hover .ptask-del{opacity:1}
+.ptask-del:hover{color:var(--red)}
+
+/* ── LEADS FILTER ── */
+.leads-filters{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:14px 18px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.lf-group{display:flex;flex-direction:column;gap:4px}
+.lf-label{font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.lf-select,.lf-input{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;color:var(--text);font-family:var(--sans);outline:none;min-width:110px}
+.lf-select:focus,.lf-input:focus{border-color:rgba(124,111,205,.4)}
+.lf-reset{align-self:flex-end;padding:6px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;font-family:var(--sans);transition:all .12s;white-space:nowrap}
+.lf-reset:hover{background:var(--bg4);color:var(--text2)}
 </style>
 </head>
 <body>
@@ -233,6 +299,7 @@ textarea.mfield{resize:vertical;line-height:1.5}
           <div class="urole" id="urole"></div>
         </div>
       </div>
+      <button class="edit-profile-btn" onclick="openProfileModal()">✎ Редагувати профіль</button>
       <button class="logout" onclick="doLogout()">↩ Вийти</button>
     </div>
   </div>
@@ -328,7 +395,7 @@ const emptyHTML = msg => `<div style="padding:32px;text-align:center;color:var(-
 // ════════════════════════════════════════
 const ROLES = {
   OPERATIONS_SALES:{label:'Операції та продажі',icon:'⚡',bg:'rgba(124,111,205,.15)',tc:'bv',desc:'ops@agency.com',
-    nav:[{id:'overview',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'},{id:'leads',ic:'◎',l:'Ліди'},{id:'finance',ic:'◈',l:'Фінанси'}]},
+    nav:[{id:'overview',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'},{id:'workspace',ic:'⬛',l:'Workspace'},{id:'leads',ic:'◎',l:'Ліди'},{id:'finance',ic:'◈',l:'Фінанси'},{id:'team',ic:'◉',l:'Команда'}]},
   PM:{label:'Проєктний менеджер',icon:'📋',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'pm@agency.com',
     nav:[{id:'pm',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'},{id:'finance',ic:'◈',l:'Фінанси'}]},
   DEV_WEBFLOW:{label:'Webflow розробник',icon:'🌐',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'webflow@agency.com',
@@ -436,9 +503,15 @@ async function doLogout() {
 function setupShell() {
   const role = currentUser.role
   const cfg = ROLES[role]
-  document.getElementById('uav').textContent = currentUser.email.charAt(0).toUpperCase()
-  document.getElementById('uav').style.cssText = AV_STYLE[role]
-  document.getElementById('uname').textContent = currentUser.email
+  const uav = document.getElementById('uav')
+  if (currentUser.avatar_url) {
+    uav.innerHTML = `<img src="${currentUser.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`
+    uav.style.cssText = AV_STYLE[role]
+  } else {
+    uav.textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase()
+    uav.style.cssText = AV_STYLE[role]
+  }
+  document.getElementById('uname').textContent = currentUser.name || currentUser.email
   const roleEl = document.getElementById('urole')
   roleEl.textContent = role
   roleEl.style.color = role==='OPERATIONS_SALES'?'#a99de8':role==='PM'?'#4dd9d9':'#f0875a'
@@ -452,7 +525,7 @@ function setupShell() {
 function go(id) {
   currentPage = id
   document.querySelectorAll('.ni').forEach(el => el.classList.toggle('active', el.id==='ni-'+id))
-  ;({overview:rOverview, pm:rPM, dev:rDev, projects:rProjects, tasks:rTasks, leads:rLeads, finance:rFinance})[id]?.()
+  ;({overview:rOverview, pm:rPM, dev:rDev, projects:rProjects, tasks:rTasks, leads:rLeads, finance:rFinance, workspace:rWorkspace, team:rTeam})[id]?.()
 }
 
 function setPage(t, s) {
@@ -500,27 +573,112 @@ function taskStatusSel(t) {
   </select>`
 }
 
+// ── Task view state ──
+let _taskView = 'kanban'  // 'list' | 'kanban'
+
+function tasksView(tasks, containerId) {
+  const el = document.getElementById(containerId)
+  if (el) el.innerHTML = _taskView === 'kanban' ? kanbanHTML(tasks) : taskListTabsHTML(tasks)
+}
+
 function tasksTableHTML(tasks) {
-  if (!tasks.length) return emptyHTML('Задач не знайдено')
-  return `<div class="section">
-    <div class="sh">
-      <span class="sh-t">Задачі <span style="color:var(--text3);font-weight:400">(${tasks.length})</span></span>
-      <button class="sbtn p" onclick="openTaskModal()">+ Нова задача</button>
+  return `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+    <div class="tabs" style="margin-bottom:0">
+      <div class="tab ${_taskView==='kanban'?'active':''}" onclick="_taskView='kanban';renderTasksInPlace(this)">Kanban</div>
+      <div class="tab ${_taskView==='list'?'active':''}" onclick="_taskView='list';renderTasksInPlace(this)">Список</div>
     </div>
-    <table>
-      <thead><tr><th>Задача</th><th>Пріоритет</th><th>Виконавець</th><th>Статус</th><th>Дедлайн</th></tr></thead>
-      <tbody>${tasks.map(t => {
-        const ov = isOverdue(t)
-        return `<tr${ov?' class="ov-row"':''}>
-          <td>${ov?'<span class="od-dot"></span>':''}<span class="cm">${t.title}</span></td>
-          <td>${priDot(t.priority)}</td>
-          <td>${t.assignee?.email||'—'}</td>
-          <td>${taskStatusSel(t)}</td>
-          <td style="color:${ov?'var(--red)':'var(--text3)'}">${t.deadline?fmt(t.deadline):'—'}</td>
-        </tr>`
-      }).join('')}</tbody>
-    </table>
-  </div>`
+    <button class="sbtn p" onclick="openTaskModal()">+ Нова задача</button>
+  </div>
+  <div id="tasks-view-area">${_taskView==='kanban' ? kanbanHTML(tasks) : taskListTabsHTML(tasks)}</div>`
+}
+
+function renderTasksInPlace(tabEl) {
+  tabEl.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t===tabEl))
+  const area = document.getElementById('tasks-view-area')
+  if (!area) return
+  // Re-use cached tasks from parent context
+  if (window._cachedTasks) area.innerHTML = _taskView==='kanban' ? kanbanHTML(window._cachedTasks) : taskListTabsHTML(window._cachedTasks)
+}
+
+function taskListTabsHTML(tasks) {
+  const today = new Date(); today.setHours(0,0,0,0)
+  const tom = new Date(today); tom.setDate(tom.getDate()+1)
+  const twoW = new Date(today); twoW.setDate(twoW.getDate()+14)
+
+  const active = tasks.filter(t=>t.status!=='DONE')
+  const done   = tasks.filter(t=>t.status==='DONE')
+
+  const todayT = active.filter(t=>t.deadline && new Date(new Date(t.deadline).setHours(0,0,0,0))<=today.getTime())
+  const tomT   = active.filter(t=>{
+    if(!t.deadline) return false
+    const d=new Date(new Date(t.deadline).setHours(0,0,0,0))
+    return d.getTime()===tom.getTime()
+  })
+  const soonT  = active.filter(t=>{
+    if(!t.deadline) return false
+    const d=new Date(new Date(t.deadline).setHours(0,0,0,0))
+    return d>tom && d<=twoW
+  })
+  const noDate = active.filter(t=>!t.deadline)
+
+  const tRow = (t,showOv=true) => {
+    const ov = showOv && isOverdue(t)
+    return `<tr class="${t.status==='DONE'?'done-row':ov?'ov-row':''}">
+      <td>${ov?'<span class="od-dot"></span>':''}<span class="cm">${t.title}</span></td>
+      <td>${priDot(t.priority)}</td>
+      <td>${t.assignee?.email||'—'}</td>
+      <td>${taskStatusSel(t)}</td>
+      <td style="color:${ov?'var(--red)':'var(--text3)'}">${t.deadline?fmt(t.deadline):'—'}</td>
+    </tr>`
+  }
+  const tbl = (rows) => rows.length===0 ? emptyHTML('Немає задач') : `<table>
+    <thead><tr><th>Задача</th><th>Пріоритет</th><th>Виконавець</th><th>Статус</th><th>Дедлайн</th></tr></thead>
+    <tbody>${rows.map(t=>tRow(t)).join('')}</tbody></table>`
+
+  return `
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'tl-today')">Сьогодні <span style="margin-left:4px;font-family:var(--mono);font-size:9px;opacity:.7">${todayT.length}</span></div>
+      <div class="tab" onclick="switchTab(this,'tl-tom')">Завтра <span style="margin-left:4px;font-family:var(--mono);font-size:9px;opacity:.7">${tomT.length}</span></div>
+      <div class="tab" onclick="switchTab(this,'tl-soon')">2 тижні <span style="margin-left:4px;font-family:var(--mono);font-size:9px;opacity:.7">${soonT.length}</span></div>
+      <div class="tab" onclick="switchTab(this,'tl-nd')">Без дати <span style="margin-left:4px;font-family:var(--mono);font-size:9px;opacity:.7">${noDate.length}</span></div>
+      <div class="tab" onclick="switchTab(this,'tl-done')">Виконані <span style="margin-left:4px;font-family:var(--mono);font-size:9px;opacity:.7">${done.length}</span></div>
+    </div>
+    <div class="section" id="tl-today">${tbl(todayT)}</div>
+    <div class="section" id="tl-tom" style="display:none">${tbl(tomT)}</div>
+    <div class="section" id="tl-soon" style="display:none">${tbl(soonT)}</div>
+    <div class="section" id="tl-nd" style="display:none">${tbl(noDate)}</div>
+    <div class="section" id="tl-done" style="display:none">${tbl(done)}</div>`
+}
+
+function kanbanHTML(tasks) {
+  const cols = [
+    { status:'TODO',        label:'До виконання', color:'var(--text3)' },
+    { status:'IN_PROGRESS', label:'В роботі',      color:'var(--violet)' },
+    { status:'REVIEW',      label:'На перевірці',  color:'var(--yellow)' },
+    { status:'DONE',        label:'Готово',         color:'var(--green)' },
+  ]
+  return `<div class="kanban">${cols.map(col=>{
+    const ct = tasks.filter(t=>t.status===col.status)
+    return `<div class="kancol">
+      <div class="kancol-h">
+        <span class="kancol-title" style="color:${col.color}">${col.label}</span>
+        <span class="kancol-cnt">${ct.length}</span>
+      </div>
+      ${ct.length===0?`<div style="padding:16px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3)">—</div>`:
+        ct.map(t=>{
+          const ov=isOverdue(t)
+          return `<div class="kancard${col.status==='DONE'?' done-card':''}">
+            <div class="kancard-title">${ov?'<span class="od-dot"></span>':''}${t.title}</div>
+            <div class="kancard-meta">
+              ${priDot(t.priority)}
+              ${t.assignee?`<span class="kancard-assignee">· ${t.assignee.email}</span>`:''}
+              ${t.deadline?`<span class="kancard-dl" style="color:${ov?'var(--red)':'var(--text3)'}">${fmt(t.deadline)}</span>`:''}
+            </div>
+            <div style="margin-top:8px">${taskStatusSel(t)}</div>
+          </div>`
+        }).join('')}
+    </div>`
+  }).join('')}</div>`
 }
 
 function overdueHTML(tasks) {
@@ -1005,6 +1163,7 @@ async function rPM() {
     const res = await api('/api/projects')
     const projects = res.ok ? await res.json() : []
     const tasks = await fetchAllTasks(projects)
+    window._cachedTasks = tasks
     document.getElementById('sc-p').textContent = projects.length
     document.getElementById('sc-t').textContent = tasks.filter(t=>t.status!=='DONE').length
     document.getElementById('sc-o').textContent = tasks.filter(isOverdue).length
@@ -1075,6 +1234,7 @@ async function rTasks() {
     const res = await api('/api/projects')
     const projects = res.ok ? await res.json() : []
     const tasks = await fetchAllTasks(projects)
+    window._cachedTasks = tasks
     document.getElementById('pcontent').innerHTML = tasksTableHTML(tasks)
   } catch (e) {
     document.getElementById('pcontent').innerHTML = errorHTML(e.message)
@@ -1089,16 +1249,19 @@ async function rLeads() {
       <div class="sc"><div class="sc-l">✓ Виграно</div><div class="sc-v s" id="sc-won">—</div></div>
       <div class="sc"><div class="sc-l">⟳ Воронка</div><div class="sc-v w" id="sc-pipe">—</div></div>
     </div>
+    <div id="leads-filters-area"></div>
     <div id="leads-table">${loadingHTML()}</div>`
   try {
     const res = await api('/api/leads')
     if (!res.ok) throw new Error('Не вдалося завантажити ліди')
     const leads = await res.json()
-    const won = leads.filter(l=>l.status==='WON').reduce((s,l)=>s+l.amount,0)
+    window._allLeads = leads
+    const won  = leads.filter(l=>l.status==='WON').reduce((s,l)=>s+l.amount,0)
     const pipe = leads.filter(l=>l.status!=='WON'&&l.status!=='LOST').reduce((s,l)=>s+l.amount,0)
     document.getElementById('sc-tot').textContent = leads.length
     document.getElementById('sc-won').textContent = cur(won)
     document.getElementById('sc-pipe').textContent = cur(pipe)
+    document.getElementById('leads-filters-area').innerHTML = leadsFiltersHTML(leads)
     document.getElementById('leads-table').innerHTML = leadsTableHTML(leads)
   } catch(e) {
     document.getElementById('leads-table').innerHTML = errorHTML(e.message)
@@ -1178,6 +1341,345 @@ function financeTableHTML(records) {
       </tr>`).join('')}</tbody>
     </table>
   </div>`
+}
+
+// ════════════════════════════════════════
+// PROFILE MODAL
+// ════════════════════════════════════════
+async function openProfileModal() {
+  openModal('Редагувати профіль', loadingHTML())
+  try {
+    const res = await api('/api/users/profile')
+    const u = res.ok ? await res.json() : currentUser
+    document.getElementById('modal-body').innerHTML = `
+      <div class="merr" id="m-err"></div>
+      <label class="mlabel">Ім'я</label>
+      <input id="mf-name" class="mfield" placeholder="Ваше ім'я" value="${u.name||''}">
+      <label class="mlabel">Email</label>
+      <input id="mf-email" class="mfield" type="email" value="${u.email||''}">
+      <label class="mlabel">Фото (URL)</label>
+      <input id="mf-avatar" class="mfield" placeholder="https://..." value="${u.avatar_url||''}">
+      <div class="mfooter">
+        <button class="sbtn" onclick="closeModal()">Скасувати</button>
+        <button class="sbtn p" onclick="submitProfile()">Зберегти →</button>
+      </div>`
+  } catch(e) { document.getElementById('modal-body').innerHTML = errorHTML(e.message) }
+}
+
+async function submitProfile() {
+  const name = document.getElementById('mf-name').value.trim()
+  const email = document.getElementById('mf-email').value.trim()
+  const avatar_url = document.getElementById('mf-avatar').value.trim()
+  modalBtnBusy('Збереження...')
+  try {
+    const res = await api('/api/users/profile', { method:'PATCH', body: JSON.stringify({ name, email, avatar_url }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error||'Помилка')
+    currentUser = { ...currentUser, ...data }
+    closeModal()
+    setupShell()
+  } catch(e) { modalErr(e.message); modalBtnRestore('Зберегти →') }
+}
+
+// ════════════════════════════════════════
+// TEAM MANAGEMENT (ops_sales only)
+// ════════════════════════════════════════
+async function rTeam() {
+  setPage('Команда', 'Управління користувачами')
+  document.getElementById('pcontent').innerHTML = loadingHTML()
+  try {
+    const res = await api('/api/users/admin')
+    const users = res.ok ? await res.json() : []
+    const roleColors = {
+      OPERATIONS_SALES:'rgba(124,111,205,.2);color:#a99de8;border-color:rgba(124,111,205,.4)',
+      PM:'rgba(77,217,217,.15);color:#4dd9d9;border-color:rgba(77,217,217,.3)',
+      DEV_WEBFLOW:'rgba(77,217,217,.15);color:#4dd9d9;border-color:rgba(77,217,217,.3)',
+      DEV_WORDPRESS:'rgba(240,135,90,.15);color:#f0875a;border-color:rgba(240,135,90,.3)',
+    }
+    const roleLabel = {OPERATIONS_SALES:'Ops & Sales',PM:'PM',DEV_WEBFLOW:'Webflow Dev',DEV_WORDPRESS:'WordPress Dev'}
+    document.getElementById('pcontent').innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.5px">Команда <span style="color:var(--text3);font-weight:400;font-size:14px">(${users.length})</span></div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:3px">Управління акаунтами</div>
+        </div>
+        <button class="sbtn p" onclick="openAddUserModal()">+ Новий користувач</button>
+      </div>
+      ${users.map(u=>`
+        <div class="user-card" id="uc-${u.id}">
+          <div class="user-av" style="background:${roleColors[u.role]?.split(';')[0]?.replace('rgba','rgba').replace('background:','')};border-color:rgba(124,111,205,.3)">
+            ${u.avatar_url?`<img src="${u.avatar_url}">`:(u.name||u.email).charAt(0).toUpperCase()}
+          </div>
+          <div class="user-info">
+            <div class="user-name">${u.name||'—'} <span style="font-size:11px;color:var(--text3);font-weight:400">${u.email}</span></div>
+            <div class="user-email" style="margin-top:4px;display:flex;gap:6px">
+              <span class="badge ${u.role==='OPERATIONS_SALES'?'bv':u.role==='PM'?'bc':'bo'}">${roleLabel[u.role]||u.role}</span>
+              ${!u.is_active?'<span class="badge br">Неактивний</span>':''}
+            </div>
+          </div>
+          <div class="user-actions">
+            <button class="sbtn" onclick="openEditUserModal('${u.id}','${u.name||''}','${u.role}',${u.is_active})">Редагувати</button>
+            ${u.id===currentUser.id?'':`<button class="sbtn" style="color:var(--red)" onclick="deleteUser('${u.id}','${u.name||u.email}')">Видалити</button>`}
+          </div>
+        </div>`).join('')}`
+  } catch(e) { document.getElementById('pcontent').innerHTML = errorHTML(e.message) }
+}
+
+function openAddUserModal() {
+  openModal('Новий користувач', `
+    <div class="merr" id="m-err"></div>
+    <label class="mlabel">Ім'я</label>
+    <input id="mf-name" class="mfield" placeholder="Ім'я користувача">
+    <label class="mlabel">Email *</label>
+    <input id="mf-email" class="mfield" type="email" placeholder="user@agency.com">
+    <label class="mlabel">Пароль *</label>
+    <input id="mf-pass" class="mfield" type="password" placeholder="Мін. 8 символів">
+    <label class="mlabel">Роль</label>
+    <select id="mf-role" class="mfield">
+      <option value="PM">Проєктний менеджер</option>
+      <option value="DEV_WEBFLOW">Webflow розробник</option>
+      <option value="DEV_WORDPRESS">WordPress розробник</option>
+      <option value="OPERATIONS_SALES">Операції та продажі</option>
+    </select>
+    <div class="mfooter">
+      <button class="sbtn" onclick="closeModal()">Скасувати</button>
+      <button class="sbtn p" onclick="submitAddUser()">Створити →</button>
+    </div>`)
+}
+
+async function submitAddUser() {
+  const name  = document.getElementById('mf-name').value.trim()
+  const email = document.getElementById('mf-email').value.trim()
+  const password = document.getElementById('mf-pass').value
+  const role  = document.getElementById('mf-role').value
+  if (!email||!password) return modalErr('Email та пароль обов\'язкові')
+  modalBtnBusy('Створення...')
+  try {
+    const res = await api('/api/users/admin', { method:'POST', body: JSON.stringify({ name, email, password, role }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error||'Помилка')
+    closeModal(); rTeam()
+  } catch(e) { modalErr(e.message); modalBtnRestore('Створити →') }
+}
+
+function openEditUserModal(id, name, role, isActive) {
+  openModal('Редагувати користувача', `
+    <div class="merr" id="m-err"></div>
+    <label class="mlabel">Ім'я</label>
+    <input id="mf-name" class="mfield" value="${name}">
+    <label class="mlabel">Роль</label>
+    <select id="mf-role" class="mfield">
+      <option value="PM"${role==='PM'?' selected':''}>Проєктний менеджер</option>
+      <option value="DEV_WEBFLOW"${role==='DEV_WEBFLOW'?' selected':''}>Webflow розробник</option>
+      <option value="DEV_WORDPRESS"${role==='DEV_WORDPRESS'?' selected':''}>WordPress розробник</option>
+      <option value="OPERATIONS_SALES"${role==='OPERATIONS_SALES'?' selected':''}>Операції та продажі</option>
+    </select>
+    <label class="mlabel">Статус</label>
+    <select id="mf-active" class="mfield">
+      <option value="true"${isActive?' selected':''}>Активний</option>
+      <option value="false"${!isActive?' selected':''}>Заблокований</option>
+    </select>
+    <label class="mlabel">Новий пароль (залиш порожнім якщо не міняти)</label>
+    <input id="mf-pass" class="mfield" type="password" placeholder="Мін. 8 символів">
+    <div class="mfooter">
+      <button class="sbtn" onclick="closeModal()">Скасувати</button>
+      <button class="sbtn p" onclick="submitEditUser('${id}')">Зберегти →</button>
+    </div>`)
+}
+
+async function submitEditUser(id) {
+  const name = document.getElementById('mf-name').value.trim()
+  const role = document.getElementById('mf-role').value
+  const is_active = document.getElementById('mf-active').value === 'true'
+  const password = document.getElementById('mf-pass').value
+  modalBtnBusy('Збереження...')
+  try {
+    const body = { name, role, is_active, ...(password ? { password } : {}) }
+    const res = await api(`/api/users/admin/${id}`, { method:'PATCH', body: JSON.stringify(body) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error||'Помилка')
+    closeModal(); rTeam()
+  } catch(e) { modalErr(e.message); modalBtnRestore('Зберегти →') }
+}
+
+async function deleteUser(id, label) {
+  if (!confirm(`Видалити "${label}"? Дія незворотна.`)) return
+  try {
+    const res = await api(`/api/users/admin/${id}`, { method:'DELETE' })
+    if (!res.ok) { const e=await res.json(); alert(e.error||'Помилка'); return }
+    rTeam()
+  } catch(e) { alert(e.message) }
+}
+
+// ════════════════════════════════════════
+// PRIVATE WORKSPACE (ops_sales only)
+// ════════════════════════════════════════
+let _privTab = null
+
+async function rWorkspace() {
+  setPage('Workspace', 'Приватний простір — тільки для Ops & Sales')
+  document.getElementById('pcontent').innerHTML = loadingHTML()
+  try {
+    const res = await api('/api/tasks/private')
+    if (!res.ok) throw new Error('Помилка завантаження')
+    const tasks = await res.json()
+
+    // Group by creator
+    const byOwner = {}
+    tasks.forEach(t => {
+      const key = t.creator.id
+      if (!byOwner[key]) byOwner[key] = { label: t.creator.name || t.creator.email, tasks: [] }
+      byOwner[key].tasks.push(t)
+    })
+
+    // Add current user tab if not present
+    if (!byOwner[currentUser.id]) {
+      byOwner[currentUser.id] = { label: currentUser.name || currentUser.email, tasks: [] }
+    }
+
+    const owners = Object.entries(byOwner)
+    if (!_privTab) _privTab = owners[0]?.[0]
+
+    document.getElementById('pcontent').innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div class="tabs" style="margin-bottom:0">
+          ${owners.map(([id,o])=>`<div class="tab${_privTab===id?' active':''}" onclick="_privTab='${id}';rWorkspace()">${o.label}</div>`).join('')}
+        </div>
+        <button class="sbtn p" onclick="openPrivTaskModal()">+ Нова задача</button>
+      </div>
+      ${owners.map(([id,o])=>`
+        <div id="pw-${id}" style="${_privTab!==id?'display:none':''}">
+          <div class="section">
+            <div class="sh"><span class="sh-t">Активні <span style="color:var(--text3);font-weight:400">(${o.tasks.filter(t=>t.status!=='DONE').length})</span></span></div>
+            ${privTasksHTML(o.tasks.filter(t=>t.status!=='DONE'))}
+          </div>
+          ${o.tasks.filter(t=>t.status==='DONE').length > 0 ? `
+          <div class="section" style="margin-top:12px">
+            <div class="sh"><span class="sh-t" style="color:var(--text3)">Виконані <span style="font-weight:400">(${o.tasks.filter(t=>t.status==='DONE').length})</span></span></div>
+            ${privTasksHTML(o.tasks.filter(t=>t.status==='DONE'))}
+          </div>`:''}</div>`).join('')}`
+  } catch(e) { document.getElementById('pcontent').innerHTML = errorHTML(e.message) }
+}
+
+function privTasksHTML(tasks) {
+  if (!tasks.length) return `<div class="priv-empty">Порожньо</div>`
+  return tasks.map(t=>`
+    <div class="ptask-item">
+      <div class="ptask-check${t.status==='DONE'?' done':''}" onclick="togglePrivTask('${t.id}','${t.status}')">
+        ${t.status==='DONE'?'✓':''}
+      </div>
+      <div class="ptask-body">
+        <div class="ptask-title${t.status==='DONE'?' done':''}">${t.title}</div>
+        <div class="ptask-meta">
+          <span>${PRI_UA[t.priority]||t.priority}</span>
+          ${t.deadline?`<span>· ${fmt(t.deadline)}</span>`:''}
+        </div>
+      </div>
+      <button class="ptask-del" onclick="deletePrivTask('${t.id}')">✕</button>
+    </div>`).join('')
+}
+
+function openPrivTaskModal() {
+  openModal('Нова особиста задача', `
+    <div class="merr" id="m-err"></div>
+    <label class="mlabel">Назва *</label>
+    <input id="mf-title" class="mfield" placeholder="Що треба зробити...">
+    <div class="mrow">
+      <div class="mhalf">
+        <label class="mlabel">Пріоритет</label>
+        <select id="mf-priority" class="mfield">
+          <option value="LOW">Низький</option>
+          <option value="MEDIUM" selected>Середній</option>
+          <option value="HIGH">Високий</option>
+          <option value="URGENT">Критичний</option>
+        </select>
+      </div>
+      <div class="mhalf">
+        <label class="mlabel">Дедлайн</label>
+        <input id="mf-deadline" class="mfield" type="date">
+      </div>
+    </div>
+    <div class="mfooter">
+      <button class="sbtn" onclick="closeModal()">Скасувати</button>
+      <button class="sbtn p" onclick="submitPrivTask()">Додати →</button>
+    </div>`)
+}
+
+async function submitPrivTask() {
+  const title    = document.getElementById('mf-title').value.trim()
+  const priority = document.getElementById('mf-priority').value
+  const deadline = document.getElementById('mf-deadline').value
+  if (!title) return modalErr('Введіть назву задачі')
+  modalBtnBusy('Додавання...')
+  try {
+    const res = await api('/api/tasks/private', { method:'POST', body: JSON.stringify({ title, priority, deadline: deadline||null }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error||'Помилка')
+    closeModal(); rWorkspace()
+  } catch(e) { modalErr(e.message); modalBtnRestore('Додати →') }
+}
+
+async function togglePrivTask(id, currentStatus) {
+  const newStatus = currentStatus==='DONE' ? 'TODO' : 'DONE'
+  try {
+    await api(`/api/tasks/private/${id}`, { method:'PATCH', body: JSON.stringify({ status: newStatus }) })
+    rWorkspace()
+  } catch {}
+}
+
+async function deletePrivTask(id) {
+  try {
+    await api(`/api/tasks/private/${id}`, { method:'DELETE' })
+    rWorkspace()
+  } catch {}
+}
+
+// ════════════════════════════════════════
+// LEADS FILTERS
+// ════════════════════════════════════════
+let _leadsFilters = { status:'', source:'', minAmt:'' }
+
+function leadsFiltersHTML(leads) {
+  const sources = [...new Set(leads.map(l=>l.source))].sort()
+  return `<div class="leads-filters">
+    <div class="lf-group">
+      <div class="lf-label">Статус</div>
+      <select class="lf-select" onchange="_leadsFilters.status=this.value;applyLeadsFilter()" >
+        <option value="">Всі</option>
+        ${['NEW','CONTACTED','PROPOSAL','WON','LOST'].map(s=>`<option value="${s}"${_leadsFilters.status===s?' selected':''}>${STATUS_UA[s]}</option>`).join('')}
+      </select>
+    </div>
+    <div class="lf-group">
+      <div class="lf-label">Джерело</div>
+      <select class="lf-select" onchange="_leadsFilters.source=this.value;applyLeadsFilter()">
+        <option value="">Всі</option>
+        ${sources.map(s=>`<option value="${s}"${_leadsFilters.source===s?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div class="lf-group">
+      <div class="lf-label">Мін. сума ($)</div>
+      <input class="lf-input" type="number" min="0" placeholder="0" value="${_leadsFilters.minAmt}"
+        onchange="_leadsFilters.minAmt=this.value;applyLeadsFilter()">
+    </div>
+    <button class="lf-reset" onclick="_leadsFilters={status:'',source:'',minAmt:''};rLeads()">↺ Скинути</button>
+  </div>`
+}
+
+function applyLeadsFilter() {
+  const all = window._allLeads || []
+  const f = _leadsFilters
+  const filtered = all.filter(l =>
+    (!f.status || l.status===f.status) &&
+    (!f.source || l.source===f.source) &&
+    (!f.minAmt || l.amount >= Number(f.minAmt))
+  )
+  const won  = filtered.filter(l=>l.status==='WON').reduce((s,l)=>s+l.amount,0)
+  const pipe = filtered.filter(l=>l.status!=='WON'&&l.status!=='LOST').reduce((s,l)=>s+l.amount,0)
+  const el = document.getElementById('sc-tot'); if(el) el.textContent = filtered.length
+  const ew = document.getElementById('sc-won'); if(ew) ew.textContent = cur(won)
+  const ep = document.getElementById('sc-pipe'); if(ep) ep.textContent = cur(pipe)
+  const tbl = document.getElementById('leads-table')
+  if (tbl) tbl.innerHTML = leadsTableHTML(filtered)
 }
 
 // ════════════════════════════════════════
