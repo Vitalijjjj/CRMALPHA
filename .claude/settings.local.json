@@ -8,7 +8,14 @@
       "Bash(git branch:*)",
       "Bash(git config:*)",
       "Bash(git push:*)",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "Bash(npm install:*)",
+      "Bash(export PATH=\"$PATH:/usr/local/bin:/opt/homebrew/bin\")",
+      "Read(//Users/gural/.nvm/versions/**)",
+      "Bash(/opt/homebrew/bin/brew install:*)",
+      "Bash(/opt/homebrew/bin/npm install:*)",
+      "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" npx prisma migrate dev --name init)"
     ]
   }
 }
