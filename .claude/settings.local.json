@@ -29,7 +29,12 @@
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" npx prisma migrate dev --name add_leads_finance)",
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require\" npx prisma migrate dev --name add_leads_finance)",
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" npx prisma db push)",
-      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Add Leads and Finance modules with CSV import/export\")"
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Add Leads and Finance modules with CSV import/export\")",
+      "Bash(node -e ':*)",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM add \"api/projects/[id]/index.js\")",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Fix broken require paths in projects/[id]/index.js\")",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM rm api/auth/login.js api/auth/logout.js api/auth/refresh.js api/auth/register.js api/leads/import-csv.js api/leads/export-csv.js api/finance/summary.js)",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Reduce serverless functions from 15 to 9 \\(Hobby plan limit fix\\)\")"
     ]
   }
 }
