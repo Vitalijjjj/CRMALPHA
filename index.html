@@ -27,15 +27,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .logo-box{width:38px;height:38px;background:var(--violet);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff}
 .logo-name{font-size:22px;font-weight:700;letter-spacing:-0.5px}
 .login-sub{color:var(--text3);font-size:12px;margin-bottom:28px;font-family:var(--mono)}
-.rc{width:100%;text-align:left;padding:15px 18px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);cursor:pointer;transition:all .15s;margin-bottom:8px;display:flex;align-items:center;gap:14px}
-.rc:hover{background:var(--bg4);border-color:#3a3a55;transform:translateX(3px)}
-.ri{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.rm{flex:1}
-.rt{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
-.rd{font-size:11px;color:var(--text3);font-family:var(--mono)}
-.rtag{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;border:1px solid;flex-shrink:0}
-.rarr{color:var(--text3);font-size:16px;transition:.15s}
-.rc:hover .rarr{color:var(--text2);transform:translateX(2px)}
 .lfoot{text-align:center;color:var(--text3);font-size:11px;margin-top:20px;font-family:var(--mono)}
 
 /* ── APP ── */
@@ -159,8 +150,6 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
 .lbtn:hover{background:var(--violet2)}
 .lbtn:disabled{opacity:.5;cursor:not-allowed}
 .lerr{color:var(--red);font-family:var(--mono);font-size:11px;text-align:center;min-height:16px}
-.lsep{display:flex;align-items:center;gap:10px;margin:16px 0 12px;color:var(--text3);font-size:11px;font-family:var(--mono)}
-.lsep::before,.lsep::after{content:'';flex:1;height:1px;background:var(--border)}
 /* overdue */
 .ov-row{background:rgba(224,92,92,.03)}
 .od-dot{display:inline-block;width:6px;height:6px;background:var(--red);border-radius:50%;margin-right:6px;vertical-align:middle}
@@ -178,6 +167,31 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
   .sg4{grid-template-columns:repeat(2,1fr)}
   .pcards{grid-template-columns:1fr}
 }
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:999;padding:24px}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-t{font-size:14px;font-weight:600}
+.modal-x{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:4px;font-family:var(--sans)}
+.modal-x:hover{color:var(--text);background:var(--bg4)}
+.modal-b{padding:20px}
+.mlabel{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px}
+.mfield{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:10px 13px;font-size:13px;color:var(--text);font-family:var(--sans);outline:none;transition:border .15s;margin-bottom:14px;display:block}
+.mfield:focus{border-color:rgba(124,111,205,.5)}
+.mfield::placeholder{color:var(--text3)}
+select.mfield{cursor:pointer}
+textarea.mfield{resize:vertical;line-height:1.5}
+.mrow{display:flex;gap:10px}
+.mrow .mhalf{flex:1}
+.mrow .mhalf .mfield{margin-bottom:0}
+.mfooter{display:flex;gap:8px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--border);margin-top:8px}
+.merr{color:var(--red);font-family:var(--mono);font-size:11px;margin-bottom:12px;display:none;padding:8px 12px;background:rgba(224,92,92,.08);border:1px solid rgba(224,92,92,.2);border-radius:6px}
+.mok{color:var(--green);font-family:var(--mono);font-size:11px;margin-bottom:12px;display:none;padding:8px 12px;background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.2);border-radius:6px}
+
+/* status select in tables */
+.status-sel{background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:3px 8px;font-size:10px;color:var(--text2);font-family:var(--mono);cursor:pointer;outline:none}
+.status-sel:focus{border-color:rgba(124,111,205,.4)}
 </style>
 </head>
 <body>
@@ -197,9 +211,7 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
   </div>
   <div class="lerr" id="l-err"></div>
   <button class="lbtn" id="l-btn" onclick="doLogin()" style="margin-top:4px">Увійти →</button>
-  <div class="lsep">швидкий вхід — тестові акаунти</div>
-  <div id="role-cards"></div>
-  <div class="lfoot">JWT авторизація · Argon2id · PostgreSQL · Vercel</div>
+  <div class="lfoot" style="margin-top:20px">JWT авторизація · Argon2id · PostgreSQL · Vercel</div>
 </div>
 </div>
 
@@ -239,12 +251,25 @@ td{padding:11px 16px;font-size:12px;color:var(--text2);white-space:nowrap}
 </div>
 </div>
 
+<!-- ════════ MODAL ════════ -->
+<div id="modal-overlay" class="overlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-box">
+    <div class="modal-h">
+      <span class="modal-t" id="modal-title"></span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-b" id="modal-body"></div>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════════
 // TOKEN STORE  (access token in memory only)
 // ════════════════════════════════════════
 let accessToken = null
 let currentUser = null  // { id, email, role, is_active }
+let currentPage = null  // track active page for refreshes
+let _finRecords = []   // cached for CSV export
 
 // ════════════════════════════════════════
 // API CLIENT  — adds Bearer, auto-refreshes
@@ -270,37 +295,9 @@ async function api(path, opts = {}) {
 }
 
 // ════════════════════════════════════════
-// MOCK DATA  (Leads & Finance — no API yet)
-// ════════════════════════════════════════
-const NOW = new Date()
-const dOff = n => { const x = new Date(NOW); x.setDate(x.getDate()+n); return x.toISOString().split('T')[0] }
-
-const LEADS = [
-  {id:'l1',name:'Петро Коваленко',src:'Реферал',st:'CONTACTED',amt:3500,cr:dOff(-10),cm:'Корпоративний сайт'},
-  {id:'l2',name:'Марина Лисенко',src:'Instagram',st:'WON',amt:1800,cr:dOff(-20),cm:'Лендінг косметика'},
-  {id:'l3',name:'Oleks Design Studio',src:'Upwork',st:'PROPOSAL',amt:5200,cr:dOff(-5),cm:'White-label розробка'},
-  {id:'l4',name:'Nova Logistics',src:'Сайт',st:'NEW',amt:4000,cr:dOff(-2)},
-  {id:'l5',name:'Grill House',src:'Реферал',st:'CONTACTED',amt:1200,cr:dOff(-7),cm:'Меню + бронювання'},
-  {id:'l6',name:'MindSpark Agency',src:'Партнер',st:'WON',amt:7800,cr:dOff(-30),cm:'Довгостроковий контракт'},
-  {id:'l7',name:'EcoShop Ukraine',src:'Холодний контакт',st:'LOST',amt:2200,cr:dOff(-15),cm:'Обрали іншого'},
-  {id:'l8',name:'Fit Academy',src:'Instagram',st:'PROPOSAL',amt:3100,cr:dOff(-3),cm:'Фітнес-клуб'},
-]
-const FINANCE = [
-  {type:'INCOME',amt:2500,dt:dOff(-25),cat:'Project Payment',desc:'AutoBrand — 50% передоплата'},
-  {type:'INCOME',amt:1800,dt:dOff(-18),cat:'Project Payment',desc:'KFC Landing — 100% оплата'},
-  {type:'EXPENSE',amt:99,dt:dOff(-20),cat:'Software',desc:'Figma subscription'},
-  {type:'INCOME',amt:3200,dt:dOff(-10),cat:'Project Payment',desc:'FashionStore — фінальна'},
-  {type:'EXPENSE',amt:299,dt:dOff(-15),cat:'Software',desc:'Webflow Business plan'},
-  {type:'INCOME',amt:1500,dt:dOff(-8),cat:'Project Payment',desc:'TechBlog — 50% передоплата'},
-  {type:'EXPENSE',amt:450,dt:dOff(-5),cat:'Contractor',desc:'Дизайнер — AutoBrand'},
-  {type:'INCOME',amt:2000,dt:dOff(-3),cat:'Project Payment',desc:'MedClinic — передоплата'},
-  {type:'EXPENSE',amt:120,dt:dOff(-1),cat:'Marketing',desc:'Instagram реклама'},
-  {type:'INCOME',amt:7800,dt:dOff(-30),cat:'Retainer',desc:'MindSpark — ретейнер'},
-]
-
-// ════════════════════════════════════════
 // HELPERS
 // ════════════════════════════════════════
+const NOW = new Date()
 const fmt = s => new Date(s).toLocaleDateString('uk-UA', {day:'numeric', month:'short'})
 const cur = n => '$' + Number(n).toLocaleString()
 const isOverdue = t => t.deadline && new Date(t.deadline) < NOW && t.status !== 'DONE'
@@ -322,7 +319,7 @@ const PC = {LOW:'#555570', MEDIUM:'#d4a843', HIGH:'#f0875a', URGENT:'#e05c5c'}
 const PRI_UA = {LOW:'Низький', MEDIUM:'Середній', HIGH:'Високий', URGENT:'Критичний'}
 const priDot = p => `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${PC[p]||'#555570'};margin-right:5px;vertical-align:middle"></span>${PRI_UA[p]||p}`
 const pb = v => `<div class="pbw"><div class="pb"><div class="pf ${v>=80?'hi':v<30?'lo':''}" style="width:${v}%"></div></div><span class="pl">${v}%</span></div>`
-const loadingHTML = () => `<div style="padding:48px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px"><span class="spin" style="width:16px;height:16px;margin-bottom:10px;display:block;margin:0 auto 10px"></span>Завантаження...</div>`
+const loadingHTML = () => `<div style="padding:48px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px"><span class="spin" style="width:16px;height:16px;display:block;margin:0 auto 10px"></span>Завантаження...</div>`
 const errorHTML = msg => `<div style="padding:32px;text-align:center;color:var(--red);font-family:var(--mono);font-size:12px">⚠ ${msg}</div>`
 const emptyHTML = msg => `<div style="padding:32px;text-align:center;color:var(--text3);font-family:var(--mono);font-size:12px">${msg}</div>`
 
@@ -347,28 +344,38 @@ const AV_STYLE = {
 }
 
 // ════════════════════════════════════════
+// MODAL SYSTEM
+// ════════════════════════════════════════
+function openModal(title, bodyHTML) {
+  document.getElementById('modal-title').textContent = title
+  document.getElementById('modal-body').innerHTML = bodyHTML
+  document.getElementById('modal-overlay').style.display = 'flex'
+}
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none'
+}
+function modalErr(msg) {
+  const el = document.getElementById('m-err')
+  if (!el) return
+  el.textContent = msg; el.style.display = 'block'
+}
+function modalOk(msg) {
+  const el = document.getElementById('m-ok')
+  if (!el) return
+  el.textContent = msg; el.style.display = 'block'
+}
+function modalBtnBusy(label) {
+  const btn = document.querySelector('#modal-body .sbtn.p')
+  if (btn) { btn.disabled = true; btn.innerHTML = `<span class="spin"></span> ${label}` }
+}
+function modalBtnRestore(label) {
+  const btn = document.querySelector('#modal-body .sbtn.p')
+  if (btn) { btn.disabled = false; btn.innerHTML = label }
+}
+
+// ════════════════════════════════════════
 // AUTH
 // ════════════════════════════════════════
-function renderLogin() {
-  document.getElementById('role-cards').innerHTML = Object.entries(ROLES).map(([role, cfg]) => `
-    <button class="rc" onclick="quickLogin('${cfg.desc}')">
-      <div class="ri" style="background:${cfg.bg}">${cfg.icon}</div>
-      <div class="rm">
-        <div class="rt">${cfg.label}</div>
-        <div class="rd">${cfg.desc} · пароль: password123</div>
-      </div>
-      <span class="rtag badge ${cfg.tc}" style="font-size:9px">${role}</span>
-      <span class="rarr">→</span>
-    </button>
-  `).join('')
-}
-
-function quickLogin(email) {
-  document.getElementById('l-email').value = email
-  document.getElementById('l-pass').value = 'password123'
-  doLogin()
-}
-
 async function doLogin() {
   const email = document.getElementById('l-email').value.trim()
   const password = document.getElementById('l-pass').value
@@ -443,6 +450,7 @@ function setupShell() {
 }
 
 function go(id) {
+  currentPage = id
   document.querySelectorAll('.ni').forEach(el => el.classList.toggle('active', el.id==='ni-'+id))
   ;({overview:rOverview, pm:rPM, dev:rDev, projects:rProjects, tasks:rTasks, leads:rLeads, finance:rFinance})[id]?.()
 }
@@ -468,7 +476,7 @@ function projectsTableHTML(projects) {
   return `<div class="section">
     <div class="sh">
       <span class="sh-t">Проєкти <span style="color:var(--text3);font-weight:400">(${projects.length})</span></span>
-      ${canAdd ? '<button class="sbtn p">+ Новий проєкт</button>' : ''}
+      ${canAdd ? '<button class="sbtn p" onclick="openProjectModal()">+ Новий проєкт</button>' : ''}
     </div>
     <table>
       <thead><tr><th>Проєкт</th><th>Клієнт</th><th>Тип</th><th>Прогрес</th><th>Статус</th><th>Дедлайн</th><th>Розробник</th></tr></thead>
@@ -485,12 +493,19 @@ function projectsTableHTML(projects) {
   </div>`
 }
 
+function taskStatusSel(t) {
+  const opts = ['TODO','IN_PROGRESS','REVIEW','DONE']
+  return `<select class="status-sel" onchange="patchTaskStatus('${t.id}',this.value,this)">
+    ${opts.map(s=>`<option value="${s}"${t.status===s?' selected':''}>${STATUS_UA[s]}</option>`).join('')}
+  </select>`
+}
+
 function tasksTableHTML(tasks) {
   if (!tasks.length) return emptyHTML('Задач не знайдено')
   return `<div class="section">
     <div class="sh">
       <span class="sh-t">Задачі <span style="color:var(--text3);font-weight:400">(${tasks.length})</span></span>
-      <button class="sbtn p">+ Нова задача</button>
+      <button class="sbtn p" onclick="openTaskModal()">+ Нова задача</button>
     </div>
     <table>
       <thead><tr><th>Задача</th><th>Пріоритет</th><th>Виконавець</th><th>Статус</th><th>Дедлайн</th></tr></thead>
@@ -500,7 +515,7 @@ function tasksTableHTML(tasks) {
           <td>${ov?'<span class="od-dot"></span>':''}<span class="cm">${t.title}</span></td>
           <td>${priDot(t.priority)}</td>
           <td>${t.assignee?.email||'—'}</td>
-          <td>${badge(t.status)}</td>
+          <td>${taskStatusSel(t)}</td>
           <td style="color:${ov?'var(--red)':'var(--text3)'}">${t.deadline?fmt(t.deadline):'—'}</td>
         </tr>`
       }).join('')}</tbody>
@@ -518,7 +533,7 @@ function overdueHTML(tasks) {
       <tbody>${ov.map(t => `<tr class="ov-row">
         <td><span class="od-dot"></span><span class="cm">${t.title}</span></td>
         <td>${priDot(t.priority)}</td><td>${t.assignee?.email||'—'}</td>
-        <td>${badge(t.status)}</td>
+        <td>${taskStatusSel(t)}</td>
         <td style="color:var(--red)">${fmt(t.deadline)}</td>
       </tr>`).join('')}</tbody>
     </table>`}
@@ -534,7 +549,326 @@ async function fetchAllTasks(projects) {
 }
 
 // ════════════════════════════════════════
-// AI MOCK
+// TASK STATUS PATCH
+// ════════════════════════════════════════
+async function patchTaskStatus(taskId, newStatus, selectEl) {
+  const prev = [...selectEl.options].find(o => o.value !== newStatus && o.defaultSelected)?.value
+    || selectEl.dataset.prev || selectEl.value
+  selectEl.dataset.prev = selectEl.value
+  selectEl.disabled = true
+  try {
+    const res = await api(`/api/tasks/${taskId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: newStatus }),
+    })
+    if (!res.ok) {
+      const e = await res.json()
+      alert(e.error || 'Помилка зміни статусу')
+      selectEl.value = selectEl.dataset.prev || prev
+    } else {
+      selectEl.dataset.prev = newStatus
+    }
+  } catch {
+    selectEl.value = selectEl.dataset.prev || prev
+  } finally {
+    selectEl.disabled = false
+  }
+}
+
+// ════════════════════════════════════════
+// PROJECT MODAL
+// ════════════════════════════════════════
+function openProjectModal() {
+  openModal('Новий проєкт', `
+    <div class="merr" id="m-err"></div>
+    <label class="mlabel">Назва проєкту *</label>
+    <input id="mf-name" class="mfield" placeholder="AutoBrand Website">
+    <label class="mlabel">Клієнт *</label>
+    <input id="mf-client" class="mfield" placeholder="Назва компанії">
+    <label class="mlabel">Тип *</label>
+    <select id="mf-type" class="mfield">
+      <option value="WEBFLOW">Webflow</option>
+      <option value="WORDPRESS">WordPress</option>
+    </select>
+    <label class="mlabel">Дедлайн</label>
+    <input id="mf-deadline" class="mfield" type="date">
+    <div class="mfooter">
+      <button class="sbtn" onclick="closeModal()">Скасувати</button>
+      <button class="sbtn p" onclick="submitProject()">Створити →</button>
+    </div>
+  `)
+}
+
+async function submitProject() {
+  const name = document.getElementById('mf-name').value.trim()
+  const client = document.getElementById('mf-client').value.trim()
+  const type = document.getElementById('mf-type').value
+  const deadline = document.getElementById('mf-deadline').value
+  if (!name || !client) return modalErr('Назва та клієнт обов\'язкові')
+  modalBtnBusy('Створення...')
+  try {
+    const res = await api('/api/projects', { method:'POST', body: JSON.stringify({ name, client, type, deadline: deadline||null }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Помилка')
+    closeModal()
+    go(currentPage)
+  } catch(e) { modalErr(e.message); modalBtnRestore('Створити →') }
+}
+
+// ════════════════════════════════════════
+// TASK MODAL
+// ════════════════════════════════════════
+async function openTaskModal(preselectedProjectId) {
+  openModal('Нова задача', loadingHTML())
+  try {
+    const [projRes, usersRes] = await Promise.all([api('/api/projects'), api('/api/users')])
+    const projects = projRes.ok ? await projRes.json() : []
+    const users = usersRes.ok ? await usersRes.json() : []
+    document.getElementById('modal-body').innerHTML = `
+      <div class="merr" id="m-err"></div>
+      <label class="mlabel">Назва задачі *</label>
+      <input id="mf-title" class="mfield" placeholder="Розробити головну сторінку">
+      <label class="mlabel">Проєкт *</label>
+      <select id="mf-project" class="mfield">
+        <option value="">Оберіть проєкт...</option>
+        ${projects.map(p=>`<option value="${p.id}"${p.id===preselectedProjectId?' selected':''}>${p.name}</option>`).join('')}
+      </select>
+      <label class="mlabel">Виконавець</label>
+      <select id="mf-assignee" class="mfield">
+        <option value="">— без виконавця —</option>
+        ${users.map(u=>`<option value="${u.id}">${u.email}</option>`).join('')}
+      </select>
+      <div class="mrow">
+        <div class="mhalf">
+          <label class="mlabel">Пріоритет</label>
+          <select id="mf-priority" class="mfield">
+            <option value="LOW">Низький</option>
+            <option value="MEDIUM" selected>Середній</option>
+            <option value="HIGH">Високий</option>
+            <option value="URGENT">Критичний</option>
+          </select>
+        </div>
+        <div class="mhalf">
+          <label class="mlabel">Дедлайн</label>
+          <input id="mf-deadline" class="mfield" type="date">
+        </div>
+      </div>
+      <div class="mfooter">
+        <button class="sbtn" onclick="closeModal()">Скасувати</button>
+        <button class="sbtn p" onclick="submitTask()">Створити →</button>
+      </div>`
+  } catch(e) { document.getElementById('modal-body').innerHTML = errorHTML(e.message) }
+}
+
+async function submitTask() {
+  const title = document.getElementById('mf-title').value.trim()
+  const projectId = document.getElementById('mf-project').value
+  const assigneeId = document.getElementById('mf-assignee').value
+  const priority = document.getElementById('mf-priority').value
+  const deadline = document.getElementById('mf-deadline').value
+  if (!title) return modalErr('Назва задачі обов\'язкова')
+  if (!projectId) return modalErr('Оберіть проєкт')
+  modalBtnBusy('Створення...')
+  try {
+    const res = await api(`/api/projects/${projectId}/tasks`, {
+      method:'POST',
+      body: JSON.stringify({ title, assignee_id: assigneeId||null, priority, deadline: deadline||null })
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Помилка')
+    closeModal()
+    go(currentPage)
+  } catch(e) { modalErr(e.message); modalBtnRestore('Створити →') }
+}
+
+// ════════════════════════════════════════
+// LEAD MODAL + STATUS PATCH
+// ════════════════════════════════════════
+function openLeadModal() {
+  openModal('Новий лід', `
+    <div class="merr" id="m-err"></div>
+    <label class="mlabel">Ім'я / Компанія *</label>
+    <input id="mf-name" class="mfield" placeholder="Петро Коваленко">
+    <label class="mlabel">Джерело *</label>
+    <input id="mf-source" class="mfield" placeholder="Instagram, Реферал, Upwork...">
+    <div class="mrow">
+      <div class="mhalf">
+        <label class="mlabel">Статус</label>
+        <select id="mf-status" class="mfield">
+          <option value="NEW">Новий</option>
+          <option value="CONTACTED">Контакт</option>
+          <option value="PROPOSAL">Пропозиція</option>
+          <option value="WON">Виграно</option>
+          <option value="LOST">Програно</option>
+        </select>
+      </div>
+      <div class="mhalf">
+        <label class="mlabel">Сума ($)</label>
+        <input id="mf-amount" class="mfield" type="number" min="0" placeholder="0">
+      </div>
+    </div>
+    <label class="mlabel">Коментар</label>
+    <input id="mf-comment" class="mfield" placeholder="Необов'язково">
+    <div class="mfooter">
+      <button class="sbtn" onclick="closeModal()">Скасувати</button>
+      <button class="sbtn p" onclick="submitLead()">Додати →</button>
+    </div>
+  `)
+}
+
+async function submitLead() {
+  const name = document.getElementById('mf-name').value.trim()
+  const source = document.getElementById('mf-source').value.trim()
+  const status = document.getElementById('mf-status').value
+  const amount = document.getElementById('mf-amount').value
+  const comment = document.getElementById('mf-comment').value.trim()
+  if (!name || !source) return modalErr('Ім\'я та джерело обов\'язкові')
+  modalBtnBusy('Додавання...')
+  try {
+    const res = await api('/api/leads', { method:'POST', body: JSON.stringify({ name, source, status, amount: amount||0, comment: comment||null }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Помилка')
+    closeModal()
+    rLeads()
+  } catch(e) { modalErr(e.message); modalBtnRestore('Додати →') }
+}
+
+async function patchLeadStatus(leadId, newStatus, selectEl) {
+  const prev = selectEl.dataset.prev || selectEl.value
+  selectEl.dataset.prev = newStatus
+  selectEl.disabled = true
+  try {
+    const res = await api(`/api/leads/${leadId}`, { method:'PATCH', body: JSON.stringify({ status: newStatus }) })
+    if (!res.ok) { const e = await res.json(); alert(e.error||'Помилка'); selectEl.value = prev; selectEl.dataset.prev = prev }
+    else { rLeads() } // refresh stats
+  } catch { selectEl.value = prev; selectEl.dataset.prev = prev }
+  finally { selectEl.disabled = false }
+}
+
+function openImportCSVModal() {
+  openModal('Імпорт лідів з CSV', `
+    <div class="merr" id="m-err"></div>
+    <div class="mok" id="m-ok"></div>
+    <p style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.6">
+      Перший рядок — заголовки: <b style="color:var(--text2)">name, source, status, amount, comment</b>
+    </p>
+    <label class="mlabel">CSV вміст</label>
+    <textarea id="mf-csv" class="mfield" rows="7" placeholder="name,source,status,amount,comment&#10;Петро,Реферал,NEW,3000,коментар"></textarea>
+    <div class="mfooter">
+      <button class="sbtn" onclick="closeModal()">Скасувати</button>
+      <button class="sbtn p" onclick="submitImportCSV()">Імпортувати →</button>
+    </div>
+  `)
+}
+
+async function submitImportCSV() {
+  const csv = document.getElementById('mf-csv').value.trim()
+  if (!csv) return modalErr('Вставте CSV дані')
+  modalBtnBusy('Імпорт...')
+  try {
+    const res = await api('/api/leads?import=csv', { method:'POST', body: JSON.stringify({ csv }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Помилка')
+    modalOk(`Імпортовано: ${data.imported}${data.skipped ? `, пропущено: ${data.skipped}` : ''}`)
+    modalBtnRestore('Імпортувати →')
+    setTimeout(() => { closeModal(); rLeads() }, 1500)
+  } catch(e) { modalErr(e.message); modalBtnRestore('Імпортувати →') }
+}
+
+async function exportLeadsCSV() {
+  try {
+    const res = await api('/api/leads?export=csv')
+    if (!res.ok) return
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `leads-${Date.now()}.csv`; a.click()
+    URL.revokeObjectURL(url)
+  } catch {}
+}
+
+// ════════════════════════════════════════
+// FINANCE MODAL
+// ════════════════════════════════════════
+async function openFinanceModal() {
+  openModal('Новий запис', loadingHTML())
+  try {
+    const res = await api('/api/projects')
+    const projects = res.ok ? await res.json() : []
+    const today = new Date().toISOString().split('T')[0]
+    document.getElementById('modal-body').innerHTML = `
+      <div class="merr" id="m-err"></div>
+      <div class="mrow">
+        <div class="mhalf">
+          <label class="mlabel">Тип *</label>
+          <select id="mf-type" class="mfield">
+            <option value="INCOME">Дохід</option>
+            <option value="EXPENSE">Витрата</option>
+          </select>
+        </div>
+        <div class="mhalf">
+          <label class="mlabel">Сума ($) *</label>
+          <input id="mf-amount" class="mfield" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+      </div>
+      <label class="mlabel">Категорія *</label>
+      <input id="mf-cat" class="mfield" placeholder="Project Payment, Software, Contractor...">
+      <label class="mlabel">Опис *</label>
+      <input id="mf-desc" class="mfield" placeholder="Короткий опис">
+      <div class="mrow">
+        <div class="mhalf">
+          <label class="mlabel">Дата *</label>
+          <input id="mf-date" class="mfield" type="date" value="${today}">
+        </div>
+        <div class="mhalf">
+          <label class="mlabel">Проєкт</label>
+          <select id="mf-project" class="mfield">
+            <option value="">— без проєкту —</option>
+            ${projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="mfooter">
+        <button class="sbtn" onclick="closeModal()">Скасувати</button>
+        <button class="sbtn p" onclick="submitFinance()">Зберегти →</button>
+      </div>`
+  } catch(e) { document.getElementById('modal-body').innerHTML = errorHTML(e.message) }
+}
+
+async function submitFinance() {
+  const type = document.getElementById('mf-type').value
+  const amount = document.getElementById('mf-amount').value
+  const category = document.getElementById('mf-cat').value.trim()
+  const description = document.getElementById('mf-desc').value.trim()
+  const date = document.getElementById('mf-date').value
+  const projectId = document.getElementById('mf-project').value
+  if (!amount || !category || !description || !date) return modalErr('Заповніть всі обов\'язкові поля')
+  modalBtnBusy('Збереження...')
+  try {
+    const res = await api('/api/finance', {
+      method:'POST',
+      body: JSON.stringify({ type, amount: Number(amount), category, description, date, project_id: projectId||null })
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Помилка')
+    closeModal()
+    rFinance()
+  } catch(e) { modalErr(e.message); modalBtnRestore('Зберегти →') }
+}
+
+function exportFinanceCSV(records) {
+  const header = 'Тип,Опис,Категорія,Дата,Сума,Проєкт'
+  const rows = records.map(r => [r.type, r.description, r.category,
+    new Date(r.date).toISOString().split('T')[0], r.amount, r.project?.name||'']
+    .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))
+  const blob = new Blob([[header,...rows].join('\n')], {type:'text/csv;charset=utf-8;'})
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a'); a.href=url; a.download=`finance-${Date.now()}.csv`; a.click()
+  URL.revokeObjectURL(url)
+}
+
+// ════════════════════════════════════════
+// AI BLOCK
 // ════════════════════════════════════════
 const AI_ANALYTICS = `## Зведення — Agency OS
 
@@ -549,10 +883,7 @@ const AI_ANALYTICS = `## Зведення — Agency OS
 
 ✅ Добре:
   • FashionStore — 100%, здано
-  • KFC Landing — фінальний етап
-
-💰 Фінанси (тестові дані):
-  Дохід: $19,800  |  Витрати: $968  |  Прибуток: $18,832`
+  • KFC Landing — фінальний етап`
 
 const AI_SPEC = `## Технічне завдання — AutoBrand Website
 
@@ -610,15 +941,12 @@ function runAI(btn, mode) {
 // ════════════════════════════════════════
 async function rOverview() {
   setPage('Операції та продажі', 'Повний огляд — проєкти, ліди та фінанси')
-  const inc = FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0)
-  const exp = FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0)
-  const won = LEADS.filter(l=>l.st==='WON').length
   document.getElementById('pcontent').innerHTML = `
     <div class="sg sg4">
       <div class="sc"><div class="sc-l">◫ Активні проєкти</div><div class="sc-v" id="sc-ap">—</div><div class="sc-t" id="sc-ar"></div></div>
       <div class="sc"><div class="sc-l">⚠ Прострочені задачі</div><div class="sc-v d" id="sc-ov">—</div><div class="sc-t">потребують уваги</div></div>
-      <div class="sc"><div class="sc-l">◎ Виграні ліди</div><div class="sc-v s">${won}</div><div class="sc-t">з ${LEADS.length} всього</div></div>
-      <div class="sc"><div class="sc-l">◈ Чистий прибуток</div><div class="sc-v s">${cur(inc-exp)}</div><div class="sc-t">${cur(inc)} дохід</div></div>
+      <div class="sc"><div class="sc-l">◎ Виграні ліди</div><div class="sc-v s" id="sc-wl">—</div><div class="sc-t" id="sc-lt"></div></div>
+      <div class="sc"><div class="sc-l">◈ Чистий прибуток</div><div class="sc-v s" id="sc-pr">—</div><div class="sc-t" id="sc-inc"></div></div>
     </div>
     ${aiBlock('analytics')}
     <div class="tabs">
@@ -627,19 +955,33 @@ async function rOverview() {
       <div class="tab" onclick="switchTab(this,'t-fin')">Фінанси</div>
     </div>
     <div id="t-ov">${loadingHTML()}</div>
-    <div id="t-leads" style="display:none">${leadsHTML()}</div>
-    <div id="t-fin" style="display:none">${financeHTML()}</div>`
+    <div id="t-leads" style="display:none">${loadingHTML()}</div>
+    <div id="t-fin" style="display:none">${loadingHTML()}</div>`
 
   try {
-    const res = await api('/api/projects')
-    const projects = res.ok ? await res.json() : []
+    const [projRes, leadsRes, finRes] = await Promise.all([
+      api('/api/projects'), api('/api/leads'), api('/api/finance')
+    ])
+    const projects = projRes.ok ? await projRes.json() : []
+    const leads = leadsRes.ok ? await leadsRes.json() : []
+    const finance = finRes.ok ? await finRes.json() : []
     const tasks = await fetchAllTasks(projects)
-    const active = projects.filter(p => p.status==='ACTIVE')
-    document.getElementById('sc-ap').textContent = active.length
+    const inc = finance.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amount,0)
+    const exp = finance.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amount,0)
+    const won = leads.filter(l=>l.status==='WON')
+    document.getElementById('sc-ap').textContent = projects.filter(p=>p.status==='ACTIVE').length
     document.getElementById('sc-ar').textContent = `${projects.filter(p=>p.status==='ON_HOLD').length} на паузі`
     document.getElementById('sc-ov').textContent = tasks.filter(isOverdue).length
+    document.getElementById('sc-wl').textContent = won.length
+    document.getElementById('sc-lt').textContent = `з ${leads.length} всього`
+    document.getElementById('sc-pr').textContent = cur(inc-exp)
+    document.getElementById('sc-inc').textContent = `${cur(inc)} дохід`
     document.getElementById('t-ov').innerHTML = overdueHTML(tasks)
-  } catch {}
+    document.getElementById('t-leads').innerHTML = leadsTableHTML(leads)
+    document.getElementById('t-fin').innerHTML = financeTableHTML(finance)
+  } catch(e) {
+    document.getElementById('t-ov').innerHTML = errorHTML(e.message)
+  }
 }
 
 async function rPM() {
@@ -739,69 +1081,100 @@ async function rTasks() {
   }
 }
 
-function rLeads() {
+async function rLeads() {
   setPage('Ліди', 'CRM — воронка та угоди')
-  const won = LEADS.filter(l=>l.st==='WON').reduce((s,l)=>s+l.amt,0)
-  const pipe = LEADS.filter(l=>l.st!=='WON'&&l.st!=='LOST').reduce((s,l)=>s+l.amt,0)
   document.getElementById('pcontent').innerHTML = `
     <div class="sg sg3">
-      <div class="sc"><div class="sc-l">◎ Всього</div><div class="sc-v">${LEADS.length}</div></div>
-      <div class="sc"><div class="sc-l">✓ Виграно</div><div class="sc-v s">${cur(won)}</div></div>
-      <div class="sc"><div class="sc-l">⟳ Воронка</div><div class="sc-v w">${cur(pipe)}</div></div>
+      <div class="sc"><div class="sc-l">◎ Всього</div><div class="sc-v" id="sc-tot">—</div></div>
+      <div class="sc"><div class="sc-l">✓ Виграно</div><div class="sc-v s" id="sc-won">—</div></div>
+      <div class="sc"><div class="sc-l">⟳ Воронка</div><div class="sc-v w" id="sc-pipe">—</div></div>
     </div>
-    ${leadsHTML()}`
+    <div id="leads-table">${loadingHTML()}</div>`
+  try {
+    const res = await api('/api/leads')
+    if (!res.ok) throw new Error('Не вдалося завантажити ліди')
+    const leads = await res.json()
+    const won = leads.filter(l=>l.status==='WON').reduce((s,l)=>s+l.amount,0)
+    const pipe = leads.filter(l=>l.status!=='WON'&&l.status!=='LOST').reduce((s,l)=>s+l.amount,0)
+    document.getElementById('sc-tot').textContent = leads.length
+    document.getElementById('sc-won').textContent = cur(won)
+    document.getElementById('sc-pipe').textContent = cur(pipe)
+    document.getElementById('leads-table').innerHTML = leadsTableHTML(leads)
+  } catch(e) {
+    document.getElementById('leads-table').innerHTML = errorHTML(e.message)
+  }
 }
 
-function leadsHTML() {
+function leadsTableHTML(leads) {
+  if (!leads.length) return emptyHTML('Лідів не знайдено')
+  const statuses = ['NEW','CONTACTED','PROPOSAL','WON','LOST']
   return `<div class="section">
     <div class="sh">
-      <span class="sh-t">Всі ліди</span>
-      <button class="sbtn">Імпорт CSV</button><button class="sbtn">Експорт CSV</button>
-      <button class="sbtn p">+ Додати лід</button>
+      <span class="sh-t">Всі ліди <span style="color:var(--text3);font-weight:400">(${leads.length})</span></span>
+      <button class="sbtn" onclick="openImportCSVModal()">Імпорт CSV</button>
+      <button class="sbtn" onclick="exportLeadsCSV()">Експорт CSV</button>
+      <button class="sbtn p" onclick="openLeadModal()">+ Додати лід</button>
     </div>
     <table>
       <thead><tr><th>Ім'я</th><th>Джерело</th><th>Статус</th><th>Сума</th><th>Створено</th><th>Коментар</th></tr></thead>
-      <tbody>${LEADS.map(l=>`<tr>
+      <tbody>${leads.map(l=>`<tr>
         <td><div class="cm">${l.name}</div></td>
-        <td><span class="badge bgr">${l.src}</span></td>
-        <td>${badge(l.st)}</td>
-        <td style="color:var(--text);font-weight:600">${cur(l.amt)}</td>
-        <td>${fmt(l.cr)}</td>
-        <td style="color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis">${l.cm||'—'}</td>
+        <td><span class="badge bgr">${l.source}</span></td>
+        <td><select class="status-sel" onchange="patchLeadStatus('${l.id}',this.value,this)" data-prev="${l.status}">
+          ${statuses.map(s=>`<option value="${s}"${l.status===s?' selected':''}>${STATUS_UA[s]}</option>`).join('')}
+        </select></td>
+        <td style="color:var(--text);font-weight:600">${cur(l.amount)}</td>
+        <td>${fmt(l.created_at)}</td>
+        <td style="color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis">${l.comment||'—'}</td>
       </tr>`).join('')}</tbody>
     </table>
   </div>`
 }
 
-function rFinance() {
+async function rFinance() {
   setPage('Фінанси', 'Доходи, витрати та фінанси проєктів')
-  const inc = FINANCE.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amt,0)
-  const exp = FINANCE.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amt,0)
   document.getElementById('pcontent').innerHTML = `
     <div class="sg sg3">
-      <div class="sc"><div class="sc-l">↑ Дохід</div><div class="sc-v s">${cur(inc)}</div></div>
-      <div class="sc"><div class="sc-l">↓ Витрати</div><div class="sc-v d">${cur(exp)}</div></div>
-      <div class="sc"><div class="sc-l">= Прибуток</div><div class="sc-v">${cur(inc-exp)}</div></div>
+      <div class="sc"><div class="sc-l">↑ Дохід</div><div class="sc-v s" id="sc-inc">—</div></div>
+      <div class="sc"><div class="sc-l">↓ Витрати</div><div class="sc-v d" id="sc-exp">—</div></div>
+      <div class="sc"><div class="sc-l">= Прибуток</div><div class="sc-v" id="sc-pr">—</div></div>
     </div>
-    ${financeHTML()}`
+    <div id="fin-table">${loadingHTML()}</div>`
+  try {
+    const res = await api('/api/finance')
+    if (!res.ok) throw new Error('Не вдалося завантажити фінанси')
+    const records = await res.json()
+    _finRecords = records
+    const inc = records.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amount,0)
+    const exp = records.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amount,0)
+    document.getElementById('sc-inc').textContent = cur(inc)
+    document.getElementById('sc-exp').textContent = cur(exp)
+    document.getElementById('sc-pr').textContent = cur(inc-exp)
+    document.getElementById('fin-table').innerHTML = financeTableHTML(records)
+  } catch(e) {
+    document.getElementById('fin-table').innerHTML = errorHTML(e.message)
+  }
 }
 
-function financeHTML() {
+function financeTableHTML(records) {
+  if (!records.length) return emptyHTML('Записів не знайдено')
   return `<div class="section">
     <div class="sh">
-      <span class="sh-t">Транзакції</span>
-      <button class="sbtn">Експорт CSV</button><button class="sbtn p">+ Додати запис</button>
+      <span class="sh-t">Транзакції <span style="color:var(--text3);font-weight:400">(${records.length})</span></span>
+      <button class="sbtn" onclick="exportFinanceCSV(_finRecords)">Експорт CSV</button>
+      <button class="sbtn p" onclick="openFinanceModal()">+ Додати запис</button>
     </div>
     <table>
-      <thead><tr><th>Тип</th><th>Опис</th><th>Категорія</th><th>Дата</th><th>Сума</th></tr></thead>
-      <tbody>${FINANCE.map(f=>`<tr>
-        <td><span class="badge ${f.type==='INCOME'?'bg_':'br'}">${f.type}</span></td>
-        <td><span class="cm">${f.desc}</span></td>
-        <td><span class="badge bgr">${f.cat}</span></td>
-        <td>${fmt(f.dt)}</td>
+      <thead><tr><th>Тип</th><th>Опис</th><th>Категорія</th><th>Дата</th><th>Сума</th><th>Проєкт</th></tr></thead>
+      <tbody>${records.map(f=>`<tr>
+        <td><span class="badge ${f.type==='INCOME'?'bg_':'br'}">${STATUS_UA[f.type]}</span></td>
+        <td><span class="cm">${f.description}</span></td>
+        <td><span class="badge bgr">${f.category}</span></td>
+        <td>${fmt(f.date)}</td>
         <td style="font-weight:600;color:${f.type==='INCOME'?'var(--green)':'var(--red)'}">
-          ${f.type==='INCOME'?'+':'−'}${cur(f.amt)}
+          ${f.type==='INCOME'?'+':'−'}${cur(f.amount)}
         </td>
+        <td style="color:var(--text3)">${f.project?.name||'—'}</td>
       </tr>`).join('')}</tbody>
     </table>
   </div>`
@@ -810,7 +1183,6 @@ function financeHTML() {
 // ════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════
-renderLogin()
 tryAutoLogin()
 </script>
 </body>
