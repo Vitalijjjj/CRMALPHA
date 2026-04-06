@@ -16,7 +16,12 @@
       "Bash(/opt/homebrew/bin/npm install:*)",
       "Bash(export PATH=\"/opt/homebrew/bin:$PATH\")",
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" npx prisma migrate dev --name init)",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" npx prisma migrate dev --name add_roles_and_tables)"
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" npx prisma migrate dev --name add_roles_and_tables)",
+      "Bash(cp \"/Users/gural/Desktop/ALPHACRM/api/projects/[id].js\" \"/Users/gural/Desktop/ALPHACRM/api/projects/[id]/index.js\")",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM rm \"api/projects/[id].js\")",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM add .)",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Add tasks CRUD with RBAC and auto progress recalculation\")",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM push)"
     ]
   }
 }
