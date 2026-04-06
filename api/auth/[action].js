@@ -80,7 +80,17 @@ async function refresh(req, res) {
   try { payload = verifyRefresh(token) }
   catch { return res.status(401).json({ error: 'Invalid or expired refresh token' }) }
 
-  const newPayload = { sub: payload.sub, email: payload.email, role: payload.role }
+  // Verify user still exists and session wasn't revoked by a password change
+  const user = await prisma.user.findUnique({ where: { id: payload.sub } })
+  if (!user || !user.is_active) return res.status(401).json({ error: 'Session expired' })
+
+  // If token was issued before the last password update — force re-login
+  if (payload.iat * 1000 < new Date(user.updated_at).getTime()) {
+    clearRefreshCookie(res)
+    return res.status(401).json({ error: 'Session expired. Please log in again.' })
+  }
+
+  const newPayload = { sub: user.id, email: user.email, role: user.role }
   setRefreshCookie(res, signRefresh(newPayload))
 
   return res.status(200).json({ accessToken: signAccess(newPayload) })
