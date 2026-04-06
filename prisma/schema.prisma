@@ -7,14 +7,128 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  OPERATIONS_SALES
+  PM
+  DEV_WEBFLOW
+  DEV_WORDPRESS
+}
+
+enum ProjectType {
+  WEBFLOW
+  WORDPRESS
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum AccessLevel {
+  VIEWER
+  EDITOR
+  ADMIN
+}
+
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
   password_hash String
-  role          String   @default("user")
+  role          Role     @default(OPERATIONS_SALES)
   is_active     Boolean  @default(true)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
+  managed_projects Project[]       @relation("ProjectPM")
+  dev_projects     Project[]       @relation("ProjectDev")
+  project_members  ProjectMember[]
+  assigned_tasks   Task[]          @relation("TaskAssignee")
+  created_tasks    Task[]          @relation("TaskCreator")
+  task_comments    TaskComment[]
+
   @@map("users")
+}
+
+model Project {
+  id         String        @id @default(cuid())
+  name       String
+  client     String
+  type       ProjectType
+  deadline   DateTime?
+  progress   Int           @default(0)
+  status     ProjectStatus @default(ACTIVE)
+  pm_id      String?
+  dev_id     String?
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
+
+  pm      User?           @relation("ProjectPM", fields: [pm_id], references: [id])
+  dev     User?           @relation("ProjectDev", fields: [dev_id], references: [id])
+  members ProjectMember[]
+  tasks   Task[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  project_id   String
+  user_id      String
+  access_level AccessLevel @default(VIEWER)
+  created_at   DateTime    @default(now())
+
+  project Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([project_id, user_id])
+  @@map("project_members")
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  project_id  String
+  assignee_id String?
+  priority    Priority   @default(MEDIUM)
+  status      TaskStatus @default(TODO)
+  deadline    DateTime?
+  created_by  String
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  project  Project       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  assignee User?         @relation("TaskAssignee", fields: [assignee_id], references: [id])
+  creator  User          @relation("TaskCreator", fields: [created_by], references: [id])
+  comments TaskComment[]
+
+  @@map("tasks")
+}
+
+model TaskComment {
+  id         String   @id @default(cuid())
+  task_id    String
+  user_id    String
+  body       String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  task Task @relation(fields: [task_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("task_comments")
 }

@@ -7,7 +7,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { email, password } = req.body
+  const { email, password, role } = req.body
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' })
@@ -29,8 +29,11 @@ module.exports = async function handler(req, res) {
     parallelism: 4,
   })
 
+  const VALID_ROLES = ['OPERATIONS_SALES', 'PM', 'DEV_WEBFLOW', 'DEV_WORDPRESS']
+  const assignedRole = role && VALID_ROLES.includes(role) ? role : 'OPERATIONS_SALES'
+
   const user = await prisma.user.create({
-    data: { email, password_hash },
+    data: { email, password_hash, role: assignedRole },
     select: { id: true, email: true, role: true, is_active: true },
   })
 
