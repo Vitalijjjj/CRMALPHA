@@ -23,7 +23,13 @@
       "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Add tasks CRUD with RBAC and auto progress recalculation\")",
       "Bash(git -C /Users/gural/Desktop/ALPHACRM push)",
       "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" node prisma/seed.js)",
-      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Connect frontend to real API, add login form, seed script\")"
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Connect frontend to real API, add login form, seed script\")",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM add index.html)",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Translate all UI text to Ukrainian\")",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" npx prisma migrate dev --name add_leads_finance)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require\" npx prisma migrate dev --name add_leads_finance)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_QXwYeio9Z7ct@ep-late-band-an5yuhmv-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\" npx prisma db push)",
+      "Bash(git -C /Users/gural/Desktop/ALPHACRM commit -m \"Add Leads and Finance modules with CSV import/export\")"
     ]
   }
 }

@@ -46,6 +46,19 @@ enum AccessLevel {
   ADMIN
 }
 
+enum LeadStatus {
+  NEW
+  CONTACTED
+  PROPOSAL
+  WON
+  LOST
+}
+
+enum FinanceType {
+  INCOME
+  EXPENSE
+}
+
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
@@ -55,12 +68,14 @@ model User {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  managed_projects Project[]       @relation("ProjectPM")
-  dev_projects     Project[]       @relation("ProjectDev")
-  project_members  ProjectMember[]
-  assigned_tasks   Task[]          @relation("TaskAssignee")
-  created_tasks    Task[]          @relation("TaskCreator")
-  task_comments    TaskComment[]
+  managed_projects  Project[]       @relation("ProjectPM")
+  dev_projects      Project[]       @relation("ProjectDev")
+  project_members   ProjectMember[]
+  assigned_tasks    Task[]          @relation("TaskAssignee")
+  created_tasks     Task[]          @relation("TaskCreator")
+  task_comments     TaskComment[]
+  leads             Lead[]
+  finance_records   FinanceRecord[]
 
   @@map("users")
 }
@@ -78,10 +93,11 @@ model Project {
   created_at DateTime      @default(now())
   updated_at DateTime      @updatedAt
 
-  pm      User?           @relation("ProjectPM", fields: [pm_id], references: [id])
-  dev     User?           @relation("ProjectDev", fields: [dev_id], references: [id])
-  members ProjectMember[]
-  tasks   Task[]
+  pm              User?           @relation("ProjectPM", fields: [pm_id], references: [id])
+  dev             User?           @relation("ProjectDev", fields: [dev_id], references: [id])
+  members         ProjectMember[]
+  tasks           Task[]
+  finance_records FinanceRecord[]
 
   @@map("projects")
 }
@@ -131,4 +147,41 @@ model TaskComment {
   user User @relation(fields: [user_id], references: [id])
 
   @@map("task_comments")
+}
+
+model Lead {
+  id         String     @id @default(cuid())
+  name       String
+  source     String
+  status     LeadStatus @default(NEW)
+  amount     Float      @default(0)
+  comment    String?
+  owner_id   String
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+
+  owner           User            @relation(fields: [owner_id], references: [id])
+  finance_records FinanceRecord[]
+
+  @@map("leads")
+}
+
+model FinanceRecord {
+  id          String      @id @default(cuid())
+  type        FinanceType
+  project_id  String?
+  lead_id     String?
+  amount      Float
+  date        DateTime
+  category    String
+  description String
+  created_by  String
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+
+  project Project? @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  lead    Lead?    @relation(fields: [lead_id], references: [id], onDelete: SetNull)
+  creator User     @relation(fields: [created_by], references: [id])
+
+  @@map("finance_records")
 }

@@ -9,6 +9,8 @@ async function main() {
   console.log('🌱 Seeding database...')
 
   // Wipe existing data in correct order
+  await prisma.financeRecord.deleteMany()
+  await prisma.lead.deleteMany()
   await prisma.taskComment.deleteMany()
   await prisma.task.deleteMany()
   await prisma.projectMember.deleteMany()
@@ -88,6 +90,36 @@ async function main() {
     await prisma.project.update({ where: { id: p.id }, data: { progress } })
   }
   console.log('✅ Progress recalculated')
+
+  // ── Leads ────────────────────────────────────────────────
+  const leads = await Promise.all([
+    prisma.lead.create({ data: { name: 'Петро Коваленко',    source: 'Реферал',         status: 'CONTACTED', amount: 3500, comment: 'Корпоративний сайт',         owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Марина Лисенко',     source: 'Instagram',       status: 'WON',       amount: 1800, comment: 'Лендінг косметика',           owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Oleks Design Studio',source: 'Upwork',          status: 'PROPOSAL',  amount: 5200, comment: 'White-label розробка',         owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Nova Logistics',     source: 'Сайт',            status: 'NEW',       amount: 4000,                                          owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Grill House',        source: 'Реферал',         status: 'CONTACTED', amount: 1200, comment: 'Меню + бронювання',            owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'MindSpark Agency',   source: 'Партнер',         status: 'WON',       amount: 7800, comment: 'Довгостроковий контракт',      owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'EcoShop Ukraine',    source: 'Холодний контакт',status: 'LOST',      amount: 2200, comment: 'Обрали іншого підрядника',     owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Fit Academy',        source: 'Instagram',       status: 'PROPOSAL',  amount: 3100, comment: 'Фітнес-клуб',                  owner_id: ops.id } }),
+  ])
+  console.log('✅ Leads created')
+
+  // ── Finance records ──────────────────────────────────────
+  const ago = (n) => new Date(now.getTime() - n * 86400000)
+
+  await prisma.financeRecord.createMany({ data: [
+    { type: 'INCOME',  project_id: p1.id,  amount: 2500, date: ago(25), category: 'Оплата проєкту',  description: 'AutoBrand — 50% передоплата',      created_by: ops.id },
+    { type: 'INCOME',  project_id: p3.id,  amount: 1800, date: ago(18), category: 'Оплата проєкту',  description: 'KFC Landing — повна оплата',        created_by: ops.id },
+    { type: 'EXPENSE',                     amount:   99, date: ago(20), category: 'Програмне забезп.', description: 'Figma — місячна підписка',          created_by: ops.id },
+    { type: 'INCOME',  project_id: p5.id,  amount: 3200, date: ago(10), category: 'Оплата проєкту',  description: 'FashionStore — фінальна оплата',    created_by: ops.id },
+    { type: 'EXPENSE',                     amount:  299, date: ago(15), category: 'Програмне забезп.', description: 'Webflow Business — місячна',       created_by: ops.id },
+    { type: 'INCOME',  project_id: p2.id,  amount: 1500, date: ago(8),  category: 'Оплата проєкту',  description: 'TechBlog — 50% передоплата',        created_by: ops.id },
+    { type: 'EXPENSE',                     amount:  450, date: ago(5),  category: 'Підрядник',        description: 'Дизайнер — AutoBrand',              created_by: ops.id },
+    { type: 'INCOME',  project_id: p4.id,  amount: 2000, date: ago(3),  category: 'Оплата проєкту',  description: 'MedClinic — передоплата',           created_by: ops.id },
+    { type: 'EXPENSE',                     amount:  120, date: ago(1),  category: 'Маркетинг',        description: 'Instagram реклама',                 created_by: ops.id },
+    { type: 'INCOME',  lead_id: leads[5].id, amount: 7800, date: ago(30), category: 'Ретейнер',       description: 'MindSpark Agency — ретейнер',       created_by: ops.id },
+  ]})
+  console.log('✅ Finance records created')
 
   console.log('\n🎉 Seed complete!')
   console.log('Test accounts (password: password123):')
