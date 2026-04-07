@@ -3,9 +3,10 @@ const { withAuth } = require('../_lib/auth')
 const { parseCSV, toCSV } = require('../_lib/csv')
 
 const LEAD_INCLUDE = {
-  owner:  { select: { id: true, email: true } },
-  status: { select: { id: true, name: true, color: true } },
-  source: { select: { id: true, name: true } },
+  owner:     { select: { id: true, email: true } },
+  status:    { select: { id: true, name: true, color: true, funnel_stage: true } },
+  source:    { select: { id: true, name: true } },
+  direction: { select: { id: true, name: true } },
 }
 
 const CSV_COLUMNS = [
