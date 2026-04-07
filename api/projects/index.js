@@ -6,6 +6,7 @@ const PROJECT_SELECT = {
   name: true,
   client: true,
   type: true,
+  image_url: true,
   deadline: true,
   progress: true,
   status: true,
@@ -48,7 +49,7 @@ async function createProject(req, res) {
     return res.status(403).json({ error: 'Forbidden: only PM and OPERATIONS_SALES can create projects' })
   }
 
-  const { name, client, type, deadline, pm_id, dev_id } = req.body
+  const { name, client, type, deadline, pm_id, dev_id, image_url } = req.body
 
   if (!name || !client || !type) {
     return res.status(400).json({ error: 'name, client, and type are required' })
@@ -66,6 +67,7 @@ async function createProject(req, res) {
       deadline: deadline ? new Date(deadline) : null,
       pm_id: pm_id || null,
       dev_id: dev_id || null,
+      image_url: image_url || null,
     },
     select: PROJECT_SELECT,
   })

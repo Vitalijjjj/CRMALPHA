@@ -963,9 +963,10 @@ function projectCardHTML(p, canAdd) {
 
   return `<div class="pcard-card">
     <div class="pcard-img">
-      <div class="pcard-img-fallback" style="background:linear-gradient(135deg,${colors[0]},${colors[1]} 50%,${colors[2]})">
-        ${initials}
-      </div>
+      ${p.image_url
+        ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;transition:transform .5s var(--t)">`
+        : `<div class="pcard-img-fallback" style="background:linear-gradient(135deg,${colors[0]},${colors[1]} 50%,${colors[2]})">${initials}</div>`
+      }
       <div class="pcard-img-overlay"></div>
       <span class="pcard-type-badge" style="background:${typeBg};color:${typeColor};border:1px solid ${typeColor}40">${p.type}</span>
       ${isOverdueP ? '<span class="pcard-type-badge" style="right:10px;left:auto;background:rgba(224,92,92,0.85);color:#fff;border:none">Прострочено</span>' : ''}
@@ -1316,6 +1317,53 @@ async function patchTaskStatus(taskId, newStatus, selectEl) {
 // ════════════════════════════════════════
 // PROJECT MODAL
 // ════════════════════════════════════════
+function projectImageUploadHTML(existingUrl) {
+  return `
+    <label class="mlabel">Обкладинка проєкту</label>
+    <div style="margin-bottom:16px">
+      ${existingUrl ? `<img id="mf-img-preview" src="${existingUrl}" alt="" style="width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--border2);margin-bottom:8px">` :
+        `<div id="mf-img-preview" style="width:100%;height:80px;border-radius:10px;border:1px dashed var(--border2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;margin-bottom:8px">Попередній перегляд</div>`}
+      <label class="sbtn" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+        📎 Вибрати фото
+        <input id="mf-img-file" type="file" accept="image/*" style="display:none" onchange="previewProjectImage(this)">
+      </label>
+      <span id="mf-img-name" style="font-size:11px;color:var(--text3);margin-left:8px"></span>
+    </div>`
+}
+
+function previewProjectImage(input) {
+  const file = input.files[0]
+  if (!file) return
+  document.getElementById('mf-img-name').textContent = file.name
+  const reader = new FileReader()
+  reader.onload = e => {
+    const prev = document.getElementById('mf-img-preview')
+    if (prev.tagName === 'IMG') {
+      prev.src = e.target.result
+    } else {
+      const img = document.createElement('img')
+      img.id = 'mf-img-preview'
+      img.src = e.target.result
+      img.style.cssText = 'width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--border2);margin-bottom:8px'
+      prev.replaceWith(img)
+    }
+  }
+  reader.readAsDataURL(file)
+}
+
+async function readProjectImage() {
+  const input = document.getElementById('mf-img-file')
+  if (!input || !input.files[0]) return undefined
+  const file = input.files[0]
+  if (file.size > 3 * 1024 * 1024) { modalErr('Файл занадто великий (макс 3 МБ)'); return null }
+  return new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = e => resolve(e.target.result)
+    r.onerror = () => reject(new Error('Помилка читання файлу'))
+    r.readAsDataURL(file)
+  })
+}
+
 function openProjectModal() {
   openModal('Новий проєкт', `
     <div class="merr" id="m-err"></div>
@@ -1330,6 +1378,7 @@ function openProjectModal() {
     </select>
     <label class="mlabel">Дедлайн</label>
     <input id="mf-deadline" class="mfield" type="date">
+    ${projectImageUploadHTML('')}
     <div class="mfooter">
       <button class="sbtn" onclick="closeModal()">Скасувати</button>
       <button class="sbtn p" onclick="submitProject()">Створити →</button>
@@ -1345,7 +1394,11 @@ async function submitProject() {
   if (!name || !client) return modalErr('Назва та клієнт обов\'язкові')
   modalBtnBusy('Створення...')
   try {
-    const res = await api('/api/projects', { method:'POST', body: JSON.stringify({ name, client, type, deadline: deadline||null }) })
+    const image_url = await readProjectImage()
+    if (image_url === null) { modalBtnRestore('Створити →'); return }
+    const body = { name, client, type, deadline: deadline||null }
+    if (image_url !== undefined) body.image_url = image_url
+    const res = await api('/api/projects', { method:'POST', body: JSON.stringify(body) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Помилка')
     closeModal()
@@ -1396,6 +1449,7 @@ async function openEditProjectModal(projectId) {
       </div>
       <label class="mlabel">Дедлайн</label>
       <input id="mf-deadline" class="mfield" type="date" value="${dl}">
+      ${projectImageUploadHTML(p.image_url||'')}
       <div class="mfooter">
         <button class="sbtn d" onclick="deleteProject('${projectId}')">Видалити</button>
         <button class="sbtn" onclick="closeModal()">Скасувати</button>
@@ -1415,7 +1469,11 @@ async function submitEditProject(projectId) {
   if (!name || !client) return modalErr('Назва та клієнт обов\'язкові')
   modalBtnBusy('Збереження...')
   try {
-    const res = await api(`/api/projects/${projectId}`, { method:'PUT', body: JSON.stringify({ name, client, type, status, pm_id: pm_id||null, dev_id: dev_id||null, deadline: deadline||null }) })
+    const image_url = await readProjectImage()
+    if (image_url === null) { modalBtnRestore('Зберегти →'); return }
+    const body = { name, client, type, status, pm_id: pm_id||null, dev_id: dev_id||null, deadline: deadline||null }
+    if (image_url !== undefined) body.image_url = image_url
+    const res = await api(`/api/projects/${projectId}`, { method:'PUT', body: JSON.stringify(body) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Помилка')
     closeModal()

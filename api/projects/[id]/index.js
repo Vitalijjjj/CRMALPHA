@@ -71,7 +71,7 @@ async function updateProject(req, res, id) {
     return res.status(200).json(updated)
   }
 
-  const { name, client, type, deadline, progress, status, pm_id, dev_id } = req.body
+  const { name, client, type, deadline, progress, status, pm_id, dev_id, image_url } = req.body
 
   const updated = await prisma.project.update({
     where: { id },
@@ -84,6 +84,7 @@ async function updateProject(req, res, id) {
       ...(status !== undefined && { status }),
       ...(pm_id !== undefined && { pm_id: pm_id || null }),
       ...(dev_id !== undefined && { dev_id: dev_id || null }),
+      ...(image_url !== undefined && { image_url: image_url || null }),
     },
     include: {
       pm: { select: { id: true, email: true } },

@@ -89,6 +89,7 @@ model Project {
   name       String
   client     String
   type       ProjectType
+  image_url  String?
   deadline   DateTime?
   progress   Int           @default(0)
   status     ProjectStatus @default(ACTIVE)
