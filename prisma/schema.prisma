@@ -46,12 +46,45 @@ enum AccessLevel {
   ADMIN
 }
 
-enum LeadStatus {
-  NEW
-  CONTACTED
-  PROPOSAL
-  WON
-  LOST
+model LeadStatus {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  color        String   @default("#6B7280")
+  sort_order   Int      @default(0)
+  is_active    Boolean  @default(true)
+  is_system    Boolean  @default(false)
+  funnel_stage String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  leads        Lead[]
+
+  @@map("lead_statuses")
+}
+
+model LeadSource {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  sort_order Int      @default(0)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  leads      Lead[]
+
+  @@map("lead_sources")
+}
+
+model LeadDirection {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  geo        String?
+  method     String?
+  tool       String?
+  is_active  Boolean  @default(true)
+  sort_order Int      @default(0)
+  created_at DateTime @default(now())
+  leads      Lead[]
+
+  @@map("lead_directions")
 }
 
 enum FinanceType {
@@ -156,17 +189,22 @@ model TaskComment {
 }
 
 model Lead {
-  id         String     @id @default(cuid())
-  name       String
-  source     String
-  status     LeadStatus @default(NEW)
-  amount     Float      @default(0)
-  comment    String?
-  owner_id   String
-  created_at DateTime   @default(now())
-  updated_at DateTime   @updatedAt
+  id                String   @id @default(cuid())
+  name              String
+  status_id         String?
+  source_id         String?
+  direction_id      String?
+  telegram_username String?
+  amount            Float    @default(0)
+  comment           String?
+  owner_id          String
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 
-  owner           User            @relation(fields: [owner_id], references: [id])
+  owner           User           @relation(fields: [owner_id], references: [id])
+  status          LeadStatus?    @relation(fields: [status_id], references: [id])
+  source          LeadSource?    @relation(fields: [source_id], references: [id])
+  direction       LeadDirection? @relation(fields: [direction_id], references: [id])
   finance_records FinanceRecord[]
 
   @@map("leads")

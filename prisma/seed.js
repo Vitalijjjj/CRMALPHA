@@ -11,6 +11,9 @@ async function main() {
   // Wipe existing data in correct order
   await prisma.financeRecord.deleteMany()
   await prisma.lead.deleteMany()
+  await prisma.leadStatus.deleteMany()
+  await prisma.leadSource.deleteMany()
+  await prisma.leadDirection.deleteMany()
   await prisma.taskComment.deleteMany()
   await prisma.task.deleteMany()
   await prisma.projectMember.deleteMany()
@@ -91,16 +94,70 @@ async function main() {
   }
   console.log('✅ Progress recalculated')
 
-  // ── Leads ────────────────────────────────────────────────
+  // ── Lead Statuses (with funnel_stage) ────────────────────
+  const statusData = [
+    { name: 'Новий',      color: '#6B7280', sort_order: 0, is_system: true, funnel_stage: 'contacted' },
+    { name: 'Написав',    color: '#8B5CF6', sort_order: 1, is_system: true, funnel_stage: 'contacted' },
+    { name: 'Колл',       color: '#3B82F6', sort_order: 2, is_system: true, funnel_stage: 'call' },
+    { name: 'КП',         color: '#F59E0B', sort_order: 3, is_system: true, funnel_stage: 'proposal' },
+    { name: 'Цікаво',     color: '#10B981', sort_order: 4, is_system: true, funnel_stage: 'interested' },
+    { name: 'Не цікаво',  color: '#EF4444', sort_order: 5, is_system: true, funnel_stage: 'not_interested' },
+    { name: 'Думає',      color: '#F97316', sort_order: 6, is_system: true, funnel_stage: 'thinking' },
+    { name: 'Продаж',     color: '#22C55E', sort_order: 7, is_system: true, funnel_stage: 'sold' },
+    { name: 'Програно',   color: '#DC2626', sort_order: 8, is_system: true, funnel_stage: 'not_interested' },
+  ]
+  const createdStatuses = []
+  for (const s of statusData) {
+    createdStatuses.push(await prisma.leadStatus.create({ data: s }))
+  }
+  const sMap = Object.fromEntries(createdStatuses.map(s => [s.name, s.id]))
+  console.log('✅ Lead statuses created')
+
+  // ── Lead Sources ──────────────────────────────────────────
+  const sourceData = [
+    { name: 'Реклама',           sort_order: 0 },
+    { name: 'Розсилки',          sort_order: 1 },
+    { name: 'Партнерка',         sort_order: 2 },
+    { name: 'Рілси/Органіка',    sort_order: 3 },
+    { name: 'Нетворкінг',        sort_order: 4 },
+    { name: 'TikTok розсилки',   sort_order: 5 },
+    { name: 'Inst Direct',       sort_order: 6 },
+  ]
+  const createdSources = []
+  for (const s of sourceData) {
+    createdSources.push(await prisma.leadSource.create({ data: s }))
+  }
+  const srcMap = Object.fromEntries(createdSources.map(s => [s.name, s.id]))
+  console.log('✅ Lead sources created')
+
+  // ── Lead Directions ───────────────────────────────────────
+  const directionData = [
+    { name: 'Будівництво Польща',  geo: 'Польща',  method: 'Реклама',    tool: 'Креос',        sort_order: 0 },
+    { name: 'IT Аутсорс США',      geo: 'США',     method: 'Розсилки',   tool: 'Inst Direct',  sort_order: 1 },
+    { name: 'E-commerce Україна',  geo: 'Україна', method: 'Органіка',   tool: 'TikTok',       sort_order: 2 },
+    { name: 'HoReCa Польща',       geo: 'Польща',  method: 'Розсилки',   tool: 'LinkedIn',     sort_order: 3 },
+  ]
+  const createdDirections = []
+  for (const d of directionData) {
+    createdDirections.push(await prisma.leadDirection.create({ data: d }))
+  }
+  const dMap = Object.fromEntries(createdDirections.map(d => [d.name, d.id]))
+  console.log('✅ Lead directions created')
+
+  // ── Leads (with direction) ────────────────────────────────
   const leads = await Promise.all([
-    prisma.lead.create({ data: { name: 'Петро Коваленко',    source: 'Реферал',         status: 'CONTACTED', amount: 3500, comment: 'Корпоративний сайт',         owner_id: ops.id } }),
-    prisma.lead.create({ data: { name: 'Марина Лисенко',     source: 'Instagram',       status: 'WON',       amount: 1800, comment: 'Лендінг косметика',           owner_id: ops.id } }),
-    prisma.lead.create({ data: { name: 'Oleks Design Studio',source: 'Upwork',          status: 'PROPOSAL',  amount: 5200, comment: 'White-label розробка',         owner_id: ops.id } }),
-    prisma.lead.create({ data: { name: 'Nova Logistics',     source: 'Сайт',            status: 'NEW',       amount: 4000,                                          owner_id: ops.id } }),
-    prisma.lead.create({ data: { name: 'Grill House',        source: 'Реферал',         status: 'CONTACTED', amount: 1200, comment: 'Меню + бронювання',            owner_id: ops.id } }),
-    prisma.lead.create({ data: { name: 'MindSpark Agency',   source: 'Партнер',         status: 'WON',       amount: 7800, comment: 'Довгостроковий контракт',      owner_id: ops.id } }),
-    prisma.lead.create({ data: { name: 'EcoShop Ukraine',    source: 'Холодний контакт',status: 'LOST',      amount: 2200, comment: 'Обрали іншого підрядника',     owner_id: ops.id } }),
-    prisma.lead.create({ data: { name: 'Fit Academy',        source: 'Instagram',       status: 'PROPOSAL',  amount: 3100, comment: 'Фітнес-клуб',                  owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Петро Коваленко',    source_id: srcMap['Нетворкінг'],      status_id: sMap['Колл'],       direction_id: dMap['Будівництво Польща'], amount: 3500, comment: 'Корпоративний сайт',        owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Марина Лисенко',     source_id: srcMap['Inst Direct'],     status_id: sMap['Продаж'],     direction_id: dMap['E-commerce Україна'], amount: 1800, comment: 'Лендінг косметика',          owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Oleks Design Studio',source_id: srcMap['Нетворкінг'],      status_id: sMap['КП'],         direction_id: dMap['IT Аутсорс США'],     amount: 5200, comment: 'White-label розробка',        owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Nova Logistics',     source_id: srcMap['Реклама'],         status_id: sMap['Написав'],    direction_id: dMap['Будівництво Польща'], amount: 4000,                                  owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Grill House',        source_id: srcMap['Рілси/Органіка'],  status_id: sMap['Написав'],    direction_id: dMap['HoReCa Польща'],      amount: 1200, comment: 'Меню + бронювання',          owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'MindSpark Agency',   source_id: srcMap['Партнерка'],       status_id: sMap['Продаж'],     direction_id: dMap['IT Аутсорс США'],     amount: 7800, comment: 'Довгостроковий контракт',    owner_id: ops.id, telegram_username: 'mindspark_ceo' } }),
+    prisma.lead.create({ data: { name: 'EcoShop Ukraine',    source_id: srcMap['Розсилки'],        status_id: sMap['Не цікаво'],  direction_id: dMap['E-commerce Україна'], amount: 2200, comment: 'Обрали іншого підрядника',   owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Fit Academy',        source_id: srcMap['TikTok розсилки'], status_id: sMap['Цікаво'],     direction_id: dMap['HoReCa Польща'],      amount: 3100, comment: 'Фітнес-клуб',               owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'BuildPro Warsaw',    source_id: srcMap['Реклама'],         status_id: sMap['КП'],         direction_id: dMap['Будівництво Польща'], amount: 6200, comment: 'Ремонтна компанія',          owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'TechFlow Inc',       source_id: srcMap['Inst Direct'],     status_id: sMap['Думає'],      direction_id: dMap['IT Аутсорс США'],     amount: 9500, comment: 'SaaS стартап',               owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'Cafe Lviv',          source_id: srcMap['Розсилки'],        status_id: sMap['Колл'],       direction_id: dMap['HoReCa Польща'],      amount: 800,  comment: 'Ресторан',                   owner_id: ops.id } }),
+    prisma.lead.create({ data: { name: 'ModaShop PL',        source_id: srcMap['Реклама'],         status_id: sMap['Цікаво'],     direction_id: dMap['E-commerce Україна'], amount: 2800, comment: 'Одяг онлайн',                owner_id: ops.id } }),
   ])
   console.log('✅ Leads created')
 

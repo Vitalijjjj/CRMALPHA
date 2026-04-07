@@ -195,15 +195,6 @@ td{padding:12px 18px;font-size:12px;color:var(--text2);white-space:nowrap}
 /* ── Spinner ── */
 .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.15);border-top-color:rgba(255,214,0,.8);border-radius:50%;animation:sp .7s linear infinite}
 
-/* ── Responsive ── */
-@media(max-width:768px){
-  .sidebar{width:56px}
-  .slogo span,.ni span:last-child,.uname,.urole,.logout{display:none}
-  .ni{justify-content:center;padding:8px}
-  .nic{width:auto}
-  .sg4{grid-template-columns:repeat(2,1fr)}
-  .pcards{grid-template-columns:1fr}
-}
 
 /* ══ MODAL ══ */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:999;padding:24px;animation:fadeIn .2s ease}
@@ -515,6 +506,135 @@ thead tr{border-bottom:1px solid rgba(255,214,0,0.06)}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:4px}
 ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.15)}
+
+/* ══ BOTTOM NAV (mobile) ══ */
+#bnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(8,8,9,0.97);border-top:1px solid rgba(255,255,255,0.08);
+  padding:6px 0 max(6px,env(safe-area-inset-bottom));
+  backdrop-filter:blur(20px);align-items:flex-end;
+}
+html.light #bnav{background:rgba(255,255,255,0.97);border-top:1px solid rgba(0,0,0,0.08)}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;
+  cursor:pointer;color:var(--text3);font-size:9px;font-family:var(--mono);letter-spacing:.04em;
+  border:none;background:none;-webkit-tap-highlight-color:transparent;transition:color .2s;
+}
+.bni.active{color:var(--gold)}
+.bni-ic{font-size:18px;line-height:1;margin-bottom:1px;transition:transform .2s}
+.bni.active .bni-ic{transform:scale(1.15)}
+
+/* ══ FILTER DRAWER ══ */
+#filter-drawer{position:fixed;inset:0;z-index:200;display:none;pointer-events:none}
+#filter-drawer.open{display:block;pointer-events:all}
+.fd-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);animation:fadeIn .2s ease}
+.fd-sheet{position:absolute;bottom:0;left:0;right:0;background:rgba(13,13,16,.98);
+  border:1px solid rgba(255,255,255,.1);border-radius:20px 20px 0 0;
+  padding:0 18px max(24px,env(safe-area-inset-bottom));
+  animation:slideUpModal .3s var(--t) both;max-height:85vh;overflow-y:auto;
+}
+html.light .fd-sheet{background:#fff;border-color:rgba(0,0,0,.1)}
+.fd-handle{width:44px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:14px auto 18px}
+html.light .fd-handle{background:rgba(0,0,0,.15)}
+.fd-title{font-size:16px;font-weight:700;margin-bottom:20px;letter-spacing:-.3px}
+.fd-group{margin-bottom:18px}
+.fd-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:block}
+.fd-select,.fd-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);
+  border-radius:12px;padding:14px 16px;font-size:16px;color:var(--text);font-family:var(--sans);
+  outline:none;-webkit-appearance:none;transition:border .2s;
+}
+html.light .fd-select,html.light .fd-input{background:#F9FAFB;border-color:rgba(0,0,0,.12);color:#0F0F14}
+.fd-select:focus,.fd-input:focus{border-color:rgba(255,214,0,.4)}
+.fd-actions{display:flex;gap:10px;padding-top:8px}
+.fd-actions button{flex:1;min-height:50px;font-size:14px;border-radius:12px}
+
+/* ══ MOBILE ══ */
+@media(max-width:768px){
+  /* Layout */
+  .sidebar{display:none}
+  #bnav{display:flex}
+  .main{width:100%;height:100%}
+  .content{padding:12px 12px 80px}
+  .topbar{padding:0 14px;height:48px}
+  .tb-title{font-size:14px}
+  .tb-sub{font-size:9px}
+
+  /* Stats */
+  .sg3{grid-template-columns:repeat(3,1fr);gap:8px}
+  .sg4{grid-template-columns:repeat(2,1fr);gap:8px}
+  .sc{padding:12px 14px;border-radius:14px}
+  .sc-v{font-size:20px;letter-spacing:-1px}
+  .sc-l{font-size:9px;margin-bottom:6px}
+
+  /* Section */
+  .section{border-radius:14px;margin-bottom:12px}
+  .sh{padding:11px 14px;gap:5px;flex-wrap:wrap}
+  .sh-t{font-size:12px;width:100%}
+  .sbtn{padding:7px 11px;font-size:11px;min-height:34px}
+  .sbtn.p{font-size:12px}
+
+  /* Tables on mobile — horizontal scroll */
+  .section{overflow-x:auto}
+  table{min-width:480px;width:100%}
+  td{padding:9px 10px;font-size:11px;white-space:nowrap}
+  th{padding:9px 10px;font-size:9px}
+
+  /* Modal → full screen slide-up */
+  .overlay{align-items:flex-end;padding:0}
+  .modal{max-width:100%;width:100%;max-height:92vh;border-radius:20px 20px 0 0;
+    animation:slideUpModal .3s var(--t) both;border-left:none;border-right:none;border-bottom:none}
+  .modal-h{padding:16px 18px}
+  .modal-b{padding:16px 18px}
+  .mfield{padding:14px 16px;font-size:16px;border-radius:11px;margin-bottom:14px}
+  select.mfield{-webkit-appearance:none;font-size:16px}
+  .mlabel{font-size:11px;margin-bottom:7px}
+  .mrow{flex-direction:column;gap:0}
+  .mrow .mhalf .mfield{margin-bottom:14px}
+  .mfooter{gap:8px;padding-top:12px}
+  .mfooter .sbtn{min-height:46px;flex:1;font-size:13px;border-radius:11px}
+
+  /* Projects */
+  .proj-grid{grid-template-columns:1fr!important;gap:10px}
+  .pcards{grid-template-columns:1fr}
+  .pcard-img{height:120px}
+
+  /* Kanban horizontal scroll */
+  .kanban{grid-template-columns:repeat(4,minmax(220px,1fr));overflow-x:auto;gap:10px;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+
+  /* Leads */
+  .leads-filters{display:none}
+  .status-sel{padding:8px 10px;font-size:13px;min-height:38px}
+
+  /* Hide desktop-only elements */
+  .desk-only{display:none!important}
+}
+
+@keyframes slideUpModal{from{transform:translateY(100%);opacity:.7}to{transform:translateY(0);opacity:1}}
+
+/* ══ INPUT / SELECT COLOR FIX (iOS Safari, autofill) ══ */
+input,select,textarea{
+  color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;
+  color-scheme:dark;
+}
+html.light input,html.light select,html.light textarea{
+  color:#0F0F14!important;
+  -webkit-text-fill-color:#0F0F14!important;
+  color-scheme:light;
+}
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus,
+select:-webkit-autofill,textarea:-webkit-autofill{
+  -webkit-text-fill-color:var(--text)!important;
+  -webkit-box-shadow:0 0 0 1000px rgba(13,13,16,0.98) inset!important;
+  caret-color:var(--text);
+}
+html.light input:-webkit-autofill,html.light input:-webkit-autofill:hover,html.light input:-webkit-autofill:focus{
+  -webkit-text-fill-color:#0F0F14!important;
+  -webkit-box-shadow:0 0 0 1000px #F9FAFB inset!important;
+}
+/* Select option text */
+select option{background:var(--bg2);color:var(--text)}
+html.light select option{background:#fff;color:#0F0F14}
+/* Placeholder */
+input::placeholder,textarea::placeholder{color:var(--text3)!important;-webkit-text-fill-color:var(--text3)!important;opacity:1}
 </style>
 </head>
 <body>
@@ -583,6 +703,22 @@ thead tr{border-bottom:1px solid rgba(255,214,0,0.06)}
   </div>
 
 </div>
+<!-- BOTTOM NAV (mobile) -->
+<nav id="bnav"></nav>
+</div>
+
+<!-- ════════ FILTER DRAWER ════════ -->
+<div id="filter-drawer">
+  <div class="fd-backdrop" onclick="closeFilterDrawer()"></div>
+  <div class="fd-sheet">
+    <div class="fd-handle" onclick="closeFilterDrawer()"></div>
+    <div class="fd-title">Фільтри</div>
+    <div id="fd-content"></div>
+    <div class="fd-actions">
+      <button class="sbtn" onclick="_leadsFilters={status:'',source:'',minAmt:''};closeFilterDrawer();rLeads()">↺ Скинути</button>
+      <button class="sbtn p" onclick="applyLeadsFilter();closeFilterDrawer()">Застосувати →</button>
+    </div>
+  </div>
 </div>
 
 <!-- ════════ MODAL ════════ -->
@@ -779,7 +915,7 @@ const emptyHTML = msg => `<div style="padding:32px;text-align:center;color:var(-
 // ════════════════════════════════════════
 const ROLES = {
   OPERATIONS_SALES:{label:'Операції та продажі',icon:'⚡',bg:'rgba(124,111,205,.15)',tc:'bv',desc:'ops@agency.com',
-    nav:[{id:'overview',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'},{id:'workspace',ic:'⬛',l:'Workspace'},{id:'leads',ic:'◎',l:'Ліди'},{id:'finance',ic:'◈',l:'Фінанси'},{id:'team',ic:'◉',l:'Команда'}]},
+    nav:[{id:'overview',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'},{id:'workspace',ic:'⬛',l:'Workspace'},{id:'leads',ic:'◎',l:'Ліди'},{id:'stats',ic:'◈',l:'Статистика'},{id:'finance',ic:'▣',l:'Фінанси'},{id:'team',ic:'◉',l:'Команда'}]},
   PM:{label:'Проєктний менеджер',icon:'📋',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'pm@agency.com',
     nav:[{id:'pm',ic:'⬡',l:'Дашборд'},{id:'projects',ic:'◫',l:'Проєкти'},{id:'tasks',ic:'☑',l:'Задачі'},{id:'finance',ic:'◈',l:'Фінанси'}]},
   DEV_WEBFLOW:{label:'Webflow розробник',icon:'🌐',bg:'rgba(77,217,217,.1)',tc:'bc',desc:'webflow@agency.com',
@@ -904,6 +1040,12 @@ function setupShell() {
       <span class="nic">${n.ic}</span><span>${n.l}</span>
     </div>
   `).join('')
+  // Bottom nav (mobile) — max 5 items
+  document.getElementById('bnav').innerHTML = cfg.nav.slice(0,5).map(n => `
+    <button class="bni" id="bni-${n.id}" onclick="go('${n.id}')">
+      <span class="bni-ic">${n.ic}</span>${n.l}
+    </button>
+  `).join('')
 }
 
 function go(id) {
@@ -913,7 +1055,10 @@ function go(id) {
     el.classList.toggle('active', isActive)
     if (isActive) flashNavItem(el)
   })
-  ;({overview:rOverview, pm:rPM, dev:rDev, projects:rProjects, tasks:rTasks, leads:rLeads, finance:rFinance, workspace:rWorkspace, team:rTeam})[id]?.()
+  document.querySelectorAll('.bni').forEach(el => {
+    el.classList.toggle('active', el.id === 'bni-' + id)
+  })
+  ;({overview:rOverview, pm:rPM, dev:rDev, projects:rProjects, tasks:rTasks, leads:rLeads, stats:rStats, finance:rFinance, workspace:rWorkspace, team:rTeam})[id]?.()
 }
 
 function setPage(t, s) {
@@ -1241,6 +1386,24 @@ async function kDrop(e, newStatus) {
 
 function overdueHTML(tasks) {
   const ov = tasks.filter(isOverdue)
+  if (isMobile()) {
+    return `<div class="section">
+      <div class="sh"><span class="sh-t"><span style="color:var(--red)">⚠</span> Прострочені задачі <span class="badge br">${ov.length}</span></span></div>
+      ${ov.length===0 ? emptyHTML('Прострочених задач немає 🎉') : `<div style="padding:10px;display:flex;flex-direction:column;gap:8px">
+        ${ov.map(t=>`<div style="background:rgba(224,92,92,0.06);border:1px solid rgba(224,92,92,0.18);border-radius:12px;padding:12px 14px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px">
+            <div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.3"><span class="od-dot"></span>${t.title}</div>
+            <span style="color:var(--red);font-family:var(--mono);font-size:11px;flex-shrink:0">${fmt(t.deadline)}</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:12px">${priDot(t.priority)}</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">${t.assignee?.email||'—'}</span>
+            <div style="margin-left:auto">${taskStatusSel(t)}</div>
+          </div>
+        </div>`).join('')}
+      </div>`}
+    </div>`
+  }
   return `<div class="section">
     <div class="sh"><span class="sh-t"><span style="color:var(--red)">⚠</span> Прострочені задачі <span class="badge br">${ov.length}</span></span></div>
     ${ov.length===0 ? emptyHTML('Прострочених задач немає 🎉') : `
@@ -1633,24 +1796,51 @@ async function submitEditTask(taskId) {
 // ════════════════════════════════════════
 // LEAD MODAL + STATUS PATCH
 // ════════════════════════════════════════
+function _statusOptions(selectedId) {
+  return (window._leadStatuses||[]).map(s =>
+    `<option value="${s.id}"${s.id===selectedId?' selected':''}>${s.name}</option>`
+  ).join('')
+}
+function _sourceOptions(selectedId) {
+  return (window._leadSources||[]).map(s =>
+    `<option value="${s.id}"${s.id===selectedId?' selected':''}>${s.name}</option>`
+  ).join('')
+}
+function _directionOptions(selectedId) {
+  return (window._leadDirections||[]).map(d =>
+    `<option value="${d.id}"${d.id===selectedId?' selected':''}>${d.name}</option>`
+  ).join('')
+}
+
 function openLeadModal() {
   openModal('Новий лід', `
     <div class="merr" id="m-err"></div>
     <label class="mlabel">Ім'я / Компанія *</label>
     <input id="mf-name" class="mfield" placeholder="Петро Коваленко">
-    <label class="mlabel">Джерело *</label>
-    <input id="mf-source" class="mfield" placeholder="Instagram, Реферал, Upwork...">
+    <label class="mlabel">Telegram</label>
+    <input id="mf-tg" class="mfield" placeholder="@username (необов'язково)">
     <div class="mrow">
       <div class="mhalf">
         <label class="mlabel">Статус</label>
         <select id="mf-status" class="mfield">
-          <option value="NEW">Новий</option>
-          <option value="CONTACTED">Контакт</option>
-          <option value="PROPOSAL">Пропозиція</option>
-          <option value="WON">Виграно</option>
-          <option value="LOST">Програно</option>
+          <option value="">— не вибрано —</option>
+          ${_statusOptions('')}
         </select>
       </div>
+      <div class="mhalf">
+        <label class="mlabel">Джерело</label>
+        <select id="mf-source" class="mfield">
+          <option value="">— не вибрано —</option>
+          ${_sourceOptions('')}
+        </select>
+      </div>
+    </div>
+    <label class="mlabel">Напрямок лідгену</label>
+    <select id="mf-direction" class="mfield">
+      <option value="">— не вибрано —</option>
+      ${_directionOptions('')}
+    </select>
+    <div class="mrow">
       <div class="mhalf">
         <label class="mlabel">Сума ($)</label>
         <input id="mf-amount" class="mfield" type="number" min="0" placeholder="0">
@@ -1667,14 +1857,16 @@ function openLeadModal() {
 
 async function submitLead() {
   const name = document.getElementById('mf-name').value.trim()
-  const source = document.getElementById('mf-source').value.trim()
-  const status = document.getElementById('mf-status').value
+  const tg = document.getElementById('mf-tg').value.trim()
+  const status_id = document.getElementById('mf-status').value
+  const source_id = document.getElementById('mf-source').value
+  const direction_id = document.getElementById('mf-direction')?.value
   const amount = document.getElementById('mf-amount').value
   const comment = document.getElementById('mf-comment').value.trim()
-  if (!name || !source) return modalErr('Ім\'я та джерело обов\'язкові')
+  if (!name) return modalErr('Ім\'я обов\'язкове')
   modalBtnBusy('Додавання...')
   try {
-    const res = await api('/api/leads', { method:'POST', body: JSON.stringify({ name, source, status, amount: amount||0, comment: comment||null }) })
+    const res = await api('/api/leads', { method:'POST', body: JSON.stringify({ name, telegram_username: tg||null, status_id: status_id||null, source_id: source_id||null, direction_id: direction_id||null, amount: amount||0, comment: comment||null }) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Помилка')
     closeModal()
@@ -1699,17 +1891,30 @@ async function openEditLeadModal(leadId) {
     <div class="merr" id="m-err"></div>
     <label class="mlabel">Ім'я / Компанія *</label>
     <input id="mf-name" class="mfield" value="${lead.name.replace(/"/g,'&quot;')}">
-    <label class="mlabel">Джерело *</label>
-    <input id="mf-source" class="mfield" value="${lead.source.replace(/"/g,'&quot;')}">
+    <label class="mlabel">Telegram</label>
+    <input id="mf-tg" class="mfield" value="${(lead.telegram_username||'').replace(/"/g,'&quot;')}" placeholder="@username">
     <div class="mrow">
       <div class="mhalf">
         <label class="mlabel">Статус</label>
         <select id="mf-status" class="mfield">
-          <option value="NEW"${lead.status==='NEW'?' selected':''}>Новий</option>
-          <option value="CONTACTED"${lead.status==='CONTACTED'?' selected':''}>Контакт</option>
-          <option value="PROPOSAL"${lead.status==='PROPOSAL'?' selected':''}>Пропозиція</option>
-          <option value="WON"${lead.status==='WON'?' selected':''}>Виграно</option>
-          <option value="LOST"${lead.status==='LOST'?' selected':''}>Програно</option>
+          <option value="">— не вибрано —</option>
+          ${_statusOptions(lead.status_id||'')}
+        </select>
+      </div>
+      <div class="mhalf">
+        <label class="mlabel">Джерело</label>
+        <select id="mf-source" class="mfield">
+          <option value="">— не вибрано —</option>
+          ${_sourceOptions(lead.source_id||'')}
+        </select>
+      </div>
+    </div>
+    <div class="mrow">
+      <div class="mhalf">
+        <label class="mlabel">Напрямок</label>
+        <select id="mf-direction" class="mfield">
+          <option value="">— не вибрано —</option>
+          ${_directionOptions(lead.direction_id||'')}
         </select>
       </div>
       <div class="mhalf">
@@ -1729,14 +1934,16 @@ async function openEditLeadModal(leadId) {
 
 async function submitEditLead(leadId) {
   const name = document.getElementById('mf-name').value.trim()
-  const source = document.getElementById('mf-source').value.trim()
-  const status = document.getElementById('mf-status').value
+  const tg = document.getElementById('mf-tg').value.trim()
+  const status_id = document.getElementById('mf-status').value
+  const source_id = document.getElementById('mf-source').value
+  const direction_id = document.getElementById('mf-direction').value
   const amount = document.getElementById('mf-amount').value
   const comment = document.getElementById('mf-comment').value.trim()
-  if (!name || !source) return modalErr('Ім\'я та джерело обов\'язкові')
+  if (!name) return modalErr('Ім\'я обов\'язкове')
   modalBtnBusy('Збереження...')
   try {
-    const res = await api(`/api/leads/${leadId}`, { method:'PATCH', body: JSON.stringify({ name, source, status, amount: amount||0, comment: comment||null }) })
+    const res = await api(`/api/leads/${leadId}`, { method:'PATCH', body: JSON.stringify({ name, telegram_username: tg||null, status_id: status_id||null, source_id: source_id||null, direction_id: direction_id||null, amount: amount||0, comment: comment||null }) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Помилка')
     closeModal()
@@ -1754,14 +1961,14 @@ async function deleteLead(leadId) {
   } catch(e) { modalErr(e.message) }
 }
 
-async function patchLeadStatus(leadId, newStatus, selectEl) {
+async function patchLeadStatus(leadId, newStatusId, selectEl) {
   const prev = selectEl.dataset.prev || selectEl.value
-  selectEl.dataset.prev = newStatus
+  selectEl.dataset.prev = newStatusId
   selectEl.disabled = true
   try {
-    const res = await api(`/api/leads/${leadId}`, { method:'PATCH', body: JSON.stringify({ status: newStatus }) })
+    const res = await api(`/api/leads/${leadId}`, { method:'PATCH', body: JSON.stringify({ status_id: newStatusId||null }) })
     if (!res.ok) { const e = await res.json(); alert(e.error||'Помилка'); selectEl.value = prev; selectEl.dataset.prev = prev }
-    else { rLeads() } // refresh stats
+    else { rLeads() }
   } catch { selectEl.value = prev; selectEl.dataset.prev = prev }
   finally { selectEl.disabled = false }
 }
@@ -1771,10 +1978,11 @@ function openImportCSVModal() {
     <div class="merr" id="m-err"></div>
     <div class="mok" id="m-ok"></div>
     <p style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:12px;line-height:1.6">
-      Перший рядок — заголовки: <b style="color:var(--text2)">name, source, status, amount, comment</b>
+      Перший рядок — заголовки: <b style="color:var(--text2)">name, source, status, amount, comment, telegram</b><br>
+      source і status — назви з довідника (наприклад: Реклама, Новий)
     </p>
     <label class="mlabel">CSV вміст</label>
-    <textarea id="mf-csv" class="mfield" rows="7" placeholder="name,source,status,amount,comment&#10;Петро,Реферал,NEW,3000,коментар"></textarea>
+    <textarea id="mf-csv" class="mfield" rows="7" placeholder="name,source,status,amount,comment,telegram&#10;Петро,Реклама,Новий,3000,коментар,@petro"></textarea>
     <div class="mfooter">
       <button class="sbtn" onclick="closeModal()">Скасувати</button>
       <button class="sbtn p" onclick="submitImportCSV()">Імпортувати →</button>
@@ -1806,6 +2014,99 @@ async function exportLeadsCSV() {
     a.href = url; a.download = `leads-${Date.now()}.csv`; a.click()
     URL.revokeObjectURL(url)
   } catch {}
+}
+
+// ── Status Admin ──────────────────────────────────────────
+
+function openManageStatusesModal() {
+  const statuses = window._leadStatuses || []
+  openModal('Керування статусами', `
+    <div class="merr" id="m-err"></div>
+    <div id="status-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+      ${statuses.map(s => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--glass);border:1px solid var(--glass-b);border-radius:8px" id="sl-${s.id}">
+          <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${s.color};flex-shrink:0"></span>
+          <span style="flex:1;font-size:13px">${s.name}</span>
+          ${!s.is_system?`<button class="sbtn d" style="padding:2px 8px;font-size:11px" onclick="deleteLeadStatus('${s.id}')">✕</button>`:'<span style="font-size:10px;color:var(--text3)">system</span>'}
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div style="flex:1"><label class="mlabel">Назва</label><input id="ns-name" class="mfield" placeholder="Новий статус"></div>
+      <div><label class="mlabel">Колір</label><input id="ns-color" type="color" value="#6B7280" style="width:40px;height:38px;border:none;background:none;cursor:pointer;border-radius:6px"></div>
+      <button class="sbtn p" onclick="addLeadStatus()" style="height:38px">+ Додати</button>
+    </div>
+    <div class="mfooter"><button class="sbtn" onclick="closeModal()">Готово</button></div>
+  `)
+}
+
+async function addLeadStatus() {
+  const name = document.getElementById('ns-name').value.trim()
+  const color = document.getElementById('ns-color').value
+  if (!name) return
+  try {
+    const res = await api('/api/leads?scope=statuses', { method:'POST', body: JSON.stringify({ name, color }) })
+    const data = await res.json()
+    if (!res.ok) return alert(data.error || 'Помилка')
+    const statuses = await (await api('/api/leads?scope=statuses')).json()
+    window._leadStatuses = statuses
+    openManageStatusesModal()
+  } catch(e) { alert(e.message) }
+}
+
+async function deleteLeadStatus(id) {
+  if (!confirm('Видалити статус? Всі ліди з цим статусом стануть без статусу.')) return
+  try {
+    const res = await api(`/api/leads/${id}?scope=status`, { method:'DELETE' })
+    if (!res.ok) { const d = await res.json(); return alert(d.error||'Помилка') }
+    window._leadStatuses = (window._leadStatuses||[]).filter(s=>s.id!==id)
+    openManageStatusesModal()
+    rLeads()
+  } catch(e) { alert(e.message) }
+}
+
+// ── Source Admin ──────────────────────────────────────────
+
+function openManageSourcesModal() {
+  const sources = window._leadSources || []
+  openModal('Керування джерелами', `
+    <div class="merr" id="m-err"></div>
+    <div id="source-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+      ${sources.map(s => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--glass);border:1px solid var(--glass-b);border-radius:8px" id="srcl-${s.id}">
+          <span style="flex:1;font-size:13px">${s.name}</span>
+          <button class="sbtn d" style="padding:2px 8px;font-size:11px" onclick="deleteLeadSource('${s.id}')">✕</button>
+        </div>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div style="flex:1"><label class="mlabel">Назва</label><input id="nsrc-name" class="mfield" placeholder="Нове джерело"></div>
+      <button class="sbtn p" onclick="addLeadSource()" style="height:38px">+ Додати</button>
+    </div>
+    <div class="mfooter"><button class="sbtn" onclick="closeModal()">Готово</button></div>
+  `)
+}
+
+async function addLeadSource() {
+  const name = document.getElementById('nsrc-name').value.trim()
+  if (!name) return
+  try {
+    const res = await api('/api/leads?scope=sources', { method:'POST', body: JSON.stringify({ name }) })
+    const data = await res.json()
+    if (!res.ok) return alert(data.error || 'Помилка')
+    const sources = await (await api('/api/leads?scope=sources')).json()
+    window._leadSources = sources
+    openManageSourcesModal()
+  } catch(e) { alert(e.message) }
+}
+
+async function deleteLeadSource(id) {
+  if (!confirm('Видалити джерело? Всі ліди з цим джерелом стануть без джерела.')) return
+  try {
+    const res = await api(`/api/leads/${id}?scope=source`, { method:'DELETE' })
+    if (!res.ok) { const d = await res.json(); return alert(d.error||'Помилка') }
+    window._leadSources = (window._leadSources||[]).filter(s=>s.id!==id)
+    openManageSourcesModal()
+    rLeads()
+  } catch(e) { alert(e.message) }
 }
 
 // ════════════════════════════════════════
@@ -1980,16 +2281,19 @@ async function rOverview() {
     <div id="t-fin" style="display:none">${loadingHTML()}</div>`
 
   try {
-    const [projRes, leadsRes, finRes] = await Promise.all([
-      api('/api/projects'), api('/api/leads'), api('/api/finance')
+    const [projRes, leadsRes, finRes, statusesRes, sourcesRes] = await Promise.all([
+      api('/api/projects'), api('/api/leads'), api('/api/finance'),
+      api('/api/leads?scope=statuses'), api('/api/leads?scope=sources')
     ])
     const projects = projRes.ok ? await projRes.json() : []
     const leads = leadsRes.ok ? await leadsRes.json() : []
+    window._leadStatuses = statusesRes.ok ? await statusesRes.json() : (window._leadStatuses||[])
+    window._leadSources  = sourcesRes.ok  ? await sourcesRes.json()  : (window._leadSources||[])
     const finance = finRes.ok ? await finRes.json() : []
     const tasks = await fetchAllTasks(projects)
     const inc = finance.filter(f=>f.type==='INCOME').reduce((s,f)=>s+f.amount,0)
     const exp = finance.filter(f=>f.type==='EXPENSE').reduce((s,f)=>s+f.amount,0)
-    const won = leads.filter(l=>l.status==='WON')
+    const won = leads.filter(l=>l.status?.name==='Продаж')
     document.getElementById('sc-ap').textContent = projects.filter(p=>p.status==='ACTIVE').length
     document.getElementById('sc-ar').textContent = `${projects.filter(p=>p.status==='ON_HOLD').length} на паузі`
     document.getElementById('sc-ov').textContent = tasks.filter(isOverdue).length
@@ -2112,48 +2416,214 @@ async function rLeads() {
       <div class="sc"><div class="sc-l">✓ Виграно</div><div class="sc-v s" id="sc-won">—</div></div>
       <div class="sc"><div class="sc-l">⟳ Воронка</div><div class="sc-v w" id="sc-pipe">—</div></div>
     </div>
+    <div id="leads-mobile-bar" style="display:none;gap:8px;margin-bottom:12px;align-items:center">
+      <div style="flex:1;position:relative">
+        <input id="leads-search" style="width:100%;background:var(--glass);border:1px solid var(--glass-b);border-radius:12px;padding:12px 14px 12px 40px;font-size:16px;color:var(--text);outline:none;font-family:var(--sans)" placeholder="Пошук лідів..." oninput="searchLeads(this.value)">
+        <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.4;pointer-events:none">🔍</span>
+      </div>
+      <button style="min-height:46px;padding:0 14px;background:var(--glass);border:1px solid var(--glass-b);border-radius:12px;color:var(--text2);font-size:20px;cursor:pointer;flex-shrink:0" onclick="openFilterDrawer()">⚙</button>
+    </div>
     <div id="leads-filters-area"></div>
     <div id="leads-table">${loadingHTML()}</div>`
   try {
-    const res = await api('/api/leads')
-    if (!res.ok) throw new Error('Не вдалося завантажити ліди')
-    const leads = await res.json()
+    const [leadsRes, statusesRes, sourcesRes, dirsRes] = await Promise.all([
+      api('/api/leads'), api('/api/leads?scope=statuses'), api('/api/leads?scope=sources'), api('/api/leads?scope=directions')
+    ])
+    if (!leadsRes.ok) throw new Error('Не вдалося завантажити ліди')
+    const leads = await leadsRes.json()
     window._allLeads = leads
-    const won  = leads.filter(l=>l.status==='WON').reduce((s,l)=>s+l.amount,0)
-    const pipe = leads.filter(l=>l.status!=='WON'&&l.status!=='LOST').reduce((s,l)=>s+l.amount,0)
-    document.getElementById('sc-tot').textContent = leads.length
-    document.getElementById('sc-won').textContent = cur(won)
-    document.getElementById('sc-pipe').textContent = cur(pipe)
-    document.getElementById('leads-filters-area').innerHTML = leadsFiltersHTML(leads)
-    document.getElementById('leads-table').innerHTML = leadsTableHTML(leads)
+    window._leadStatuses = statusesRes.ok ? await statusesRes.json() : []
+    window._leadSources = sourcesRes.ok ? await sourcesRes.json() : []
+    window._leadDirections = dirsRes.ok ? await dirsRes.json() : []
+    _updateLeadsStats(leads)
+    const mbar = document.getElementById('leads-mobile-bar')
+    if (mbar && isMobile()) mbar.style.display = 'flex'
+    document.getElementById('leads-filters-area').innerHTML = isMobile() ? '' : leadsFiltersHTML(leads)
+    document.getElementById('leads-table').innerHTML = isMobile() ? leadsCardsHTML(leads) : leadsTableHTML(leads)
   } catch(e) {
     document.getElementById('leads-table').innerHTML = errorHTML(e.message)
   }
 }
 
+function _isWonStatus(lead) { return lead.status?.name === 'Продаж' }
+function _isLostStatus(lead) { return lead.status?.name === 'Програно' }
+
+function _updateLeadsStats(leads) {
+  const won  = leads.filter(_isWonStatus).reduce((s,l)=>s+l.amount,0)
+  const pipe = leads.filter(l=>!_isWonStatus(l)&&!_isLostStatus(l)).reduce((s,l)=>s+l.amount,0)
+  const et = document.getElementById('sc-tot'); if(et) et.textContent = leads.length
+  const ew = document.getElementById('sc-won'); if(ew) ew.textContent = cur(won)
+  const ep = document.getElementById('sc-pipe'); if(ep) ep.textContent = cur(pipe)
+}
+
+function leadStatusBadge(l) {
+  if (!l.status) return '<span style="color:var(--text3);font-size:11px">—</span>'
+  return `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${l.status.color}22;color:${l.status.color};border:1px solid ${l.status.color}44">${l.status.name}</span>`
+}
+
 function leadsTableHTML(leads) {
   if (!leads.length) return emptyHTML('Лідів не знайдено')
-  const statuses = ['NEW','CONTACTED','PROPOSAL','WON','LOST']
+  const statuses = window._leadStatuses || []
   return `<div class="section">
     <div class="sh">
       <span class="sh-t">Всі ліди <span style="color:var(--text3);font-weight:400">(${leads.length})</span></span>
-      <button class="sbtn" onclick="openImportCSVModal()">Імпорт CSV</button>
-      <button class="sbtn" onclick="exportLeadsCSV()">Експорт CSV</button>
+      <button class="sbtn desk-only" onclick="openManageStatusesModal()">⚙ Статуси</button>
+      <button class="sbtn desk-only" onclick="openManageSourcesModal()">⚙ Джерела</button>
+      <button class="sbtn desk-only" onclick="openImportCSVModal()">Імпорт CSV</button>
+      <button class="sbtn desk-only" onclick="exportLeadsCSV()">Експорт CSV</button>
       <button class="sbtn p" onclick="openLeadModal()">+ Додати лід</button>
     </div>
     <table>
-      <thead><tr><th>Ім'я</th><th>Джерело</th><th>Статус</th><th>Сума</th><th>Створено</th><th>Коментар</th><th></th></tr></thead>
+      <thead><tr><th>Ім'я / TG</th><th>Джерело</th><th>Статус</th><th>Сума</th><th>Створено</th><th>Коментар</th><th></th></tr></thead>
       <tbody>${leads.map(l=>`<tr>
-        <td><div class="cm">${l.name}</div></td>
-        <td><span class="badge bgr">${l.source}</span></td>
-        <td><select class="status-sel" onchange="patchLeadStatus('${l.id}',this.value,this)" data-prev="${l.status}">
-          ${statuses.map(s=>`<option value="${s}"${l.status===s?' selected':''}>${STATUS_UA[s]}</option>`).join('')}
+        <td><div class="cm">${l.name}</div>${l.telegram_username?`<a href="https://t.me/${l.telegram_username}" target="_blank" style="color:#2AABEE;font-size:11px;font-family:var(--mono)">✈ @${l.telegram_username}</a>`:''}</td>
+        <td>${l.source?`<span class="badge bgr">${l.source.name}</span>`:'<span style="color:var(--text3);font-size:11px">—</span>'}</td>
+        <td><select class="status-sel" onchange="patchLeadStatus('${l.id}',this.value,this)" data-prev="${l.status_id||''}">
+          <option value="">—</option>
+          ${statuses.map(s=>`<option value="${s.id}"${l.status_id===s.id?' selected':''}>${s.name}</option>`).join('')}
         </select></td>
         <td style="color:var(--text);font-weight:600">${cur(l.amount)}</td>
         <td>${fmt(l.created_at)}</td>
         <td style="color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis">${l.comment||'—'}</td>
         <td style="white-space:nowrap;display:flex;gap:6px"><button class="sbtn" onclick="openEditLeadModal('${l.id}')">✎</button><button class="sbtn d" onclick="deleteLead('${l.id}')">✕</button></td>
       </tr>`).join('')}</tbody>
+    </table>
+  </div>`
+}
+
+// ════════════════════════════════════════
+// STATISTICS
+// ════════════════════════════════════════
+async function rStats() {
+  setPage('Статистика', 'CRM — конверсії та воронка')
+  document.getElementById('pcontent').innerHTML = `
+    <div class="section" style="margin-bottom:16px">
+      <div class="sh"><span class="sh-t">Фільтри</span></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <div>
+          <label class="mlabel" style="margin-bottom:4px;display:block">Від</label>
+          <input id="st-from" type="date" class="mfield" style="width:auto;padding:8px 12px">
+        </div>
+        <div>
+          <label class="mlabel" style="margin-bottom:4px;display:block">До</label>
+          <input id="st-to" type="date" class="mfield" style="width:auto;padding:8px 12px">
+        </div>
+        <div style="padding-top:20px">
+          <button class="sbtn p" onclick="loadStats()">Застосувати</button>
+          <button class="sbtn" onclick="document.getElementById('st-from').value='';document.getElementById('st-to').value='';loadStats()">Скинути</button>
+        </div>
+      </div>
+    </div>
+    <div id="stats-kpi" style="margin-bottom:16px">${loadingHTML()}</div>
+    <div id="stats-table">${loadingHTML()}</div>`
+  loadStats()
+}
+
+async function loadStats() {
+  const from = document.getElementById('st-from')?.value || ''
+  const to   = document.getElementById('st-to')?.value   || ''
+  const kpiEl   = document.getElementById('stats-kpi')
+  const tableEl = document.getElementById('stats-table')
+  if (kpiEl)   kpiEl.innerHTML   = loadingHTML()
+  if (tableEl) tableEl.innerHTML = loadingHTML()
+  try {
+    let url = '/api/leads?scope=stats'
+    if (from) url += `&from=${from}`
+    if (to)   url += `&to=${to}`
+    const res = await api(url)
+    if (!res.ok) throw new Error('Не вдалося завантажити статистику')
+    const { kpi, directions } = await res.json()
+    if (kpiEl)   kpiEl.innerHTML   = statsKpiHTML(kpi)
+    if (tableEl) tableEl.innerHTML = statsFunnelHTML(directions, kpi)
+  } catch(e) {
+    if (kpiEl)   kpiEl.innerHTML   = errorHTML(e.message)
+    if (tableEl) tableEl.innerHTML = ''
+  }
+}
+
+function statsKpiHTML(kpi) {
+  const cards = [
+    { l:'Контактів',    v: kpi.total_contacted,     cl:'',  ic:'◎' },
+    { l:'Дзвінків',     v: kpi.total_calls,          cl:'',  ic:'☎' },
+    { l:'Надіслано КП', v: kpi.total_proposals,      cl:'',  ic:'✉' },
+    { l:'Цікаво',       v: kpi.total_interested,     cl:'s', ic:'↑' },
+    { l:'Не цікаво',    v: kpi.total_not_interested, cl:'d', ic:'↓' },
+    { l:'Думає',        v: kpi.total_thinking,       cl:'w', ic:'…' },
+    { l:'Продано',      v: kpi.total_sold,            cl:'s', ic:'✓' },
+    { l:'Виручка',      v: cur(kpi.revenue),          cl:'s', ic:'$' },
+  ]
+  const convCards = [
+    { l:'Написав → Дзвінок', v: kpi.conv_to_call + '%' },
+    { l:'Дзвінок → КП',      v: kpi.conv_to_proposal + '%' },
+    { l:'КП → Продаж',       v: kpi.conv_to_sold + '%' },
+    { l:'Загальна конверсія', v: kpi.conv_total + '%',   bold: true },
+  ]
+  return `
+    <div class="sg" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:12px">
+      ${cards.map(c=>`<div class="sc"><div class="sc-l">${c.ic} ${c.l}</div><div class="sc-v ${c.cl}">${c.v}</div></div>`).join('')}
+    </div>
+    <div class="sg" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+      ${convCards.map(c=>`<div class="sc"><div class="sc-l">→ ${c.l}</div><div class="sc-v ${convColor(parseFloat(c.v))}">${c.v}</div></div>`).join('')}
+    </div>`
+}
+
+function convColor(pct) {
+  if (pct >= 15) return 's'
+  if (pct >= 5)  return 'w'
+  return 'd'
+}
+
+function statsFunnelHTML(directions, kpi) {
+  if (!directions.length) return emptyHTML('Немає даних для відображення')
+  const allDirs = [...directions, {
+    direction: 'РАЗОМ', geo: '', method: '',
+    total_contacted: kpi.total_contacted, total_calls: kpi.total_calls,
+    total_proposals: kpi.total_proposals, total_interested: kpi.total_interested,
+    total_not_interested: kpi.total_not_interested, total_thinking: kpi.total_thinking,
+    total_sold: kpi.total_sold, revenue: kpi.revenue,
+    conv_to_call: kpi.conv_to_call, conv_to_proposal: kpi.conv_to_proposal,
+    conv_to_sold: kpi.conv_to_sold, conv_total: kpi.conv_total,
+    _total: true,
+  }]
+  return `<div class="section">
+    <div class="sh"><span class="sh-t">Воронка по напрямках</span></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Напрямок</th><th>Гео</th><th>Метод</th>
+          <th>Контакт</th><th>Дзвінок</th><th>КП</th>
+          <th>Цікаво</th><th>Не цікаво</th><th>Думає</th><th>Продаж</th>
+          <th>Виручка</th>
+          <th title="Написав→Дзвінок">Cv1%</th>
+          <th title="Дзвінок→КП">Cv2%</th>
+          <th title="КП→Продаж">Cv3%</th>
+          <th title="Загальна конверсія">Cv%</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${allDirs.map(d => {
+          const bold = d._total ? 'font-weight:700;border-top:2px solid var(--glass-b)' : ''
+          const cc = convColor(d.conv_total)
+          const ccStyle = cc==='s'?'color:var(--green)':cc==='w'?'color:var(--gold2)':'color:var(--red)'
+          return `<tr style="${bold}">
+            <td><span class="cm">${d.direction}</span></td>
+            <td style="color:var(--text3)">${d.geo||'—'}</td>
+            <td style="color:var(--text3)">${d.method||'—'}</td>
+            <td>${d.total_contacted}</td>
+            <td>${d.total_calls}</td>
+            <td>${d.total_proposals}</td>
+            <td style="color:var(--green)">${d.total_interested}</td>
+            <td style="color:var(--red)">${d.total_not_interested}</td>
+            <td style="color:var(--gold)">${d.total_thinking}</td>
+            <td style="color:var(--green);font-weight:600">${d.total_sold}</td>
+            <td style="color:var(--green);font-weight:600">${cur(d.revenue)}</td>
+            <td>${d.conv_to_call}%</td>
+            <td>${d.conv_to_proposal}%</td>
+            <td>${d.conv_to_sold}%</td>
+            <td style="${ccStyle};font-weight:700">${d.conv_total}%</td>
+          </tr>`
+        }).join('')}
+      </tbody>
     </table>
   </div>`
 }
@@ -2537,25 +3007,115 @@ async function deletePrivTask(id) {
 }
 
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// MOBILE HELPERS
+// ════════════════════════════════════════
+const isMobile = () => window.innerWidth < 769
+
+function openFilterDrawer() {
+  const statuses = window._leadStatuses || []
+  const sources  = window._leadSources  || []
+  document.getElementById('fd-content').innerHTML = `
+    <div class="fd-group">
+      <label class="fd-label">Статус</label>
+      <select class="fd-select" onchange="_leadsFilters.status=this.value">
+        <option value="">Всі статуси</option>
+        ${statuses.map(s=>`<option value="${s.id}"${_leadsFilters.status===s.id?' selected':''}>${s.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="fd-group">
+      <label class="fd-label">Джерело</label>
+      <select class="fd-select" onchange="_leadsFilters.source=this.value">
+        <option value="">Всі джерела</option>
+        ${sources.map(s=>`<option value="${s.id}"${_leadsFilters.source===s.id?' selected':''}>${s.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="fd-group">
+      <label class="fd-label">Мінімальна сума ($)</label>
+      <input class="fd-input" type="number" min="0" placeholder="0" value="${_leadsFilters.minAmt}"
+        oninput="_leadsFilters.minAmt=this.value">
+    </div>
+  `
+  document.getElementById('filter-drawer').classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeFilterDrawer() {
+  document.getElementById('filter-drawer').classList.remove('open')
+  document.body.style.overflow = ''
+}
+
+function searchLeads(q) {
+  const all = window._allLeads || []
+  const filtered = q.trim()
+    ? all.filter(l =>
+        l.name.toLowerCase().includes(q.toLowerCase()) ||
+        (l.telegram_username||'').toLowerCase().includes(q.toLowerCase()) ||
+        (l.comment||'').toLowerCase().includes(q.toLowerCase()))
+    : all
+  _updateLeadsStats(filtered)
+  const tbl = document.getElementById('leads-table')
+  if (tbl) tbl.innerHTML = isMobile() ? leadsCardsHTML(filtered) : leadsTableHTML(filtered)
+}
+
+function leadsCardsHTML(leads) {
+  if (!leads.length) return emptyHTML('Лідів не знайдено')
+  const statuses = window._leadStatuses || []
+  return `<div class="section">
+    <div class="sh">
+      <span class="sh-t">Ліди <span style="color:var(--text3);font-weight:400">(${leads.length})</span></span>
+      <button class="sbtn p" onclick="openLeadModal()">+ Додати</button>
+    </div>
+    <div style="padding:10px">
+      ${leads.map(l=>`
+      <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:14px;padding:14px;margin-bottom:10px;backdrop-filter:blur(12px)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px">
+          <div style="min-width:0">
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.name}</div>
+            ${l.telegram_username?`<a href="https://t.me/${l.telegram_username}" target="_blank" style="color:#2AABEE;font-size:12px;display:inline-flex;align-items:center;gap:4px;text-decoration:none;font-family:var(--mono)">✈ @${l.telegram_username}</a>`:''}
+          </div>
+          <div style="flex-shrink:0">${leadStatusBadge(l)}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+          ${l.source?`<span class="badge bgr">${l.source.name}</span>`:''}
+          <span style="font-weight:700;color:var(--text);font-size:14px">${cur(l.amount)}</span>
+          <span style="color:var(--text3);font-family:var(--mono);font-size:10px">${fmt(l.created_at)}</span>
+        </div>
+        ${l.comment?`<div style="color:var(--text3);font-size:12px;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:8px;line-height:1.5">${l.comment}</div>`:''}
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="status-sel" style="flex:1;padding:10px 12px;font-size:14px;min-height:44px;border-radius:10px;-webkit-appearance:none" onchange="patchLeadStatus('${l.id}',this.value,this)" data-prev="${l.status_id||''}">
+            <option value="">— статус —</option>
+            ${statuses.map(s=>`<option value="${s.id}"${l.status_id===s.id?' selected':''}>${s.name}</option>`).join('')}
+          </select>
+          ${l.telegram_username?`<a href="https://t.me/${l.telegram_username}" target="_blank" style="min-height:44px;padding:0 14px;display:inline-flex;align-items:center;background:rgba(42,171,238,0.1);border:1px solid rgba(42,171,238,0.25);border-radius:10px;color:#2AABEE;text-decoration:none;font-size:18px;flex-shrink:0">✈</a>`:''}
+          <button class="sbtn" style="min-height:44px;padding:0 14px;font-size:15px;flex-shrink:0" onclick="openEditLeadModal('${l.id}')">✎</button>
+          <button class="sbtn d" style="min-height:44px;padding:0 14px;font-size:15px;flex-shrink:0" onclick="deleteLead('${l.id}')">✕</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`
+}
+
 // LEADS FILTERS
 // ════════════════════════════════════════
 let _leadsFilters = { status:'', source:'', minAmt:'' }
 
 function leadsFiltersHTML(leads) {
-  const sources = [...new Set(leads.map(l=>l.source))].sort()
+  const statuses = window._leadStatuses || []
+  const sources  = window._leadSources  || []
   return `<div class="leads-filters">
     <div class="lf-group">
       <div class="lf-label">Статус</div>
-      <select class="lf-select" onchange="_leadsFilters.status=this.value;applyLeadsFilter()" >
+      <select class="lf-select" onchange="_leadsFilters.status=this.value;applyLeadsFilter()">
         <option value="">Всі</option>
-        ${['NEW','CONTACTED','PROPOSAL','WON','LOST'].map(s=>`<option value="${s}"${_leadsFilters.status===s?' selected':''}>${STATUS_UA[s]}</option>`).join('')}
+        ${statuses.map(s=>`<option value="${s.id}"${_leadsFilters.status===s.id?' selected':''}>${s.name}</option>`).join('')}
       </select>
     </div>
     <div class="lf-group">
       <div class="lf-label">Джерело</div>
       <select class="lf-select" onchange="_leadsFilters.source=this.value;applyLeadsFilter()">
         <option value="">Всі</option>
-        ${sources.map(s=>`<option value="${s}"${_leadsFilters.source===s?' selected':''}>${s}</option>`).join('')}
+        ${sources.map(s=>`<option value="${s.id}"${_leadsFilters.source===s.id?' selected':''}>${s.name}</option>`).join('')}
       </select>
     </div>
     <div class="lf-group">
@@ -2571,17 +3131,13 @@ function applyLeadsFilter() {
   const all = window._allLeads || []
   const f = _leadsFilters
   const filtered = all.filter(l =>
-    (!f.status || l.status===f.status) &&
-    (!f.source || l.source===f.source) &&
+    (!f.status || l.status_id===f.status) &&
+    (!f.source || l.source_id===f.source) &&
     (!f.minAmt || l.amount >= Number(f.minAmt))
   )
-  const won  = filtered.filter(l=>l.status==='WON').reduce((s,l)=>s+l.amount,0)
-  const pipe = filtered.filter(l=>l.status!=='WON'&&l.status!=='LOST').reduce((s,l)=>s+l.amount,0)
-  const el = document.getElementById('sc-tot'); if(el) el.textContent = filtered.length
-  const ew = document.getElementById('sc-won'); if(ew) ew.textContent = cur(won)
-  const ep = document.getElementById('sc-pipe'); if(ep) ep.textContent = cur(pipe)
+  _updateLeadsStats(filtered)
   const tbl = document.getElementById('leads-table')
-  if (tbl) tbl.innerHTML = leadsTableHTML(filtered)
+  if (tbl) tbl.innerHTML = isMobile() ? leadsCardsHTML(filtered) : leadsTableHTML(filtered)
 }
 
 // ════════════════════════════════════════
