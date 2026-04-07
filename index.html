@@ -804,10 +804,28 @@ async function fetchAllTasks(projects) {
 // TASK STATUS PATCH
 // ════════════════════════════════════════
 async function patchTaskStatus(taskId, newStatus, selectEl) {
-  const prev = [...selectEl.options].find(o => o.value !== newStatus && o.defaultSelected)?.value
-    || selectEl.dataset.prev || selectEl.value
-  selectEl.dataset.prev = selectEl.value
+  const oldStatus = selectEl.dataset.prev || [...selectEl.options].find(o => o.defaultSelected)?.value || selectEl.value
+  selectEl.dataset.prev = newStatus
   selectEl.disabled = true
+
+  // Optimistic UI: move card to new column immediately
+  const card = selectEl.closest('[data-task-id]')
+  let origParent = null
+  if (card && _taskView === 'kanban') {
+    origParent = card.parentElement
+    card.dataset.status = newStatus
+    card.classList.toggle('done-card', newStatus === 'DONE')
+    const targetCards = document.querySelector(`.kancol[data-status="${newStatus}"] .kanboard-cards`)
+    if (targetCards) targetCards.appendChild(card)
+    // update counters
+    document.querySelectorAll('.kancol').forEach(c => {
+      const cnt = c.querySelector('.kanboard-cards')?.children.length ?? 0
+      const st = c.dataset.status
+      const el = document.getElementById('kcnt-' + st)
+      if (el) el.textContent = cnt
+    })
+  }
+
   try {
     const res = await api(`/api/tasks/${taskId}`, {
       method: 'PATCH',
@@ -816,12 +834,23 @@ async function patchTaskStatus(taskId, newStatus, selectEl) {
     if (!res.ok) {
       const e = await res.json()
       alert(e.error || 'Помилка зміни статусу')
-      selectEl.value = selectEl.dataset.prev || prev
-    } else {
-      selectEl.dataset.prev = newStatus
+      // rollback
+      selectEl.value = oldStatus
+      selectEl.dataset.prev = oldStatus
+      if (card && origParent) {
+        card.dataset.status = oldStatus
+        card.classList.toggle('done-card', oldStatus === 'DONE')
+        origParent.appendChild(card)
+      }
     }
   } catch {
-    selectEl.value = selectEl.dataset.prev || prev
+    selectEl.value = oldStatus
+    selectEl.dataset.prev = oldStatus
+    if (card && origParent) {
+      card.dataset.status = oldStatus
+      card.classList.toggle('done-card', oldStatus === 'DONE')
+      origParent.appendChild(card)
+    }
   } finally {
     selectEl.disabled = false
   }
