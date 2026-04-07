@@ -190,12 +190,6 @@ async function handleDirections(req, res) {
 
 // ── Stats ─────────────────────────────────────────────────
 
-const CALL_STAGES        = ['call','proposal','interested','not_interested','thinking','sold']
-const PROPOSAL_STAGES    = ['proposal','interested','not_interested','thinking','sold']
-const INTERESTED_STAGES  = ['interested']
-const NOTINT_STAGES      = ['not_interested']
-const THINKING_STAGES    = ['thinking']
-const SOLD_STAGES        = ['sold']
 
 function pct(a, b) { return b === 0 ? 0 : Math.round(a * 1000 / b) / 10 }
 
@@ -247,31 +241,34 @@ async function handleStats(req, res) {
     row.total_contacted++
     kpi.total_contacted++
 
-    if (CALL_STAGES.includes(stage))     { row.total_calls++;        kpi.total_calls++ }
-    if (PROPOSAL_STAGES.includes(stage)) { row.total_proposals++;    kpi.total_proposals++ }
-    if (stage === 'interested')          { row.total_interested++;   kpi.total_interested++ }
-    if (stage === 'not_interested')      { row.total_not_interested++; kpi.total_not_interested++ }
-    if (stage === 'thinking')            { row.total_thinking++;     kpi.total_thinking++ }
-    if (stage === 'sold')                { row.total_sold++; row.revenue += lead.amount; kpi.total_sold++; kpi.revenue += lead.amount }
+    if (stage === 'call')            { row.total_calls++;          kpi.total_calls++ }
+    if (stage === 'proposal')        { row.total_proposals++;      kpi.total_proposals++ }
+    if (stage === 'interested')      { row.total_interested++;     kpi.total_interested++ }
+    if (stage === 'not_interested')  { row.total_not_interested++; kpi.total_not_interested++ }
+    if (stage === 'thinking')        { row.total_thinking++;       kpi.total_thinking++ }
+    if (stage === 'sold')            { row.total_sold++; row.revenue += lead.amount; kpi.total_sold++; kpi.revenue += lead.amount }
   }
 
-  // Compute conversions per row
+  // Compute conversions per row (cumulative buckets for conv rates)
+  function cumCalls(r)     { return r.total_calls + r.total_proposals + r.total_interested + r.total_not_interested + r.total_thinking + r.total_sold }
+  function cumProposals(r) { return r.total_proposals + r.total_interested + r.total_not_interested + r.total_thinking + r.total_sold }
+
   const directions = Object.values(dirMap)
     .filter(r => r.total_contacted > 0 || r.direction_id !== null)
     .map(r => ({
       ...r,
-      conv_to_call:     pct(r.total_calls,     r.total_contacted),
-      conv_to_proposal: pct(r.total_proposals, r.total_calls),
-      conv_to_sold:     pct(r.total_sold,      r.total_proposals),
-      conv_total:       pct(r.total_sold,      r.total_contacted),
+      conv_to_call:     pct(cumCalls(r),     r.total_contacted),
+      conv_to_proposal: pct(cumProposals(r), cumCalls(r)),
+      conv_to_sold:     pct(r.total_sold,    cumProposals(r)),
+      conv_total:       pct(r.total_sold,    r.total_contacted),
     }))
 
   const kpiWithConv = {
     ...kpi,
-    conv_to_call:     pct(kpi.total_calls,     kpi.total_contacted),
-    conv_to_proposal: pct(kpi.total_proposals, kpi.total_calls),
-    conv_to_sold:     pct(kpi.total_sold,      kpi.total_proposals),
-    conv_total:       pct(kpi.total_sold,      kpi.total_contacted),
+    conv_to_call:     pct(cumCalls(kpi),     kpi.total_contacted),
+    conv_to_proposal: pct(cumProposals(kpi), cumCalls(kpi)),
+    conv_to_sold:     pct(kpi.total_sold,    cumProposals(kpi)),
+    conv_total:       pct(kpi.total_sold,    kpi.total_contacted),
   }
 
   return res.status(200).json({ kpi: kpiWithConv, directions, period: { from: from||null, to: to||null } })
