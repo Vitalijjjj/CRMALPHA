@@ -556,7 +556,7 @@ function projectsTableHTML(projects) {
       ${canAdd ? '<button class="sbtn p" onclick="openProjectModal()">+ Новий проєкт</button>' : ''}
     </div>
     <table>
-      <thead><tr><th>Проєкт</th><th>Клієнт</th><th>Тип</th><th>Прогрес</th><th>Статус</th><th>Дедлайн</th><th>Розробник</th></tr></thead>
+      <thead><tr><th>Проєкт</th><th>Клієнт</th><th>Тип</th><th>Прогрес</th><th>Статус</th><th>Дедлайн</th><th>Розробник</th>${canAdd?'<th></th>':''}</tr></thead>
       <tbody>${projects.map(p => `<tr>
         <td><div class="cm">${p.name}</div></td>
         <td>${p.client}</td>
@@ -565,6 +565,7 @@ function projectsTableHTML(projects) {
         <td>${badge(p.status)}</td>
         <td style="color:${p.deadline&&new Date(p.deadline)<NOW?'var(--red)':'var(--text3)'}">${p.deadline?fmt(p.deadline):'—'}</td>
         <td>${p.dev?.email||'—'}</td>
+        ${canAdd?`<td style="white-space:nowrap"><button class="sbtn" onclick="openEditProjectModal('${p.id}')">✎</button></td>`:''}
       </tr>`).join('')}</tbody>
     </table>
   </div>`
@@ -633,10 +634,11 @@ function taskListTabsHTML(tasks) {
       <td>${t.assignee?.email||'—'}</td>
       <td>${taskStatusSel(t)}</td>
       <td style="color:${ov?'var(--red)':'var(--text3)'}">${t.deadline?fmt(t.deadline):'—'}</td>
+      <td><button class="sbtn" onclick="openEditTaskModal('${t.id}')">✎</button></td>
     </tr>`
   }
   const tbl = (rows) => rows.length===0 ? emptyHTML('Немає задач') : `<table>
-    <thead><tr><th>Задача</th><th>Пріоритет</th><th>Виконавець</th><th>Статус</th><th>Дедлайн</th></tr></thead>
+    <thead><tr><th>Задача</th><th>Пріоритет</th><th>Виконавець</th><th>Статус</th><th>Дедлайн</th><th></th></tr></thead>
     <tbody>${rows.map(t=>tRow(t)).join('')}</tbody></table>`
 
   return `
@@ -685,6 +687,7 @@ function kanbanHTML(tasks) {
               ${priDot(t.priority)}
               ${t.assignee?`<span class="kancard-assignee">· ${t.assignee.email}</span>`:''}
               ${t.deadline?`<span class="kancard-dl" style="color:${ov?'var(--red)':'var(--text3)'}">${fmt(t.deadline)}</span>`:''}
+              <button class="sbtn" style="padding:1px 7px;font-size:11px;margin-left:auto" onclick="openEditTaskModal('${t.id}')">✎</button>
             </div>
             <div style="margin-top:8px">${taskStatusSel(t)}</div>
           </div>`
@@ -896,6 +899,75 @@ async function submitProject() {
   } catch(e) { modalErr(e.message); modalBtnRestore('Створити →') }
 }
 
+async function openEditProjectModal(projectId) {
+  openModal('Редагувати проєкт', loadingHTML())
+  try {
+    const [pRes, uRes] = await Promise.all([api(`/api/projects/${projectId}`), api('/api/users')])
+    const p = await pRes.json()
+    const users = uRes.ok ? await uRes.json() : []
+    const dl = p.deadline ? new Date(p.deadline).toISOString().slice(0,10) : ''
+    document.getElementById('modal-body').innerHTML = `
+      <div class="merr" id="m-err"></div>
+      <label class="mlabel">Назва *</label>
+      <input id="mf-name" class="mfield" value="${p.name}">
+      <label class="mlabel">Клієнт *</label>
+      <input id="mf-client" class="mfield" value="${p.client}">
+      <label class="mlabel">Тип</label>
+      <select id="mf-type" class="mfield">
+        <option value="WEBFLOW"${p.type==='WEBFLOW'?' selected':''}>Webflow</option>
+        <option value="WORDPRESS"${p.type==='WORDPRESS'?' selected':''}>WordPress</option>
+      </select>
+      <label class="mlabel">Статус</label>
+      <select id="mf-status" class="mfield">
+        <option value="ACTIVE"${p.status==='ACTIVE'?' selected':''}>Активний</option>
+        <option value="COMPLETED"${p.status==='COMPLETED'?' selected':''}>Завершено</option>
+        <option value="ON_HOLD"${p.status==='ON_HOLD'?' selected':''}>На паузі</option>
+        <option value="CANCELLED"${p.status==='CANCELLED'?' selected':''}>Скасовано</option>
+      </select>
+      <div class="mrow">
+        <div class="mhalf">
+          <label class="mlabel">PM</label>
+          <select id="mf-pm" class="mfield">
+            <option value="">— без PM —</option>
+            ${users.map(u=>`<option value="${u.id}"${p.pm?.id===u.id?' selected':''}>${u.email}</option>`).join('')}
+          </select>
+        </div>
+        <div class="mhalf">
+          <label class="mlabel">Розробник</label>
+          <select id="mf-dev" class="mfield">
+            <option value="">— без розробника —</option>
+            ${users.map(u=>`<option value="${u.id}"${p.dev?.id===u.id?' selected':''}>${u.email}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <label class="mlabel">Дедлайн</label>
+      <input id="mf-deadline" class="mfield" type="date" value="${dl}">
+      <div class="mfooter">
+        <button class="sbtn" onclick="closeModal()">Скасувати</button>
+        <button class="sbtn p" onclick="submitEditProject('${projectId}')">Зберегти →</button>
+      </div>`
+  } catch(e) { document.getElementById('modal-body').innerHTML = errorHTML(e.message) }
+}
+
+async function submitEditProject(projectId) {
+  const name = document.getElementById('mf-name').value.trim()
+  const client = document.getElementById('mf-client').value.trim()
+  const type = document.getElementById('mf-type').value
+  const status = document.getElementById('mf-status').value
+  const pm_id = document.getElementById('mf-pm').value
+  const dev_id = document.getElementById('mf-dev').value
+  const deadline = document.getElementById('mf-deadline').value
+  if (!name || !client) return modalErr('Назва та клієнт обов\'язкові')
+  modalBtnBusy('Збереження...')
+  try {
+    const res = await api(`/api/projects/${projectId}`, { method:'PUT', body: JSON.stringify({ name, client, type, status, pm_id: pm_id||null, dev_id: dev_id||null, deadline: deadline||null }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Помилка')
+    closeModal()
+    go(currentPage)
+  } catch(e) { modalErr(e.message); modalBtnRestore('Зберегти →') }
+}
+
 // ════════════════════════════════════════
 // TASK MODAL
 // ════════════════════════════════════════
@@ -962,6 +1034,72 @@ async function submitTask() {
   } catch(e) { modalErr(e.message); modalBtnRestore('Створити →') }
 }
 
+async function openEditTaskModal(taskId) {
+  openModal('Редагувати задачу', loadingHTML())
+  try {
+    const [tRes, uRes] = await Promise.all([
+      api(`/api/tasks/${taskId}`),
+      api('/api/users'),
+    ])
+    if (!tRes.ok) throw new Error('Задачу не знайдено')
+    const t = await tRes.json()
+    const users = uRes.ok ? await uRes.json() : []
+    const dl = t.deadline ? new Date(t.deadline).toISOString().slice(0,10) : ''
+    document.getElementById('modal-body').innerHTML = `
+      <div class="merr" id="m-err"></div>
+      <label class="mlabel">Назва *</label>
+      <input id="mf-title" class="mfield" value="${t.title.replace(/"/g,'&quot;')}">
+      <label class="mlabel">Виконавець</label>
+      <select id="mf-assignee" class="mfield">
+        <option value="">— без виконавця —</option>
+        ${users.map(u=>`<option value="${u.id}"${t.assignee?.id===u.id?' selected':''}>${u.email}</option>`).join('')}
+      </select>
+      <div class="mrow">
+        <div class="mhalf">
+          <label class="mlabel">Пріоритет</label>
+          <select id="mf-priority" class="mfield">
+            <option value="LOW"${t.priority==='LOW'?' selected':''}>Низький</option>
+            <option value="MEDIUM"${t.priority==='MEDIUM'?' selected':''}>Середній</option>
+            <option value="HIGH"${t.priority==='HIGH'?' selected':''}>Високий</option>
+            <option value="URGENT"${t.priority==='URGENT'?' selected':''}>Критичний</option>
+          </select>
+        </div>
+        <div class="mhalf">
+          <label class="mlabel">Статус</label>
+          <select id="mf-status" class="mfield">
+            <option value="TODO"${t.status==='TODO'?' selected':''}>До виконання</option>
+            <option value="IN_PROGRESS"${t.status==='IN_PROGRESS'?' selected':''}>В роботі</option>
+            <option value="REVIEW"${t.status==='REVIEW'?' selected':''}>На перевірці</option>
+            <option value="DONE"${t.status==='DONE'?' selected':''}>Готово</option>
+          </select>
+        </div>
+      </div>
+      <label class="mlabel">Дедлайн</label>
+      <input id="mf-deadline" class="mfield" type="date" value="${dl}">
+      <div class="mfooter">
+        <button class="sbtn" onclick="closeModal()">Скасувати</button>
+        <button class="sbtn p" onclick="submitEditTask('${taskId}')">Зберегти →</button>
+      </div>`
+  } catch(e) { document.getElementById('modal-body').innerHTML = errorHTML(e.message) }
+}
+
+async function submitEditTask(taskId) {
+  const title = document.getElementById('mf-title').value.trim()
+  const assignee_id = document.getElementById('mf-assignee').value
+  const priority = document.getElementById('mf-priority').value
+  const status = document.getElementById('mf-status').value
+  const deadline = document.getElementById('mf-deadline').value
+  if (!title) return modalErr('Назва обов\'язкова')
+  modalBtnBusy('Збереження...')
+  try {
+    const res = await api(`/api/tasks/${taskId}`, { method:'PATCH', body: JSON.stringify({ title, assignee_id: assignee_id||null, priority, status, deadline: deadline||null }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Помилка')
+    closeModal()
+    go(currentPage)
+  } catch(e) { modalErr(e.message); modalBtnRestore('Зберегти →') }
+}
+
 // ════════════════════════════════════════
 // LEAD MODAL + STATUS PATCH
 // ════════════════════════════════════════
@@ -1012,6 +1150,57 @@ async function submitLead() {
     closeModal()
     rLeads()
   } catch(e) { modalErr(e.message); modalBtnRestore('Додати →') }
+}
+
+async function openEditLeadModal(leadId) {
+  const lead = (window._allLeads||[]).find(l=>l.id===leadId)
+  if (!lead) return
+  openModal('Редагувати лід', `
+    <div class="merr" id="m-err"></div>
+    <label class="mlabel">Ім'я / Компанія *</label>
+    <input id="mf-name" class="mfield" value="${lead.name.replace(/"/g,'&quot;')}">
+    <label class="mlabel">Джерело *</label>
+    <input id="mf-source" class="mfield" value="${lead.source.replace(/"/g,'&quot;')}">
+    <div class="mrow">
+      <div class="mhalf">
+        <label class="mlabel">Статус</label>
+        <select id="mf-status" class="mfield">
+          <option value="NEW"${lead.status==='NEW'?' selected':''}>Новий</option>
+          <option value="CONTACTED"${lead.status==='CONTACTED'?' selected':''}>Контакт</option>
+          <option value="PROPOSAL"${lead.status==='PROPOSAL'?' selected':''}>Пропозиція</option>
+          <option value="WON"${lead.status==='WON'?' selected':''}>Виграно</option>
+          <option value="LOST"${lead.status==='LOST'?' selected':''}>Програно</option>
+        </select>
+      </div>
+      <div class="mhalf">
+        <label class="mlabel">Сума ($)</label>
+        <input id="mf-amount" class="mfield" type="number" min="0" value="${lead.amount||0}">
+      </div>
+    </div>
+    <label class="mlabel">Коментар</label>
+    <input id="mf-comment" class="mfield" value="${(lead.comment||'').replace(/"/g,'&quot;')}">
+    <div class="mfooter">
+      <button class="sbtn" onclick="closeModal()">Скасувати</button>
+      <button class="sbtn p" onclick="submitEditLead('${leadId}')">Зберегти →</button>
+    </div>
+  `)
+}
+
+async function submitEditLead(leadId) {
+  const name = document.getElementById('mf-name').value.trim()
+  const source = document.getElementById('mf-source').value.trim()
+  const status = document.getElementById('mf-status').value
+  const amount = document.getElementById('mf-amount').value
+  const comment = document.getElementById('mf-comment').value.trim()
+  if (!name || !source) return modalErr('Ім\'я та джерело обов\'язкові')
+  modalBtnBusy('Збереження...')
+  try {
+    const res = await api(`/api/leads/${leadId}`, { method:'PATCH', body: JSON.stringify({ name, source, status, amount: amount||0, comment: comment||null }) })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Помилка')
+    closeModal()
+    rLeads()
+  } catch(e) { modalErr(e.message); modalBtnRestore('Зберегти →') }
 }
 
 async function patchLeadStatus(leadId, newStatus, selectEl) {
@@ -1402,7 +1591,7 @@ function leadsTableHTML(leads) {
       <button class="sbtn p" onclick="openLeadModal()">+ Додати лід</button>
     </div>
     <table>
-      <thead><tr><th>Ім'я</th><th>Джерело</th><th>Статус</th><th>Сума</th><th>Створено</th><th>Коментар</th></tr></thead>
+      <thead><tr><th>Ім'я</th><th>Джерело</th><th>Статус</th><th>Сума</th><th>Створено</th><th>Коментар</th><th></th></tr></thead>
       <tbody>${leads.map(l=>`<tr>
         <td><div class="cm">${l.name}</div></td>
         <td><span class="badge bgr">${l.source}</span></td>
@@ -1412,6 +1601,7 @@ function leadsTableHTML(leads) {
         <td style="color:var(--text);font-weight:600">${cur(l.amount)}</td>
         <td>${fmt(l.created_at)}</td>
         <td style="color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis">${l.comment||'—'}</td>
+        <td><button class="sbtn" onclick="openEditLeadModal('${l.id}')">✎</button></td>
       </tr>`).join('')}</tbody>
     </table>
   </div>`
