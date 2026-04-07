@@ -210,9 +210,13 @@ tr.done-row:hover{opacity:.5}
 .kancol-h{padding:11px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .kancol-title{font-size:11px;font-weight:600;font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;flex:1}
 .kancol-cnt{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg4);padding:2px 7px;border-radius:10px}
-.kancard{margin:8px;padding:11px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;cursor:default;transition:border-color .12s}
+.kancard{margin:8px;padding:11px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;cursor:grab;transition:border-color .12s,opacity .12s,transform .12s}
 .kancard:hover{border-color:var(--border2)}
 .kancard.done-card{opacity:.38}
+.kancard.dragging{opacity:.35;transform:scale(.97);cursor:grabbing}
+.kancol.drag-over{border-color:rgba(124,111,205,.55);background:rgba(124,111,205,.04)}
+.kancol.drag-over .kanboard-cards{min-height:60px}
+.kanboard-cards{min-height:8px}
 .kancard-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:7px;line-height:1.4}
 .kancard-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .kancard-assignee{font-family:var(--mono);font-size:10px;color:var(--text3)}
@@ -659,15 +663,23 @@ function kanbanHTML(tasks) {
   ]
   return `<div class="kanban">${cols.map(col=>{
     const ct = tasks.filter(t=>t.status===col.status)
-    return `<div class="kancol">
+    return `<div class="kancol" data-status="${col.status}"
+        ondragover="kDragOver(event)"
+        ondragleave="kDragLeave(event)"
+        ondrop="kDrop(event,'${col.status}')">
       <div class="kancol-h">
         <span class="kancol-title" style="color:${col.color}">${col.label}</span>
-        <span class="kancol-cnt">${ct.length}</span>
+        <span class="kancol-cnt" id="kcnt-${col.status}">${ct.length}</span>
       </div>
-      ${ct.length===0?`<div style="padding:16px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3)">—</div>`:
-        ct.map(t=>{
+      <div class="kanboard-cards">
+        ${ct.map(t=>{
           const ov=isOverdue(t)
-          return `<div class="kancard${col.status==='DONE'?' done-card':''}">
+          return `<div class="kancard${col.status==='DONE'?' done-card':''}"
+              draggable="true"
+              data-task-id="${t.id}"
+              data-status="${t.status}"
+              ondragstart="kDragStart(event,'${t.id}')"
+              ondragend="kDragEnd(event)">
             <div class="kancard-title">${ov?'<span class="od-dot"></span>':''}${t.title}</div>
             <div class="kancard-meta">
               ${priDot(t.priority)}
@@ -677,8 +689,90 @@ function kanbanHTML(tasks) {
             <div style="margin-top:8px">${taskStatusSel(t)}</div>
           </div>`
         }).join('')}
+      </div>
     </div>`
   }).join('')}</div>`
+}
+
+// ── Kanban drag-and-drop ──
+let _dragId = null
+
+function kDragStart(e, taskId) {
+  _dragId = taskId
+  e.dataTransfer.effectAllowed = 'move'
+  setTimeout(() => e.target.classList.add('dragging'), 0)
+}
+
+function kDragEnd(e) {
+  e.target.classList.remove('dragging')
+  document.querySelectorAll('.kancol.drag-over').forEach(c => c.classList.remove('drag-over'))
+}
+
+function kDragOver(e) {
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'move'
+  const col = e.currentTarget
+  if (!col.classList.contains('drag-over')) col.classList.add('drag-over')
+}
+
+function kDragLeave(e) {
+  // Only remove if leaving the column entirely (not entering a child)
+  if (!e.currentTarget.contains(e.relatedTarget)) {
+    e.currentTarget.classList.remove('drag-over')
+  }
+}
+
+async function kDrop(e, newStatus) {
+  e.preventDefault()
+  const col = e.currentTarget
+  col.classList.remove('drag-over')
+  if (!_dragId) return
+
+  const taskId = _dragId
+  _dragId = null
+
+  const card = document.querySelector(`[data-task-id="${taskId}"]`)
+  if (!card) return
+
+  const oldStatus = card.dataset.status
+  if (oldStatus === newStatus) return  // no change
+
+  // Optimistic UI: move card immediately
+  card.dataset.status = newStatus
+  card.classList.toggle('done-card', newStatus === 'DONE')
+  const sel = card.querySelector('.status-sel')
+  if (sel) sel.value = newStatus
+
+  const targetCards = col.querySelector('.kanboard-cards')
+  targetCards.appendChild(card)
+
+  // Update column counters
+  document.querySelectorAll('.kancol').forEach(c => {
+    const cnt = c.querySelector('.kanboard-cards')?.children.length ?? 0
+    const status = c.dataset.status
+    const el = document.getElementById('kcnt-' + status)
+    if (el) el.textContent = cnt
+  })
+
+  // Persist to API
+  try {
+    const res = await api(`/api/tasks/${taskId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: newStatus }),
+    })
+    if (!res.ok) {
+      // Rollback: move card back
+      card.dataset.status = oldStatus
+      card.classList.toggle('done-card', oldStatus === 'DONE')
+      if (sel) sel.value = oldStatus
+      const orig = document.querySelector(`.kancol[data-status="${oldStatus}"] .kanboard-cards`)
+      if (orig) orig.appendChild(card)
+      const d = await res.json()
+      alert(d.error || 'Помилка збереження')
+    }
+  } catch {
+    // silent fail — card stays where user dropped it, will sync on next load
+  }
 }
 
 function overdueHTML(tasks) {
@@ -1357,8 +1451,18 @@ async function openProfileModal() {
       <input id="mf-name" class="mfield" placeholder="Ваше ім'я" value="${u.name||''}">
       <label class="mlabel">Email</label>
       <input id="mf-email" class="mfield" type="email" value="${u.email||''}">
-      <label class="mlabel">Фото (URL)</label>
-      <input id="mf-avatar" class="mfield" placeholder="https://..." value="${u.avatar_url||''}">
+      <label class="mlabel">Фото профілю</label>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px">
+        <img id="mf-avatar-preview" src="${u.avatar_url||''}" alt=""
+          style="width:64px;height:64px;border-radius:50%;object-fit:cover;background:#1a1a2e;border:2px solid rgba(124,111,205,.3);${u.avatar_url?'':'display:none'}">
+        <div style="flex:1">
+          <label class="sbtn" style="cursor:pointer;display:inline-block;margin-bottom:6px">
+            📎 Вибрати файл
+            <input id="mf-avatar-file" type="file" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+          </label>
+          <div id="mf-avatar-name" style="font-size:12px;color:#888;margin-top:2px"></div>
+        </div>
+      </div>
       <div class="mfooter">
         <button class="sbtn" onclick="closeModal()">Скасувати</button>
         <button class="sbtn p" onclick="submitProfile()">Зберегти →</button>
@@ -1366,13 +1470,41 @@ async function openProfileModal() {
   } catch(e) { document.getElementById('modal-body').innerHTML = errorHTML(e.message) }
 }
 
+function previewAvatar(input) {
+  const file = input.files[0]
+  if (!file) return
+  document.getElementById('mf-avatar-name').textContent = file.name
+  const reader = new FileReader()
+  reader.onload = e => {
+    const prev = document.getElementById('mf-avatar-preview')
+    prev.src = e.target.result
+    prev.style.display = 'block'
+  }
+  reader.readAsDataURL(file)
+}
+
 async function submitProfile() {
   const name = document.getElementById('mf-name').value.trim()
   const email = document.getElementById('mf-email').value.trim()
-  const avatar_url = document.getElementById('mf-avatar').value.trim()
+  const fileInput = document.getElementById('mf-avatar-file')
   modalBtnBusy('Збереження...')
+
+  let avatar_url
+  if (fileInput && fileInput.files[0]) {
+    const file = fileInput.files[0]
+    if (file.size > 2 * 1024 * 1024) { modalErr('Файл занадто великий (макс 2 МБ)'); modalBtnRestore('Зберегти →'); return }
+    avatar_url = await new Promise((resolve, reject) => {
+      const r = new FileReader()
+      r.onload = e => resolve(e.target.result)
+      r.onerror = () => reject(new Error('Помилка читання файлу'))
+      r.readAsDataURL(file)
+    })
+  }
+
   try {
-    const res = await api('/api/users?scope=profile', { method:'PATCH', body: JSON.stringify({ name, email, avatar_url }) })
+    const body = { name, email }
+    if (avatar_url !== undefined) body.avatar_url = avatar_url
+    const res = await api('/api/users?scope=profile', { method:'PATCH', body: JSON.stringify(body) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error||'Помилка')
     currentUser = { ...currentUser, ...data }
