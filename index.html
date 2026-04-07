@@ -2499,16 +2499,16 @@ async function rStats() {
   document.getElementById('pcontent').innerHTML = `
     <div class="section" style="margin-bottom:16px">
       <div class="sh"><span class="sh-t">Фільтри</span></div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
         <div>
           <label class="mlabel" style="margin-bottom:4px;display:block">Від</label>
-          <input id="st-from" type="date" class="mfield" style="width:auto;padding:8px 12px">
+          <input id="st-from" type="date" class="mfield" style="width:160px;padding:8px 12px">
         </div>
         <div>
           <label class="mlabel" style="margin-bottom:4px;display:block">До</label>
-          <input id="st-to" type="date" class="mfield" style="width:auto;padding:8px 12px">
+          <input id="st-to" type="date" class="mfield" style="width:160px;padding:8px 12px">
         </div>
-        <div style="padding-top:20px">
+        <div style="display:flex;gap:8px">
           <button class="sbtn p" onclick="loadStats()">Застосувати</button>
           <button class="sbtn" onclick="document.getElementById('st-from').value='';document.getElementById('st-to').value='';loadStats()">Скинути</button>
           <button class="sbtn" onclick="exportStatsCSV()">Експорт CSV</button>
