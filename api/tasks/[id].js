@@ -7,8 +7,9 @@ const VALID_STATUSES = ['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE']
 async function handler(req, res) {
   const { id } = req.query
 
-  if (req.method === 'GET')   return getTask(req, res, id)
-  if (req.method === 'PATCH') return updateTask(req, res, id)
+  if (req.method === 'GET')    return getTask(req, res, id)
+  if (req.method === 'PATCH')  return updateTask(req, res, id)
+  if (req.method === 'DELETE') return deleteTask(req, res, id)
   return res.status(405).json({ error: 'Method not allowed' })
 }
 
@@ -72,6 +73,18 @@ async function updateTask(req, res, id) {
   const progress = await recalculateProgress(task.project.id)
 
   return res.status(200).json({ ...updated, project: { ...updated.project, progress } })
+}
+
+async function deleteTask(req, res, id) {
+  const { role, sub } = req.user
+  const task = await prisma.task.findUnique({ where: { id }, include: { project: { select: { id: true } } } })
+  if (!task) return res.status(404).json({ error: 'Task not found' })
+  if (!FULL_ACCESS.includes(role) && task.created_by !== sub) {
+    return res.status(403).json({ error: 'Forbidden' })
+  }
+  await prisma.task.delete({ where: { id } })
+  await recalculateProgress(task.project.id)
+  return res.status(200).json({ message: 'Видалено' })
 }
 
 module.exports = withAuth(handler)

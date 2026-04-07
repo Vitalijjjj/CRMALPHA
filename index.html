@@ -78,6 +78,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .sbtn:hover{background:var(--bg4);color:var(--text)}
 .sbtn.p{background:var(--violet);border-color:var(--violet);color:#fff}
 .sbtn.p:hover{background:var(--violet2)}
+.sbtn.d{border-color:rgba(231,76,60,.4);color:var(--red)}
+.sbtn.d:hover{background:rgba(231,76,60,.12)}
 
 /* table */
 table{width:100%;border-collapse:collapse}
@@ -943,6 +945,7 @@ async function openEditProjectModal(projectId) {
       <label class="mlabel">Дедлайн</label>
       <input id="mf-deadline" class="mfield" type="date" value="${dl}">
       <div class="mfooter">
+        <button class="sbtn d" onclick="deleteProject('${projectId}')">Видалити</button>
         <button class="sbtn" onclick="closeModal()">Скасувати</button>
         <button class="sbtn p" onclick="submitEditProject('${projectId}')">Зберегти →</button>
       </div>`
@@ -1034,6 +1037,16 @@ async function submitTask() {
   } catch(e) { modalErr(e.message); modalBtnRestore('Створити →') }
 }
 
+async function deleteProject(projectId) {
+  if (!confirm('Видалити проєкт? Всі задачі та дані будуть втрачені.')) return
+  try {
+    const res = await api(`/api/projects/${projectId}`, { method:'DELETE' })
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error||'Помилка') }
+    closeModal()
+    go(currentPage)
+  } catch(e) { modalErr(e.message) }
+}
+
 async function openEditTaskModal(taskId) {
   openModal('Редагувати задачу', loadingHTML())
   try {
@@ -1077,6 +1090,7 @@ async function openEditTaskModal(taskId) {
       <label class="mlabel">Дедлайн</label>
       <input id="mf-deadline" class="mfield" type="date" value="${dl}">
       <div class="mfooter">
+        <button class="sbtn d" onclick="deleteTask('${taskId}')">Видалити</button>
         <button class="sbtn" onclick="closeModal()">Скасувати</button>
         <button class="sbtn p" onclick="submitEditTask('${taskId}')">Зберегти →</button>
       </div>`
@@ -1152,6 +1166,16 @@ async function submitLead() {
   } catch(e) { modalErr(e.message); modalBtnRestore('Додати →') }
 }
 
+async function deleteTask(taskId) {
+  if (!confirm('Видалити задачу?')) return
+  try {
+    const res = await api(`/api/tasks/${taskId}`, { method:'DELETE' })
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error||'Помилка') }
+    closeModal()
+    go(currentPage)
+  } catch(e) { modalErr(e.message) }
+}
+
 async function openEditLeadModal(leadId) {
   const lead = (window._allLeads||[]).find(l=>l.id===leadId)
   if (!lead) return
@@ -1180,6 +1204,7 @@ async function openEditLeadModal(leadId) {
     <label class="mlabel">Коментар</label>
     <input id="mf-comment" class="mfield" value="${(lead.comment||'').replace(/"/g,'&quot;')}">
     <div class="mfooter">
+      <button class="sbtn d" onclick="deleteLead('${leadId}')">Видалити</button>
       <button class="sbtn" onclick="closeModal()">Скасувати</button>
       <button class="sbtn p" onclick="submitEditLead('${leadId}')">Зберегти →</button>
     </div>
@@ -1201,6 +1226,16 @@ async function submitEditLead(leadId) {
     closeModal()
     rLeads()
   } catch(e) { modalErr(e.message); modalBtnRestore('Зберегти →') }
+}
+
+async function deleteLead(leadId) {
+  if (!confirm('Видалити лід?')) return
+  try {
+    const res = await api(`/api/leads/${leadId}`, { method:'DELETE' })
+    if (!res.ok) { const d = await res.json(); throw new Error(d.error||'Помилка') }
+    closeModal()
+    rLeads()
+  } catch(e) { modalErr(e.message) }
 }
 
 async function patchLeadStatus(leadId, newStatus, selectEl) {
