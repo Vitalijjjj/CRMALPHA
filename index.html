@@ -567,7 +567,7 @@ function projectsTableHTML(projects) {
         <td>${badge(p.status)}</td>
         <td style="color:${p.deadline&&new Date(p.deadline)<NOW?'var(--red)':'var(--text3)'}">${p.deadline?fmt(p.deadline):'—'}</td>
         <td>${p.dev?.email||'—'}</td>
-        ${canAdd?`<td style="white-space:nowrap"><button class="sbtn" onclick="openEditProjectModal('${p.id}')">✎</button></td>`:''}
+        ${canAdd?`<td style="white-space:nowrap;display:flex;gap:6px"><button class="sbtn" onclick="openEditProjectModal('${p.id}')">✎</button><button class="sbtn d" onclick="deleteProject('${p.id}')">✕</button></td>`:''}
       </tr>`).join('')}</tbody>
     </table>
   </div>`
@@ -636,7 +636,7 @@ function taskListTabsHTML(tasks) {
       <td>${t.assignee?.email||'—'}</td>
       <td>${taskStatusSel(t)}</td>
       <td style="color:${ov?'var(--red)':'var(--text3)'}">${t.deadline?fmt(t.deadline):'—'}</td>
-      <td><button class="sbtn" onclick="openEditTaskModal('${t.id}')">✎</button></td>
+      <td style="white-space:nowrap;display:flex;gap:6px"><button class="sbtn" onclick="openEditTaskModal('${t.id}')">✎</button><button class="sbtn d" onclick="deleteTask('${t.id}')">✕</button></td>
     </tr>`
   }
   const tbl = (rows) => rows.length===0 ? emptyHTML('Немає задач') : `<table>
@@ -690,6 +690,7 @@ function kanbanHTML(tasks) {
               ${t.assignee?`<span class="kancard-assignee">· ${t.assignee.email}</span>`:''}
               ${t.deadline?`<span class="kancard-dl" style="color:${ov?'var(--red)':'var(--text3)'}">${fmt(t.deadline)}</span>`:''}
               <button class="sbtn" style="padding:1px 7px;font-size:11px;margin-left:auto" onclick="openEditTaskModal('${t.id}')">✎</button>
+              <button class="sbtn d" style="padding:1px 7px;font-size:11px" onclick="deleteTask('${t.id}')">✕</button>
             </div>
             <div style="margin-top:8px">${taskStatusSel(t)}</div>
           </div>`
@@ -1636,7 +1637,7 @@ function leadsTableHTML(leads) {
         <td style="color:var(--text);font-weight:600">${cur(l.amount)}</td>
         <td>${fmt(l.created_at)}</td>
         <td style="color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis">${l.comment||'—'}</td>
-        <td><button class="sbtn" onclick="openEditLeadModal('${l.id}')">✎</button></td>
+        <td style="white-space:nowrap;display:flex;gap:6px"><button class="sbtn" onclick="openEditLeadModal('${l.id}')">✎</button><button class="sbtn d" onclick="deleteLead('${l.id}')">✕</button></td>
       </tr>`).join('')}</tbody>
     </table>
   </div>`
