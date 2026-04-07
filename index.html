@@ -2511,12 +2511,32 @@ async function rStats() {
         <div style="padding-top:20px">
           <button class="sbtn p" onclick="loadStats()">Застосувати</button>
           <button class="sbtn" onclick="document.getElementById('st-from').value='';document.getElementById('st-to').value='';loadStats()">Скинути</button>
+          <button class="sbtn" onclick="exportStatsCSV()">Експорт CSV</button>
         </div>
       </div>
     </div>
     <div id="stats-kpi" style="margin-bottom:16px">${loadingHTML()}</div>
     <div id="stats-table">${loadingHTML()}</div>`
   loadStats()
+}
+
+function exportStatsCSV() {
+  const leads = window._statsLeads || []
+  if (!leads.length) return alert('Немає даних для експорту')
+  const cols = ['Імʼя','Telegram','Статус','Напрямок','Джерело','Сума','Дата']
+  const rows = leads.map(l => [
+    l.name,
+    l.telegram_username ? '@' + l.telegram_username : '',
+    l.status?.name || '',
+    l.direction?.name || '',
+    l.source?.name || '',
+    l.amount,
+    l.created_at ? l.created_at.split('T')[0] : '',
+  ])
+  const csv = [cols, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n')
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
+  a.download = `stats-leads-${Date.now()}.csv`; a.click()
 }
 
 async function loadStats() {
@@ -2530,9 +2550,10 @@ async function loadStats() {
     let url = '/api/leads?scope=stats'
     if (from) url += `&from=${from}`
     if (to)   url += `&to=${to}`
-    const res = await api(url)
-    if (!res.ok) throw new Error('Не вдалося завантажити статистику')
-    const { kpi, directions } = await res.json()
+    const [statsRes, leadsRes] = await Promise.all([api(url), api('/api/leads')])
+    if (!statsRes.ok) throw new Error('Не вдалося завантажити статистику')
+    const { kpi, directions } = await statsRes.json()
+    window._statsLeads = leadsRes.ok ? await leadsRes.json() : []
     if (kpiEl)   kpiEl.innerHTML   = statsKpiHTML(kpi)
     if (tableEl) tableEl.innerHTML = statsFunnelHTML(directions, kpi)
   } catch(e) {
@@ -2541,26 +2562,59 @@ async function loadStats() {
   }
 }
 
+const STAGE_SETS = {
+  all:           null,
+  call:          ['call','proposal','interested','not_interested','thinking','sold'],
+  proposal:      ['proposal','interested','not_interested','thinking','sold'],
+  interested:    ['interested'],
+  not_interested:['not_interested'],
+  thinking:      ['thinking'],
+  sold:          ['sold'],
+}
+
+function openStatsLeadsModal(stageKey, label) {
+  const all = window._statsLeads || []
+  const stages = STAGE_SETS[stageKey]
+  const leads = stages === null ? all : all.filter(l => stages.includes(l.status?.funnel_stage))
+  openModal(`${label} — ${leads.length} контактів`, `
+    <div style="max-height:60vh;overflow-y:auto;margin:-4px -4px 0">
+      ${leads.length === 0 ? '<p style="color:var(--text3);text-align:center;padding:24px">Немає контактів</p>' :
+        leads.map(l => `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--glass-b)">
+          <div style="flex:1;min-width:0">
+            <div class="cm" style="margin-bottom:2px">${l.name}</div>
+            ${l.telegram_username ? `<a href="https://t.me/${l.telegram_username}" target="_blank" style="color:#2AABEE;font-size:11px;font-family:var(--mono)">✈ @${l.telegram_username}</a>` : ''}
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            ${l.status ? `<div style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:${l.status.color}22;color:${l.status.color};border:1px solid ${l.status.color}44;margin-bottom:3px">${l.status.name}</div>` : ''}
+            <div style="font-size:12px;font-weight:600;color:var(--green)">${cur(l.amount)}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="mfooter"><button class="sbtn" onclick="closeModal()">Закрити</button></div>
+  `)
+}
+
 function statsKpiHTML(kpi) {
   const cards = [
-    { l:'Контактів',    v: kpi.total_contacted,     cl:'',  ic:'◎' },
-    { l:'Дзвінків',     v: kpi.total_calls,          cl:'',  ic:'☎' },
-    { l:'Надіслано КП', v: kpi.total_proposals,      cl:'',  ic:'✉' },
-    { l:'Цікаво',       v: kpi.total_interested,     cl:'s', ic:'↑' },
-    { l:'Не цікаво',    v: kpi.total_not_interested, cl:'d', ic:'↓' },
-    { l:'Думає',        v: kpi.total_thinking,       cl:'w', ic:'…' },
-    { l:'Продано',      v: kpi.total_sold,            cl:'s', ic:'✓' },
-    { l:'Виручка',      v: cur(kpi.revenue),          cl:'s', ic:'$' },
+    { l:'Контактів',    v: kpi.total_contacted,     cl:'',  ic:'◎', stage:'all' },
+    { l:'Дзвінків',     v: kpi.total_calls,          cl:'',  ic:'☎', stage:'call' },
+    { l:'Надіслано КП', v: kpi.total_proposals,      cl:'',  ic:'✉', stage:'proposal' },
+    { l:'Цікаво',       v: kpi.total_interested,     cl:'s', ic:'↑', stage:'interested' },
+    { l:'Не цікаво',    v: kpi.total_not_interested, cl:'d', ic:'↓', stage:'not_interested' },
+    { l:'Думає',        v: kpi.total_thinking,       cl:'w', ic:'…', stage:'thinking' },
+    { l:'Продано',      v: kpi.total_sold,            cl:'s', ic:'✓', stage:'sold' },
+    { l:'Виручка',      v: cur(kpi.revenue),          cl:'s', ic:'$', stage:'sold' },
   ]
   const convCards = [
     { l:'Написав → Дзвінок', v: kpi.conv_to_call + '%' },
     { l:'Дзвінок → КП',      v: kpi.conv_to_proposal + '%' },
     { l:'КП → Продаж',       v: kpi.conv_to_sold + '%' },
-    { l:'Загальна конверсія', v: kpi.conv_total + '%',   bold: true },
+    { l:'Загальна конверсія', v: kpi.conv_total + '%' },
   ]
   return `
     <div class="sg" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr));margin-bottom:12px">
-      ${cards.map(c=>`<div class="sc"><div class="sc-l">${c.ic} ${c.l}</div><div class="sc-v ${c.cl}">${c.v}</div></div>`).join('')}
+      ${cards.map(c=>`<div class="sc" style="cursor:pointer" onclick="openStatsLeadsModal('${c.stage}','${c.l}')"><div class="sc-l">${c.ic} ${c.l}</div><div class="sc-v ${c.cl}">${c.v}</div></div>`).join('')}
     </div>
     <div class="sg" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
       ${convCards.map(c=>`<div class="sc"><div class="sc-l">→ ${c.l}</div><div class="sc-v ${convColor(parseFloat(c.v))}">${c.v}</div></div>`).join('')}
