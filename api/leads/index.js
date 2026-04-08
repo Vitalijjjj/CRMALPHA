@@ -48,7 +48,7 @@ async function listLeads(req, res) {
 
 async function createLead(req, res) {
   const { sub } = req.user
-  const { name, status_id, source_id, telegram_username, amount, comment } = req.body
+  const { name, status_id, source_id, direction_id, telegram_username, partner, amount, comment } = req.body
 
   if (!name) return res.status(400).json({ error: 'name is required' })
 
@@ -59,7 +59,9 @@ async function createLead(req, res) {
       name,
       status_id: status_id || null,
       source_id: source_id || null,
+      direction_id: direction_id || null,
       telegram_username: tg,
+      partner: partner || null,
       amount: amount ? Number(amount) : 0,
       comment: comment || null,
       owner_id: sub,
@@ -175,13 +177,13 @@ async function handleDirections(req, res) {
     return res.status(200).json(directions)
   }
   if (req.method === 'POST') {
-    const { name, geo, method, tool, sort_order } = req.body
+    const { name, geo, method, tool, niche, sort_order } = req.body
     if (!name) return res.status(400).json({ error: 'name is required' })
     const existing = await prisma.leadDirection.findUnique({ where: { name } })
     if (existing) return res.status(409).json({ error: 'Direction with this name already exists' })
     const maxOrder = await prisma.leadDirection.aggregate({ _max: { sort_order: true } })
     const direction = await prisma.leadDirection.create({
-      data: { name, geo: geo||null, method: method||null, tool: tool||null, sort_order: sort_order ?? (maxOrder._max.sort_order ?? -1) + 1 },
+      data: { name, geo: geo||null, method: method||null, tool: tool||null, niche: niche||null, sort_order: sort_order ?? (maxOrder._max.sort_order ?? -1) + 1 },
     })
     return res.status(201).json(direction)
   }
@@ -190,13 +192,49 @@ async function handleDirections(req, res) {
 
 // ── Stats ─────────────────────────────────────────────────
 
-
 function pct(a, b) { return b === 0 ? 0 : Math.round(a * 1000 / b) / 10 }
+function cumCalls(r)     { return r.total_calls + r.total_proposals + r.total_interested + r.total_not_interested + r.total_thinking + r.total_sold }
+function cumProposals(r) { return r.total_proposals + r.total_interested + r.total_not_interested + r.total_thinking + r.total_sold }
+
+function getGroupKey(lead, groupBy) {
+  switch (groupBy) {
+    case 'geo':     return lead.direction?.geo    || '__none__'
+    case 'method':  return lead.direction?.method || '__none__'
+    case 'niche':   return lead.direction?.niche  || '__none__'
+    case 'partner': return lead.partner           || '__none__'
+    default:        return lead.direction_id      || '__none__'
+  }
+}
+
+function getGroupLabel(lead, groupBy) {
+  switch (groupBy) {
+    case 'geo':     return lead.direction?.geo    || 'Без гео'
+    case 'method':  return lead.direction?.method || 'Без методу'
+    case 'niche':   return lead.direction?.niche  || 'Без ніші'
+    case 'partner': return lead.partner           || 'Без партнера'
+    default:        return lead.direction?.name   || 'Без напрямку'
+  }
+}
+
+function emptyRow(label) {
+  return { label, total_contacted:0, total_calls:0, total_proposals:0,
+    total_interested:0, total_not_interested:0, total_thinking:0, total_sold:0, revenue:0 }
+}
+
+function addConversions(r) {
+  return {
+    ...r,
+    conv_to_call:     pct(cumCalls(r),     r.total_contacted),
+    conv_to_proposal: pct(cumProposals(r), cumCalls(r)),
+    conv_to_sold:     pct(r.total_sold,    cumProposals(r)),
+    conv_total:       pct(r.total_sold,    r.total_contacted),
+  }
+}
 
 async function handleStats(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { from, to, manager_id } = req.query
+  const { from, to, manager_id, groupBy = 'direction' } = req.query
   const dateFilter = {
     ...(from ? { gte: new Date(from) } : {}),
     ...(to   ? { lte: new Date(to + 'T23:59:59Z') } : {}),
@@ -206,72 +244,52 @@ async function handleStats(req, res) {
     ...(manager_id ? { owner_id: manager_id } : {}),
   }
 
-  // Load all leads with status funnel_stage
   const leads = await prisma.lead.findMany({
     where,
     include: {
       status:    { select: { funnel_stage: true } },
-      direction: { select: { id: true, name: true, geo: true, method: true } },
+      direction: { select: { id: true, name: true, geo: true, method: true, niche: true } },
       owner:     { select: { id: true, email: true, name: true } },
     },
   })
 
-  // Group by direction
-  const dirMap = {}
-  const allDirections = await prisma.leadDirection.findMany({ where: { is_active: true }, orderBy: { sort_order: 'asc' } })
-  allDirections.forEach(d => {
-    dirMap[d.id] = { direction_id: d.id, direction: d.name, geo: d.geo, method: d.method,
-      total_contacted: 0, total_calls: 0, total_proposals: 0, total_interested: 0,
-      total_not_interested: 0, total_thinking: 0, total_sold: 0, revenue: 0 }
-  })
-  // Bucket for leads without direction
-  dirMap['__none__'] = { direction_id: null, direction: 'Без напрямку', geo: null, method: null,
-    total_contacted: 0, total_calls: 0, total_proposals: 0, total_interested: 0,
-    total_not_interested: 0, total_thinking: 0, total_sold: 0, revenue: 0 }
+  // Pre-seed direction groupBy with all active directions (so empty ones appear)
+  const groupMap = {}
+  if (groupBy === 'direction') {
+    const allDirections = await prisma.leadDirection.findMany({ where: { is_active: true }, orderBy: { sort_order: 'asc' } })
+    allDirections.forEach(d => { groupMap[d.id] = emptyRow(d.name) })
+  }
+  groupMap['__none__'] = emptyRow(
+    groupBy === 'geo' ? 'Без гео' : groupBy === 'method' ? 'Без методу' :
+    groupBy === 'niche' ? 'Без ніші' : groupBy === 'partner' ? 'Без партнера' : 'Без напрямку'
+  )
 
-  let kpi = { total_contacted:0, total_calls:0, total_proposals:0, total_interested:0,
-    total_not_interested:0, total_thinking:0, total_sold:0, revenue:0 }
+  const kpi = emptyRow('РАЗОМ')
 
   for (const lead of leads) {
+    const key   = getGroupKey(lead, groupBy)
+    const label = getGroupLabel(lead, groupBy)
+    if (!groupMap[key]) groupMap[key] = emptyRow(label)
+    const row = groupMap[key]
     const stage = lead.status?.funnel_stage || 'contacted'
-    const key = lead.direction_id || '__none__'
-    if (!dirMap[key]) continue
-    const row = dirMap[key]
 
-    row.total_contacted++
-    kpi.total_contacted++
-
-    if (stage === 'call')            { row.total_calls++;          kpi.total_calls++ }
-    if (stage === 'proposal')        { row.total_proposals++;      kpi.total_proposals++ }
-    if (stage === 'interested')      { row.total_interested++;     kpi.total_interested++ }
-    if (stage === 'not_interested')  { row.total_not_interested++; kpi.total_not_interested++ }
-    if (stage === 'thinking')        { row.total_thinking++;       kpi.total_thinking++ }
-    if (stage === 'sold')            { row.total_sold++; row.revenue += lead.amount; kpi.total_sold++; kpi.revenue += lead.amount }
+    row.total_contacted++; kpi.total_contacted++
+    if (stage === 'call')           { row.total_calls++;          kpi.total_calls++ }
+    if (stage === 'proposal')       { row.total_proposals++;      kpi.total_proposals++ }
+    if (stage === 'interested')     { row.total_interested++;     kpi.total_interested++ }
+    if (stage === 'not_interested') { row.total_not_interested++; kpi.total_not_interested++ }
+    if (stage === 'thinking')       { row.total_thinking++;       kpi.total_thinking++ }
+    if (stage === 'sold')           { row.total_sold++; row.revenue += lead.amount; kpi.total_sold++; kpi.revenue += lead.amount }
   }
 
-  // Compute conversions per row (cumulative buckets for conv rates)
-  function cumCalls(r)     { return r.total_calls + r.total_proposals + r.total_interested + r.total_not_interested + r.total_thinking + r.total_sold }
-  function cumProposals(r) { return r.total_proposals + r.total_interested + r.total_not_interested + r.total_thinking + r.total_sold }
+  const rows = Object.values(groupMap)
+    .filter(r => r.total_contacted > 0 || groupBy === 'direction')
+    .map(addConversions)
 
-  const directions = Object.values(dirMap)
-    .filter(r => r.total_contacted > 0 || r.direction_id !== null)
-    .map(r => ({
-      ...r,
-      conv_to_call:     pct(cumCalls(r),     r.total_contacted),
-      conv_to_proposal: pct(cumProposals(r), cumCalls(r)),
-      conv_to_sold:     pct(r.total_sold,    cumProposals(r)),
-      conv_total:       pct(r.total_sold,    r.total_contacted),
-    }))
+  const kpiWithConv = addConversions(kpi)
 
-  const kpiWithConv = {
-    ...kpi,
-    conv_to_call:     pct(cumCalls(kpi),     kpi.total_contacted),
-    conv_to_proposal: pct(cumProposals(kpi), cumCalls(kpi)),
-    conv_to_sold:     pct(kpi.total_sold,    cumProposals(kpi)),
-    conv_total:       pct(kpi.total_sold,    kpi.total_contacted),
-  }
-
-  return res.status(200).json({ kpi: kpiWithConv, directions, period: { from: from||null, to: to||null } })
+  // backward-compat: also return as `directions`
+  return res.status(200).json({ kpi: kpiWithConv, rows, directions: rows, groupBy, period: { from: from||null, to: to||null } })
 }
 
 module.exports = withAuth(handler, { roles: ['OPERATIONS_SALES'] })

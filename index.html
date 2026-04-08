@@ -1835,11 +1835,19 @@ function openLeadModal() {
         </select>
       </div>
     </div>
-    <label class="mlabel">Напрямок лідгену</label>
-    <select id="mf-direction" class="mfield">
-      <option value="">— не вибрано —</option>
-      ${_directionOptions('')}
-    </select>
+    <div class="mrow">
+      <div class="mhalf">
+        <label class="mlabel">Напрямок</label>
+        <select id="mf-direction" class="mfield">
+          <option value="">— не вибрано —</option>
+          ${_directionOptions('')}
+        </select>
+      </div>
+      <div class="mhalf">
+        <label class="mlabel">Партнер</label>
+        <input id="mf-partner" class="mfield" placeholder="Ім'я партнера (необов'язково)">
+      </div>
+    </div>
     <div class="mrow">
       <div class="mhalf">
         <label class="mlabel">Сума ($)</label>
@@ -1861,12 +1869,13 @@ async function submitLead() {
   const status_id = document.getElementById('mf-status').value
   const source_id = document.getElementById('mf-source').value
   const direction_id = document.getElementById('mf-direction')?.value
+  const partner = document.getElementById('mf-partner')?.value.trim()
   const amount = document.getElementById('mf-amount').value
   const comment = document.getElementById('mf-comment').value.trim()
   if (!name) return modalErr('Ім\'я обов\'язкове')
   modalBtnBusy('Додавання...')
   try {
-    const res = await api('/api/leads', { method:'POST', body: JSON.stringify({ name, telegram_username: tg||null, status_id: status_id||null, source_id: source_id||null, direction_id: direction_id||null, amount: amount||0, comment: comment||null }) })
+    const res = await api('/api/leads', { method:'POST', body: JSON.stringify({ name, telegram_username: tg||null, status_id: status_id||null, source_id: source_id||null, direction_id: direction_id||null, partner: partner||null, amount: amount||0, comment: comment||null }) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Помилка')
     closeModal()
@@ -1918,6 +1927,12 @@ async function openEditLeadModal(leadId) {
         </select>
       </div>
       <div class="mhalf">
+        <label class="mlabel">Партнер</label>
+        <input id="mf-partner" class="mfield" value="${(lead.partner||'').replace(/"/g,'&quot;')}" placeholder="Ім'я партнера">
+      </div>
+    </div>
+    <div class="mrow">
+      <div class="mhalf">
         <label class="mlabel">Сума ($)</label>
         <input id="mf-amount" class="mfield" type="number" min="0" value="${lead.amount||0}">
       </div>
@@ -1938,12 +1953,13 @@ async function submitEditLead(leadId) {
   const status_id = document.getElementById('mf-status').value
   const source_id = document.getElementById('mf-source').value
   const direction_id = document.getElementById('mf-direction').value
+  const partner = document.getElementById('mf-partner')?.value.trim()
   const amount = document.getElementById('mf-amount').value
   const comment = document.getElementById('mf-comment').value.trim()
   if (!name) return modalErr('Ім\'я обов\'язкове')
   modalBtnBusy('Збереження...')
   try {
-    const res = await api(`/api/leads/${leadId}`, { method:'PATCH', body: JSON.stringify({ name, telegram_username: tg||null, status_id: status_id||null, source_id: source_id||null, direction_id: direction_id||null, amount: amount||0, comment: comment||null }) })
+    const res = await api(`/api/leads/${leadId}`, { method:'PATCH', body: JSON.stringify({ name, telegram_username: tg||null, status_id: status_id||null, source_id: source_id||null, direction_id: direction_id||null, partner: partner||null, amount: amount||0, comment: comment||null }) })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Помилка')
     closeModal()
@@ -2494,7 +2510,16 @@ function leadsTableHTML(leads) {
 // ════════════════════════════════════════
 // STATISTICS
 // ════════════════════════════════════════
+const STAT_TABS = [
+  { key: 'direction', l: 'По напрямках' },
+  { key: 'geo',       l: 'По гео' },
+  { key: 'method',    l: 'По методу' },
+  { key: 'niche',     l: 'По ніші' },
+  { key: 'partner',   l: 'По партнеру' },
+]
+
 async function rStats() {
+  window._statsGroupBy = window._statsGroupBy || 'direction'
   setPage('Статистика', 'CRM — конверсії та воронка')
   document.getElementById('pcontent').innerHTML = `
     <div class="section" style="margin-bottom:16px">
@@ -2515,8 +2540,20 @@ async function rStats() {
         </div>
       </div>
     </div>
+    <div id="stats-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+      ${STAT_TABS.map(t=>`<button id="st-tab-${t.key}" class="sbtn${t.key===window._statsGroupBy?' p':''}" onclick="switchStatTab('${t.key}')">${t.l}</button>`).join('')}
+    </div>
     <div id="stats-kpi" style="margin-bottom:16px">${loadingHTML()}</div>
     <div id="stats-table">${loadingHTML()}</div>`
+  loadStats()
+}
+
+function switchStatTab(key) {
+  window._statsGroupBy = key
+  STAT_TABS.forEach(t => {
+    const el = document.getElementById('st-tab-' + t.key)
+    if (el) { el.className = 'sbtn' + (t.key === key ? ' p' : '') }
+  })
   loadStats()
 }
 
@@ -2540,22 +2577,23 @@ function exportStatsCSV() {
 }
 
 async function loadStats() {
-  const from = document.getElementById('st-from')?.value || ''
-  const to   = document.getElementById('st-to')?.value   || ''
+  const from    = document.getElementById('st-from')?.value || ''
+  const to      = document.getElementById('st-to')?.value   || ''
+  const groupBy = window._statsGroupBy || 'direction'
   const kpiEl   = document.getElementById('stats-kpi')
   const tableEl = document.getElementById('stats-table')
   if (kpiEl)   kpiEl.innerHTML   = loadingHTML()
   if (tableEl) tableEl.innerHTML = loadingHTML()
   try {
-    let url = '/api/leads?scope=stats'
+    let url = `/api/leads?scope=stats&groupBy=${groupBy}`
     if (from) url += `&from=${from}`
     if (to)   url += `&to=${to}`
     const [statsRes, leadsRes] = await Promise.all([api(url), api('/api/leads')])
     if (!statsRes.ok) throw new Error('Не вдалося завантажити статистику')
-    const { kpi, directions } = await statsRes.json()
+    const { kpi, rows } = await statsRes.json()
     window._statsLeads = leadsRes.ok ? await leadsRes.json() : []
     if (kpiEl)   kpiEl.innerHTML   = statsKpiHTML(kpi)
-    if (tableEl) tableEl.innerHTML = statsFunnelHTML(directions, kpi)
+    if (tableEl) tableEl.innerHTML = statsFunnelHTML(rows, kpi, groupBy)
   } catch(e) {
     if (kpiEl)   kpiEl.innerHTML   = errorHTML(e.message)
     if (tableEl) tableEl.innerHTML = ''
@@ -2627,10 +2665,14 @@ function convColor(pct) {
   return 'd'
 }
 
-function statsFunnelHTML(directions, kpi) {
-  if (!directions.length) return emptyHTML('Немає даних для відображення')
-  const allDirs = [...directions, {
-    direction: 'РАЗОМ', geo: '', method: '',
+const STAT_TAB_LABELS = { direction:'Напрямок', geo:'Гео', method:'Метод', niche:'Ніша', partner:'Партнер' }
+
+function statsFunnelHTML(rows, kpi, groupBy = 'direction') {
+  if (!rows.length) return emptyHTML('Немає даних для відображення')
+  const colLabel = STAT_TAB_LABELS[groupBy] || 'Група'
+  const tabLabel = (STAT_TABS.find(t=>t.key===groupBy)||{}).l || 'Воронка'
+  const totals = {
+    label: 'РАЗОМ',
     total_contacted: kpi.total_contacted, total_calls: kpi.total_calls,
     total_proposals: kpi.total_proposals, total_interested: kpi.total_interested,
     total_not_interested: kpi.total_not_interested, total_thinking: kpi.total_thinking,
@@ -2638,43 +2680,42 @@ function statsFunnelHTML(directions, kpi) {
     conv_to_call: kpi.conv_to_call, conv_to_proposal: kpi.conv_to_proposal,
     conv_to_sold: kpi.conv_to_sold, conv_total: kpi.conv_total,
     _total: true,
-  }]
+  }
+  const allRows = [...rows, totals]
   return `<div class="section">
-    <div class="sh"><span class="sh-t">Воронка по напрямках</span></div>
+    <div class="sh"><span class="sh-t">Воронка — ${tabLabel}</span></div>
     <table>
       <thead>
         <tr>
-          <th>Напрямок</th><th>Гео</th><th>Метод</th>
+          <th>${colLabel}</th>
           <th>Контакт</th><th>Дзвінок</th><th>КП</th>
           <th>Цікаво</th><th>Не цікаво</th><th>Думає</th><th>Продаж</th>
           <th>Виручка</th>
-          <th title="Написав→Дзвінок">Cv1%</th>
+          <th title="Контакт→Дзвінок">Cv1%</th>
           <th title="Дзвінок→КП">Cv2%</th>
           <th title="КП→Продаж">Cv3%</th>
           <th title="Загальна конверсія">Cv%</th>
         </tr>
       </thead>
       <tbody>
-        ${allDirs.map(d => {
-          const bold = d._total ? 'font-weight:700;border-top:2px solid var(--glass-b)' : ''
-          const cc = convColor(d.conv_total)
+        ${allRows.map(r => {
+          const bold = r._total ? 'font-weight:700;border-top:2px solid var(--glass-b)' : ''
+          const cc = convColor(r.conv_total)
           const ccStyle = cc==='s'?'color:var(--green)':cc==='w'?'color:var(--gold2)':'color:var(--red)'
           return `<tr style="${bold}">
-            <td><span class="cm">${d.direction}</span></td>
-            <td style="color:var(--text3)">${d.geo||'—'}</td>
-            <td style="color:var(--text3)">${d.method||'—'}</td>
-            <td>${d.total_contacted}</td>
-            <td>${d.total_calls}</td>
-            <td>${d.total_proposals}</td>
-            <td style="color:var(--green)">${d.total_interested}</td>
-            <td style="color:var(--red)">${d.total_not_interested}</td>
-            <td style="color:var(--gold)">${d.total_thinking}</td>
-            <td style="color:var(--green);font-weight:600">${d.total_sold}</td>
-            <td style="color:var(--green);font-weight:600">${cur(d.revenue)}</td>
-            <td>${d.conv_to_call}%</td>
-            <td>${d.conv_to_proposal}%</td>
-            <td>${d.conv_to_sold}%</td>
-            <td style="${ccStyle};font-weight:700">${d.conv_total}%</td>
+            <td><span class="cm">${r.label}</span></td>
+            <td>${r.total_contacted}</td>
+            <td>${r.total_calls}</td>
+            <td>${r.total_proposals}</td>
+            <td style="color:var(--green)">${r.total_interested}</td>
+            <td style="color:var(--red)">${r.total_not_interested}</td>
+            <td style="color:var(--gold)">${r.total_thinking}</td>
+            <td style="color:var(--green);font-weight:600">${r.total_sold}</td>
+            <td style="color:var(--green);font-weight:600">${cur(r.revenue)}</td>
+            <td>${r.conv_to_call}%</td>
+            <td>${r.conv_to_proposal}%</td>
+            <td>${r.conv_to_sold}%</td>
+            <td style="${ccStyle};font-weight:700">${r.conv_total}%</td>
           </tr>`
         }).join('')}
       </tbody>

@@ -26,7 +26,7 @@ async function updateLead(req, res, id) {
   const lead = await prisma.lead.findUnique({ where: { id } })
   if (!lead) return res.status(404).json({ error: 'Lead not found' })
 
-  const { name, status_id, source_id, direction_id, telegram_username, amount, comment } = req.body
+  const { name, status_id, source_id, direction_id, telegram_username, partner, amount, comment } = req.body
 
   const tg = telegram_username !== undefined
     ? (telegram_username ? telegram_username.replace(/^@/, '') : null)
@@ -40,6 +40,7 @@ async function updateLead(req, res, id) {
       ...(source_id !== undefined && { source_id: source_id || null }),
       ...(direction_id !== undefined && { direction_id: direction_id || null }),
       ...(tg !== undefined && { telegram_username: tg }),
+      ...(partner !== undefined && { partner: partner || null }),
       ...(amount !== undefined && { amount: Number(amount) }),
       ...(comment !== undefined && { comment: comment || null }),
     },
@@ -121,7 +122,7 @@ async function handleSourceItem(req, res, id) {
 
 async function handleDirectionItem(req, res, id) {
   if (req.method === 'PATCH') {
-    const { name, geo, method, tool, sort_order, is_active } = req.body
+    const { name, geo, method, tool, niche, sort_order, is_active } = req.body
     if (name) {
       const existing = await prisma.leadDirection.findFirst({ where: { name, NOT: { id } } })
       if (existing) return res.status(409).json({ error: 'Direction with this name already exists' })
@@ -133,6 +134,7 @@ async function handleDirectionItem(req, res, id) {
         ...(geo        !== undefined && { geo: geo || null }),
         ...(method     !== undefined && { method: method || null }),
         ...(tool       !== undefined && { tool: tool || null }),
+        ...(niche      !== undefined && { niche: niche || null }),
         ...(sort_order !== undefined && { sort_order: Number(sort_order) }),
         ...(is_active  !== undefined && { is_active: Boolean(is_active) }),
       },
