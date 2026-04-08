@@ -196,6 +196,9 @@ model Lead {
   source_id         String?
   direction_id      String?
   telegram_username String?
+  geo               String?
+  niche             String?
+  method            String?
   partner           String?
   amount            Float    @default(0)
   comment           String?

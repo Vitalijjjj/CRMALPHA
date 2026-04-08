@@ -48,7 +48,7 @@ async function listLeads(req, res) {
 
 async function createLead(req, res) {
   const { sub } = req.user
-  const { name, status_id, source_id, direction_id, telegram_username, partner, amount, comment } = req.body
+  const { name, status_id, source_id, direction_id, telegram_username, geo, niche, method, partner, amount, comment } = req.body
 
   if (!name) return res.status(400).json({ error: 'name is required' })
 
@@ -61,6 +61,9 @@ async function createLead(req, res) {
       source_id: source_id || null,
       direction_id: direction_id || null,
       telegram_username: tg,
+      geo: geo || null,
+      niche: niche || null,
+      method: method || null,
       partner: partner || null,
       amount: amount ? Number(amount) : 0,
       comment: comment || null,
@@ -198,21 +201,21 @@ function cumProposals(r) { return r.total_proposals + r.total_interested + r.tot
 
 function getGroupKey(lead, groupBy) {
   switch (groupBy) {
-    case 'geo':     return lead.direction?.geo    || '__none__'
-    case 'method':  return lead.direction?.method || '__none__'
-    case 'niche':   return lead.direction?.niche  || '__none__'
-    case 'partner': return lead.partner           || '__none__'
-    default:        return lead.direction_id      || '__none__'
+    case 'geo':     return lead.geo      || '__none__'
+    case 'method':  return lead.method   || '__none__'
+    case 'niche':   return lead.niche    || '__none__'
+    case 'partner': return lead.partner  || '__none__'
+    default:        return lead.direction_id || '__none__'
   }
 }
 
 function getGroupLabel(lead, groupBy) {
   switch (groupBy) {
-    case 'geo':     return lead.direction?.geo    || 'Без гео'
-    case 'method':  return lead.direction?.method || 'Без методу'
-    case 'niche':   return lead.direction?.niche  || 'Без ніші'
-    case 'partner': return lead.partner           || 'Без партнера'
-    default:        return lead.direction?.name   || 'Без напрямку'
+    case 'geo':     return lead.geo      || 'Без гео'
+    case 'method':  return lead.method   || 'Без джерела'
+    case 'niche':   return lead.niche    || 'Без напрямку'
+    case 'partner': return lead.partner  || 'Без партнерки'
+    default:        return lead.direction?.name || 'Без кампанії'
   }
 }
 
@@ -260,8 +263,8 @@ async function handleStats(req, res) {
     allDirections.forEach(d => { groupMap[d.id] = emptyRow(d.name) })
   }
   groupMap['__none__'] = emptyRow(
-    groupBy === 'geo' ? 'Без гео' : groupBy === 'method' ? 'Без методу' :
-    groupBy === 'niche' ? 'Без ніші' : groupBy === 'partner' ? 'Без партнера' : 'Без напрямку'
+    groupBy === 'geo' ? 'Без гео' : groupBy === 'method' ? 'Без джерела' :
+    groupBy === 'niche' ? 'Без напрямку' : groupBy === 'partner' ? 'Без партнерки' : 'Без кампанії'
   )
 
   const kpi = emptyRow('РАЗОМ')

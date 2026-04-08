@@ -26,7 +26,7 @@ async function updateLead(req, res, id) {
   const lead = await prisma.lead.findUnique({ where: { id } })
   if (!lead) return res.status(404).json({ error: 'Lead not found' })
 
-  const { name, status_id, source_id, direction_id, telegram_username, partner, amount, comment } = req.body
+  const { name, status_id, source_id, direction_id, telegram_username, geo, niche, method, partner, amount, comment } = req.body
 
   const tg = telegram_username !== undefined
     ? (telegram_username ? telegram_username.replace(/^@/, '') : null)
@@ -40,6 +40,9 @@ async function updateLead(req, res, id) {
       ...(source_id !== undefined && { source_id: source_id || null }),
       ...(direction_id !== undefined && { direction_id: direction_id || null }),
       ...(tg !== undefined && { telegram_username: tg }),
+      ...(geo !== undefined && { geo: geo || null }),
+      ...(niche !== undefined && { niche: niche || null }),
+      ...(method !== undefined && { method: method || null }),
       ...(partner !== undefined && { partner: partner || null }),
       ...(amount !== undefined && { amount: Number(amount) }),
       ...(comment !== undefined && { comment: comment || null }),
